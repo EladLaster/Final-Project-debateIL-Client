@@ -1,8 +1,5 @@
 /* Tailwind Directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 /* Global RTL direction helper (retained for future i18n) */
 html[dir="rtl"] {
   direction: rtl;
