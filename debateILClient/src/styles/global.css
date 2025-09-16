@@ -1,0 +1,18 @@
+body,
+html,
+#root,
+.app-root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483);
+  color: #fff;
+}
+* {
+  box-sizing: border-box;
+}
+main {
+  max-width: 1600px;
+  margin: 0 auto;
+}
