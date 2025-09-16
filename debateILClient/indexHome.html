@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Debate Arena - מסך בית</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483);
+            color: white;
+            min-height: 100vh;
+            direction: rtl;
+            overflow-x: hidden;
+        }
+
+        /* כותרת עליונה */
+        .header {
+            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(30,30,60,0.8));
+            padding: 20px 40px;
+            border-bottom: 3px solid #4ecdc4;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4ecdc4;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+            box-shadow: 0 5px 15px rgba(78,205,196,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(78,205,196,0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(78,205,196,0.2);
+            color: white;
+            border: 2px solid rgba(78,205,196,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            border-color: #4ecdc4;
+            background: rgba(78,205,196,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* תוכן מרכזי */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* סרגל חיפוש */
+        .search-section {
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(30,30,60,0.6));
+            border-radius: 25px;
+            border: 2px solid rgba(78,205,196,0.3);
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 25px 18px 60px;
+            border: 2px solid rgba(78,205,196,0.3);
+            border-radius: 20px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78,205,196,0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #4ecdc4;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: rgba(78,205,196,0.2);
+            border: 2px solid rgba(78,205,196,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .filter-tab:hover, .filter-tab.active {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            border-color: #4ecdc4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(78,205,196,0.3);
+        }
+
+        /* רשת דיונים */
+        .debates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+        }
+
+        .debate-card {
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(30,30,60,0.6));
+            border-radius: 25px;
+            border: 2px solid rgba(78,205,196,0.3);
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .debate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .debate-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #4ecdc4;
+            box-shadow: 0 25px 60px rgba(78,205,196,0.2);
+        }
+
+        .debate-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .debate-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-live {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            animation: live-pulse 2s infinite;
+            box-shadow: 0 5px 15px rgba(255,71,87,0.3);
+        }
+
+        .status-scheduled {
+            background: linear-gradient(135deg, #ffa502, #ff9f43);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255,165,2,0.3);
+        }
+
+        .status-finished {
+            background: linear-gradient(135deg, #2ed573, #7bed9f);
+            color: white;
+            box-shadow: 0 5px 15px rgba(46,213,115,0.3);
+        }
+
+        @keyframes live-pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1); 
+                box-shadow: 0 5px 15px rgba(255,71,87,0.3);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scale(1.05); 
+                box-shadow: 0 8px 25px rgba(255,71,87,0.5);
+            }
+        }
+
+        .debate-topic {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 25px 0 20px 0;
+            color: #4ecdc4;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .debate-participants {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .participant {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .participant-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            border: 3px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .participant-avatar.human {
+            border-color: #ff4757;
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+        }
+
+        .participant-avatar.ai {
+            border-color: #45b7d1;
+            background: linear-gradient(135deg, #45b7d1, #4ea5d9);
+        }
+
+        .participant-avatar.empty {
+            border-color: #666;
+            background: rgba(255,255,255,0.1);
+            color: #666;
+        }
+
+        .participant-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .participant-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+
+        .vs-indicator {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78,205,196,0.5);
+        }
+
+        .debate-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(78,205,196,0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(78,205,196,0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .stat-item:hover {
+            background: rgba(78,205,196,0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .debate-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+            box-shadow: 0 5px 15px rgba(78,205,196,0.3);
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(78,205,196,0.5);
+        }
+
+        .action-btn.secondary {
+            background: rgba(78,205,196,0.2);
+            color: white;
+            border: 2px solid rgba(78,205,196,0.3);
+        }
+
+        .action-btn.secondary:hover {
+            background: rgba(78,205,196,0.3);
+            border-color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+
+        /* סטטיסטיקות מהירות */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .quick-stat {
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(30,30,60,0.6));
+            border-radius: 20px;
+            border: 2px solid rgba(78,205,196,0.3);
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+        }
+
+        .quick-stat:hover {
+            transform: translateY(-5px);
+            border-color: #4ecdc4;
+            box-shadow: 0 15px 30px rgba(78,205,196,0.2);
+        }
+
+        .quick-stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .quick-stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 8px;
+        }
+
+        .quick-stat-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* טאבים */
+        .content-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .content-tab {
+            background: rgba(78,205,196,0.2);
+            border: 2px solid rgba(78,205,196,0.3);
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .content-tab:hover, .content-tab.active {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            border-color: #4ecdc4;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(78,205,196,0.3);
+        }
+
+        /* אנימציות */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        .fade-in:nth-child(4) { animation-delay: 0.4s; }
+
+        /* חלקיקים */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle 3s linear infinite;
+        }
+
+        @keyframes particle {
+            0% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateY(-100px) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
+        /* רספונסיביות */
+        @media (max-width: 1200px) {
+            .debates-grid {
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .debates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .user-menu {
+                order: 2;
+            }
+            
+            .filter-tabs {
+                justify-content: center;
+            }
+            
+            .debate-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* טולטיפים */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* עדכונים חיים */
+        .live-updates {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(30,30,60,0.9));
+            border-radius: 20px;
+            border: 2px solid #4ecdc4;
+            padding: 20px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transform: translateX(-120%);
+            transition: transform 0.3s ease;
+        }
+
+        .live-updates.show {
+            transform: translateX(0);
+        }
+
+        .live-updates h4 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .live-update-item {
+            background: rgba(78,205,196,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4ecdc4;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- כותרת עליונה -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🏛️ AI Debate Arena
+            </div>
+            <div class="user-menu">
+                <a href="#" class="btn btn-secondary">💬 התחבר</a>
+                <a href="#" class="btn btn-primary">🚀 הצטרף למשחק</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- סטטיסטיקות מהירות -->
+        <div class="quick-stats">
+            <div class="quick-stat fade-in">
+                <div class="quick-stat-icon">🎯</div>
+                <div class="quick-stat-number">47</div>
+                <div class="quick-stat-label">דיונים פעילים</div>
+            </div>
+            <div class="quick-stat fade-in">
+                <div class="quick-stat-icon">👥</div>
+                <div class="quick-stat-number">2,143</div>
+                <div class="quick-stat-label">דיבייטרים מקוונים</div>
+            </div>
+            <div class="quick-stat fade-in">
+                <div class="quick-stat-icon">⚡</div>
+                <div class="quick-stat-number">89</div>
+                <div class="quick-stat-label">דיונים היום</div>
+            </div>
+            <div class="quick-stat fade-in">
+                <div class="quick-stat-icon">🏆</div>
+                <div class="quick-stat-number">8.7</div>
+                <div class="quick-stat-label">ניקוד ממוצע</div>
+            </div>
+        </div>
+
+        <!-- סרגל חיפוש -->
+        <div class="search-section fade-in">
+            <div class="search-bar">
+                <div class="search-icon">🔍</div>
+                <input type="text" class="search-input" placeholder="חפש דיון לפי נושא, משתתף או תאריך...">
+            </div>
+            <div class="filter-tabs">
+                <div class="filter-tab active">🔥 חי עכשיו</div>
+                <div class="filter-tab">⏰ מתוזמן</div>
+                <div class="filter-tab">✅ הושלם</div>
+                <div class="filter-tab">🤖 עם AI</div>
+                <div class="filter-tab">🏆 תחרותי</div>
+                <div class="filter-tab">🎓 חינוכי</div>
+            </div>
+        </div>
+
+        <!-- טאבי תוכן -->
+        <div class="content-tabs">
+            <div class="content-tab active">🎮 דיונים פעילים</div>
+            <div class="content-tab">📊 המובילים</div>
+            <div class="content-tab">🎯 מומלצים עבורך</div>
+        </div>
+
+        <!-- רשת הדיונים -->
+        <div class="debates-grid">
+            <!-- דיון חי -->
+            <div class="debate-card fade-in">
+                <div class="debate-status status-live">
+                    🔴 חי עכשיו
+                </div>
+                <div class="debate-topic">
+                    האם עבודה מהבית יעילה יותר מעבודה במשרד?
+                </div>
+                
+                <div class="debate-participants">
+                    <div class="participant">
+                        <div class="participant-avatar human tooltip" data-tooltip="אלעד לסטר - דיבייטר מנוסה">👨‍💻</div>
+                        <div class="participant-name">אלעד</div>
+                    </div>
+                    <div class="vs-indicator">VS</div>
+                    <div class="participant">
+                        <div class="participant-avatar ai tooltip" data-tooltip="AI Assistant - בוט חכם">🤖</div>
+                        <div class="participant-name">AI Assistant</div>
+                    </div>
+                </div>
+                
+                <div class="debate-stats">
+                    <div class="stat-item tooltip" data-tooltip="צופים כרגע">
+                        <div class="stat-number">247</div>
+                        <div class="stat-label">צופים</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="זמן שעבר">
+                        <div class="stat-number">23:45</div>
+                        <div class="stat-label">זמן</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="ניקוד נוכחי">
+                        <div class="stat-number">8.9</div>
+                        <div class="stat-label">ניקוד</div>
+                    </div>
+                </div>
+                
+                <div class="debate-actions">
+                    <button class="action-btn secondary">👁️ צפה</button>
+                    <button class="action-btn primary">🎤 הצטרף לקהל</button>
+                </div>
+            </div>
+
+            <!-- דיון מתוזמן -->
+            <div class="debate-card fade-in">
+                <div class="debate-status status-scheduled">
+                    ⏰ מתוזמן
+                </div>
+                <div class="debate-topic">
+                    טכנולוגיה VS טבע - איזה כיוון לעתיד?
+                </div>
+                
+                <div class="debate-participants">
+                    <div class="participant">
+                        <div class="participant-avatar human tooltip" data-tooltip="שרה כהן - מומחית טכנולוגיה">👩‍💻</div>
+                        <div class="participant-name">שרה</div>
+                    </div>
+                    <div class="vs-indicator">VS</div>
+                    <div class="participant">
+                        <div class="participant-avatar human tooltip" data-tooltip="דני לוי - פעיל סביבתי">🌱</div>
+                        <div class="participant-name">דני</div>
+                    </div>
+                </div>
+                
+                <div class="debate-stats">
+                    <div class="stat-item tooltip" data-tooltip="נרשמים">
+                        <div class="stat-number">89</div>
+                        <div class="stat-label">רשומים</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="זמן התחלה">
+                        <div class="stat-number">20:00</div>
+                        <div class="stat-label">התחלה</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="משך צפוי">
+                        <div class="stat-number">45 דק׳</div>
+                        <div class="stat-label">משך</div>
+                    </div>
+                </div>
+                
+                <div class="debate-actions">
+                    <button class="action-btn secondary">📋 פרטים</button>
+                    <button class="action-btn primary">🔔 הירשם</button>
+                </div>
+            </div>
+
+            <!-- דיון הושלם -->
+            <div class="debate-card fade-in">
+                <div class="debate-status status-finished">
+                    ✅ הושלם
+                </div>
+                <div class="debate-topic">
+                    חינוך דיגיטלי או מסורתי - מה עדיף לילדים?
+                </div>
+                
+                <div class="debate-participants">
+                    <div class="participant">
+                        <div class="participant-avatar human tooltip" data-tooltip="מיכל רוזן - מורה ותיקה">👩‍🏫</div>
+                        <div class="participant-name">מיכל</div>
+                    </div>
+                    <div class="vs-indicator">VS</div>
+                    <div class="participant">
+                        <div class="participant-avatar ai tooltip" data-tooltip="EduBot - AI חינוכי">🎓</div>
+                        <div class="participant-name">EduBot</div>
+                    </div>
+                </div>
+                
+                <div class="debate-stats">
+                    <div class="stat-item tooltip" data-tooltip="הזוכה">
+                        <div class="stat-number">🏆</div>
+                        <div class="stat-label">מיכל ניצחה</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="ניקוד סופי">
+                        <div class="stat-number">9.2</div>
+                        <div class="stat-label">ניקוד</div>
+                    </div>
+                    <div class="stat-item tooltip" data-tooltip="צפיות">
+                        <div class="stat-number">1,234</div>
+                        <div class="stat-label">צפיות</div>
+                    </div>
+                </div>
+                
+                <div class="debate-actions">
+                    <button class="action-btn primary">🎬 צפה בחזרה</button>
+                </div>
+            </div>
+
+            <!-- דיון נוסף -->
+            <div class="debate-card fade-in">
+                <div class="debate-status status-live">
+                    🔴 חי עכשיו
+                </div>
+                <div class="debate-topic">
+                    האם הרשתות החברתיות מזיקות לחברה?
+                </div
