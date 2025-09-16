@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./layouts/MainLayout.jsx";
+import Header from "./components/Header.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import DebatePage from "./pages/DebatePage.jsx";
 import ReplayPage from "./pages/ReplayPage.jsx";
@@ -10,16 +10,19 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/debate/:id" element={<DebatePage />} />
-          <Route path="/replay/:id" element={<ReplayPage />} />
-          <Route path="/profile/:id" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPanelPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
+      <div className="min-h-screen bg-white">
+        <Header />
+        <main className="py-6">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/debate/:id" element={<DebatePage />} />
+            <Route path="/replay/:id" element={<ReplayPage />} />
+            <Route path="/profile/:id" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminPanelPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }
