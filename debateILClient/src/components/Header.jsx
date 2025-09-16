@@ -17,7 +17,7 @@ export default function Header() {
         <NavLink to="/" className="text-xl font-bold text-gray-900">
           DebateIL
         </NavLink>
-        
+
         {/* Navigation */}
         <nav className="flex gap-6">
           {navLinks.map((link) => (
