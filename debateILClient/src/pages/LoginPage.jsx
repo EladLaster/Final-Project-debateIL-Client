@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../data/brandColors";
+import logoImg from "../assets/logo.png";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,12 +23,22 @@ export default function LoginPage() {
         className="w-full max-w-md bg-white rounded-lg shadow p-8 border-2"
         style={{ borderColor: brandColors.primary }}
       >
-        <h2
-          className="text-2xl font-bold mb-6 text-center"
-          style={{ color: brandColors.primary }}
-        >
-          Login
-        </h2>
+        <div className="flex flex-col items-center mb-4">
+          <img
+            src={logoImg}
+            alt="DebateIL Logo"
+            className="h-100 mb-1"
+            style={{
+              borderRadius: 6,
+            }}
+          />
+          <h2
+            className="text-2xl font-bold text-center"
+            style={{ color: brandColors.primary }}
+          >
+            Login
+          </h2>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
