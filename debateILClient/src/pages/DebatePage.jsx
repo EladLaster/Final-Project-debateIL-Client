@@ -1,5 +1,9 @@
 import { useParams, Link } from "react-router-dom";
-import { getDebateById, getArgumentsWithUserInfo, getVotesForDebate } from "../data/mockData";
+import {
+  getDebateById,
+  getArgumentsWithUserInfo,
+  getVotesForDebate,
+} from "../data/mockData";
 import ContentCard from "../components/basic-ui/ContentCard.jsx";
 import StatusBadge from "../components/basic-ui/StatusBadge.jsx";
 import PrimaryButton from "../components/basic-ui/PrimaryButton.jsx";
@@ -8,7 +12,7 @@ import ArgumentCard from "../components/debate-room/ArgumentCard.jsx";
 export default function DebatePage() {
   const { id } = useParams();
   const debateId = parseInt(id);
-  
+
   // Get debate data
   const debate = getDebateById(debateId);
   const debateArguments = getArgumentsWithUserInfo(debateId);
@@ -18,8 +22,12 @@ export default function DebatePage() {
     return (
       <div className="p-6">
         <ContentCard className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Debate Not Found</h1>
-          <p className="text-gray-600 mb-6">The debate you're looking for doesn't exist or has been removed.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Debate Not Found
+          </h1>
+          <p className="text-gray-600 mb-6">
+            The debate you're looking for doesn't exist or has been removed.
+          </p>
           <Link to="/">
             <PrimaryButton>← Back to Home</PrimaryButton>
           </Link>
@@ -61,7 +69,10 @@ export default function DebatePage() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Back Navigation */}
       <div className="mb-6">
-        <Link to="/" className="text-blue-600 hover:text-blue-800 flex items-center">
+        <Link
+          to="/"
+          className="text-blue-600 hover:text-blue-800 flex items-center"
+        >
           ← Back to Debates
         </Link>
       </div>
@@ -84,7 +95,9 @@ export default function DebatePage() {
           </div>
           <div>
             <span className="font-medium">⏰ Time:</span>
-            <div>{formatTime(debate.start_time)} - {formatTime(debate.end_time)}</div>
+            <div>
+              {formatTime(debate.start_time)} - {formatTime(debate.end_time)}
+            </div>
           </div>
           <div>
             <span className="font-medium">👥 Participants:</span>
@@ -106,15 +119,19 @@ export default function DebatePage() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           💬 Arguments ({debateArguments.length})
         </h2>
-        
+
         {debateArguments.length > 0 ? (
           <div className="space-y-4">
             {debateArguments.map((argument) => (
-              <ArgumentCard 
-                key={argument.id} 
+              <ArgumentCard
+                key={argument.id}
                 argument={argument}
-                onVote={(argumentId) => console.log('Vote on argument:', argumentId)}
-                onReply={(argumentId) => console.log('Reply to argument:', argumentId)}
+                onVote={(argumentId) =>
+                  console.log("Vote on argument:", argumentId)
+                }
+                onReply={(argumentId) =>
+                  console.log("Reply to argument:", argumentId)
+                }
               />
             ))}
           </div>
@@ -137,7 +154,7 @@ export default function DebatePage() {
             </PrimaryButton>
           </>
         )}
-        
+
         {debate.status === "finished" && (
           <Link to={`/replay/${debate.id}`}>
             <PrimaryButton variant="outline" size="large">
@@ -145,7 +162,7 @@ export default function DebatePage() {
             </PrimaryButton>
           </Link>
         )}
-        
+
         {debate.status === "scheduled" && (
           <PrimaryButton variant="primary" size="large">
             📝 Register for Debate

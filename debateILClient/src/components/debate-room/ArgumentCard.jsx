@@ -14,7 +14,8 @@ export default function ArgumentCard({ argument, onReply, onVote }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-            {argument.user.firstName[0]}{argument.user.lastName[0]}
+            {argument.user.firstName[0]}
+            {argument.user.lastName[0]}
           </div>
           <div>
             <p className="font-medium text-gray-900">
@@ -24,7 +25,9 @@ export default function ArgumentCard({ argument, onReply, onVote }) {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-500">{formatTime(argument.timestamp)}</p>
+          <p className="text-sm text-gray-500">
+            {formatTime(argument.timestamp)}
+          </p>
           <StatusBadge variant="live">Participant</StatusBadge>
         </div>
       </div>
@@ -36,14 +39,14 @@ export default function ArgumentCard({ argument, onReply, onVote }) {
 
       {/* Actions */}
       <div className="flex items-center space-x-4 text-sm">
-        <button 
+        <button
           onClick={() => onVote?.(argument.id)}
           className="flex items-center space-x-1 text-green-600 hover:text-green-700 transition-colors"
         >
           <span>👍</span>
           <span>Support</span>
         </button>
-        <button 
+        <button
           onClick={() => onReply?.(argument.id)}
           className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 transition-colors"
         >
