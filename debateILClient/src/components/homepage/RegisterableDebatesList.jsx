@@ -64,11 +64,10 @@ export default function RegisterableDebatesList({ debates }) {
   const DebateCard = ({ debate }) => (
     <ContentCard className="p-6 h-full">
       <div className="flex flex-col space-y-3 h-full">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 leading-tight">
             {debate.topic}
           </h3>
-          <StatusBadge variant="available">Open</StatusBadge>
         </div>
 
         <div className="flex items-center justify-center space-x-2 text-blue-600 text-sm">
@@ -135,21 +134,13 @@ export default function RegisterableDebatesList({ debates }) {
           )}
         </div>
 
-        <div className="flex gap-2 mt-auto">
+        <div className="mt-auto">
           <PrimaryButton
             variant="primary"
             onClick={() => handleRegister(debate.id)}
-            className="flex-1 text-sm py-2"
+            className="w-full text-sm py-2"
           >
-            ⚔️ Join!
-          </PrimaryButton>
-          <PrimaryButton
-            variant="ghost"
-            onClick={() => navigate(`/debate/${debate.id}`)}
-            size="small"
-            className="px-3"
-          >
-            ℹ️
+            ⚔️ Join Battle!
           </PrimaryButton>
         </div>
       </div>

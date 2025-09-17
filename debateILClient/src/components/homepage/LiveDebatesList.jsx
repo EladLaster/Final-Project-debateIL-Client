@@ -64,11 +64,10 @@ export default function LiveDebatesList({ debates }) {
   const DebateCard = ({ debate }) => (
     <ContentCard className="p-6 h-full">
       <div className="flex flex-col space-y-4 h-full">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 leading-tight">
             {debate.topic}
           </h3>
-          <StatusBadge variant="live">🔴 Live</StatusBadge>
         </div>
 
         <div className="flex items-center justify-center space-x-2 text-red-600 text-sm">
@@ -127,21 +126,13 @@ export default function LiveDebatesList({ debates }) {
           )}
         </div>
 
-        <div className="flex gap-2 mt-auto">
+        <div className="mt-auto">
           <PrimaryButton
             variant="secondary"
             onClick={() => handleJoinDebate(debate.id)}
-            className="flex-1 text-sm py-2"
+            className="w-full text-sm py-2"
           >
-            🎯 Join
-          </PrimaryButton>
-          <PrimaryButton
-            variant="ghost"
-            onClick={() => handleJoinDebate(debate.id)}
-            size="small"
-            className="px-3"
-          >
-            ℹ️
+            🎯 Join Live!
           </PrimaryButton>
         </div>
       </div>
