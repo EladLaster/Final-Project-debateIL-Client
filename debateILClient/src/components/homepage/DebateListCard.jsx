@@ -50,30 +50,27 @@ export default function DebateListCard({ debate }) {
     <ContentCard className="p-6">
       <div className="flex flex-col space-y-4">
         {/* Header with status */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {debate.topic}
-            </h3>
-            {getStatusBadge(debate.status)}
-
-            {/* Available spots indicator */}
-            {isScheduled && (
-              <div className="mt-2">
-                {debate.available_spots > 0 ? (
-                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    🆓 {debate.available_spots} spot
-                    {debate.available_spots === 1 ? "" : "s"} available
-                  </div>
-                ) : (
-                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    🚫 Debate Full
-                  </div>
-                )}
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {debate.topic}
+          </h3>
+          <div>{getStatusBadge(debate.status)}</div>
+        </div>
+        {/* Available spots indicator */}
+        {isScheduled && (
+          <div className="mt-2">
+            {debate.available_spots > 0 ? (
+              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                🆓 {debate.available_spots} spot
+                {debate.available_spots === 1 ? "" : "s"} available
+              </div>
+            ) : (
+              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                🚫 Debate Full
               </div>
             )}
           </div>
-        </div>
+        )}
 
         {/* Participants - prominently displayed below topic */}
         <div className="border-t border-gray-200 pt-4">

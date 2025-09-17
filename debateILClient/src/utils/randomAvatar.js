@@ -13,7 +13,7 @@ export async function getRandomAvatarUrl() {
 
 export function getAvatarById(userId) {
   const lastTwoDigits = userId % 100;
-  const gender = lastTwoDigits % 2 === 0 ? "men" : "women";
+  const gender = lastTwoDigits % 2 === 0 ? "women" : "men";
   return `https://randomuser.me/api/portraits/${gender}/${lastTwoDigits}.jpg`;
 }
 
