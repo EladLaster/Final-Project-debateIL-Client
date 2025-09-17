@@ -6,6 +6,7 @@ import ReplayPage from "./pages/ReplayPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import AdminPanelPage from "./pages/AdminPanelPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
             <Route path="/replay/:id" element={<ReplayPage />} />
             <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPanelPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
