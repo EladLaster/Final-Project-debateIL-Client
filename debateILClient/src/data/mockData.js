@@ -66,7 +66,7 @@ export const mockDebates = [
     end_time: "2025-09-16T20:00:00Z",
     status: "scheduled",
     user1_id: 3,
-    user2_id: null, // מקום פנוי!
+    user2_id: null, // Available spot
   },
   {
     id: 3,
@@ -83,8 +83,8 @@ export const mockDebates = [
     start_time: "2025-09-17T10:00:00Z",
     end_time: "2025-09-17T12:00:00Z",
     status: "scheduled",
-    user1_id: null, // מקום פנוי!
-    user2_id: null, // מקום פנוי!
+    user1_id: null, // Available spot
+    user2_id: null, // Available spot
   },
   {
     id: 5,
@@ -111,7 +111,7 @@ export const mockDebates = [
     end_time: "2025-09-18T22:00:00Z",
     status: "scheduled",
     user1_id: 2,
-    user2_id: null, // מקום פנוי!
+    user2_id: null, // Available spot
   },
 ];
 
@@ -301,49 +301,48 @@ export const isUserParticipant = (debateId, userId) => {
   return debate && (debate.user1_id === userId || debate.user2_id === userId);
 };
 
-// Check if debate has available spots
-export const getDebateAvailableSpots = (debateId) => {
+// Get debate registration status with availability info
+export const getDebateAvailability = (debateId) => {
   const debate = getDebateById(debateId);
-  if (!debate) return 0;
-  
-  let spots = 0;
-  if (!debate.user1_id) spots++;
-  if (!debate.user2_id) spots++;
-  return spots;
+  if (!debate) return { availableSpots: 0, status: "not-found", isFull: true };
+
+  const availableSpots = [debate.user1_id, debate.user2_id].filter(
+    (id) => !id
+  ).length;
+
+  let status = "full";
+  if (availableSpots === 2) status = "open";
+  else if (availableSpots === 1) status = "one-spot";
+
+  return {
+    availableSpots,
+    status,
+    isFull: availableSpots === 0,
+  };
 };
 
-// Check if debate is full
-export const isDebateFull = (debateId) => {
-  return getDebateAvailableSpots(debateId) === 0;
-};
-
-// Get debate registration status
-export const getDebateRegistrationStatus = (debateId) => {
-  const debate = getDebateById(debateId);
-  if (!debate) return "not-found";
-  
-  const availableSpots = getDebateAvailableSpots(debateId);
-  
-  if (availableSpots === 2) return "open"; // דיון ללא משתתפים
-  if (availableSpots === 1) return "one-spot"; // מקום אחד פנוי
-  return "full"; // מלא
-};
+// Backward compatibility functions
+export const getDebateAvailableSpots = (debateId) =>
+  getDebateAvailability(debateId).availableSpots;
+export const isDebateFull = (debateId) =>
+  getDebateAvailability(debateId).isFull;
+export const getDebateRegistrationStatus = (debateId) =>
+  getDebateAvailability(debateId).status;
 
 // Enhanced debate data with participant info and additional details
 export const getEnhancedDebates = () => {
   return mockDebates.map((debate) => {
     const participants = getDebateParticipants(debate.id);
-    const availableSpots = getDebateAvailableSpots(debate.id);
-    const registrationStatus = getDebateRegistrationStatus(debate.id);
-    
+    const availability = getDebateAvailability(debate.id);
+
     return {
       ...debate,
       user1: participants.user1,
       user2: participants.user2,
-      participants_count: 2 - availableSpots, // מספר משתתפים בפועל
-      available_spots: availableSpots,
-      registration_status: registrationStatus,
-      is_full: isDebateFull(debate.id),
+      participants_count: 2 - availability.availableSpots,
+      available_spots: availability.availableSpots,
+      registration_status: availability.status,
+      is_full: availability.isFull,
       arguments_count: getArgumentsForDebate(debate.id).length,
       recent_activity: mockArguments
         .filter((arg) => arg.debate_id === debate.id)

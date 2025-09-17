@@ -55,17 +55,18 @@ export default function DebateListCard({ debate }) {
               {debate.topic}
             </h3>
             {getStatusBadge(debate.status)}
-            
+
             {/* Available spots indicator */}
             {isScheduled && (
               <div className="mt-2">
                 {debate.available_spots > 0 ? (
                   <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    🆓 {debate.available_spots} מקום{debate.available_spots === 1 ? '' : 'ות'} פנוי{debate.available_spots === 1 ? '' : 'ים'}
+                    🆓 {debate.available_spots} spot
+                    {debate.available_spots === 1 ? "" : "s"} available
                   </div>
                 ) : (
                   <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    🚫 דיון מלא
+                    🚫 Debate Full
                   </div>
                 )}
               </div>
@@ -73,9 +74,11 @@ export default function DebateListCard({ debate }) {
           </div>
         </div>
 
-        {/* Participants - בגדול מתחת לנושא */}
+        {/* Participants - prominently displayed below topic */}
         <div className="border-t border-gray-200 pt-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">⚔️ לוחמים:</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-3">
+            ⚔️ Fighters:
+          </h4>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="text-lg font-bold">
@@ -84,7 +87,9 @@ export default function DebateListCard({ debate }) {
                     🥊 {debate.user1.firstName} {debate.user1.lastName}
                   </span>
                 ) : (
-                  <span className="text-gray-400">🎯 מחכה ללוחם...</span>
+                  <span className="text-gray-400">
+                    🎯 Waiting for fighter...
+                  </span>
                 )}
               </div>
             </div>
@@ -96,7 +101,9 @@ export default function DebateListCard({ debate }) {
                     🥊 {debate.user2.firstName} {debate.user2.lastName}
                   </span>
                 ) : (
-                  <span className="text-gray-400">🎯 מחכה ללוחם...</span>
+                  <span className="text-gray-400">
+                    🎯 Waiting for fighter...
+                  </span>
                 )}
               </div>
             </div>
@@ -115,7 +122,7 @@ export default function DebateListCard({ debate }) {
           </div>
           <div className="flex items-center space-x-2">
             <span className="font-medium">👥 Status:</span>
-            <span>{debate.participants_count}/2 משתתפים</span>
+            <span>{debate.participants_count}/2 participants</span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="font-medium">💬 Arguments:</span>
@@ -149,7 +156,7 @@ export default function DebateListCard({ debate }) {
               onClick={handleJoinDebate}
               className="flex-1"
             >
-              ⚔️ הירשם לקרב!
+              ⚔️ Join Battle!
             </PrimaryButton>
           )}
 
@@ -159,7 +166,7 @@ export default function DebateListCard({ debate }) {
               disabled
               className="flex-1 opacity-50 cursor-not-allowed"
             >
-              🚫 דיון מלא
+              🚫 Debate Full
             </PrimaryButton>
           )}
 
