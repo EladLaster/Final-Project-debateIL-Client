@@ -42,6 +42,8 @@ export default function DebateListCard({ debate }) {
   const isLive = debate.status === "live";
   const isScheduled = debate.status === "scheduled";
   const isFinished = debate.status === "finished";
+  const hasAvailableSpots = debate.available_spots > 0;
+  const canRegister = isScheduled && hasAvailableSpots;
 
   return (
     <ContentCard className="p-6">
@@ -53,11 +55,56 @@ export default function DebateListCard({ debate }) {
               {debate.topic}
             </h3>
             {getStatusBadge(debate.status)}
+            
+            {/* Available spots indicator */}
+            {isScheduled && (
+              <div className="mt-2">
+                {debate.available_spots > 0 ? (
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    🆓 {debate.available_spots} מקום{debate.available_spots === 1 ? '' : 'ות'} פנוי{debate.available_spots === 1 ? '' : 'ים'}
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    🚫 דיון מלא
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Participants - בגדול מתחת לנושא */}
+        <div className="border-t border-gray-200 pt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">⚔️ לוחמים:</h4>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-bold">
+                {debate.user1 ? (
+                  <span className="text-blue-600">
+                    🥊 {debate.user1.firstName} {debate.user1.lastName}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">🎯 מחכה ללוחם...</span>
+                )}
+              </div>
+            </div>
+            <div className="text-center text-gray-500 font-bold">VS</div>
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-bold">
+                {debate.user2 ? (
+                  <span className="text-red-600">
+                    🥊 {debate.user2.firstName} {debate.user2.lastName}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">🎯 מחכה ללוחם...</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Debate Info */}
-        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 border-t border-gray-200 pt-4">
           <div className="flex items-center space-x-2">
             <span className="font-medium">📅 Date:</span>
             <span>{formatDate(debate.start_time)}</span>
@@ -67,8 +114,8 @@ export default function DebateListCard({ debate }) {
             <span>{formatTime(debate.start_time)}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="font-medium">👥 Participants:</span>
-            <span>{debate.participants_count || 0}</span>
+            <span className="font-medium">👥 Status:</span>
+            <span>{debate.participants_count}/2 משתתפים</span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="font-medium">💬 Arguments:</span>
@@ -96,13 +143,23 @@ export default function DebateListCard({ debate }) {
             </PrimaryButton>
           )}
 
-          {isScheduled && (
+          {canRegister && (
             <PrimaryButton
               variant="primary"
               onClick={handleJoinDebate}
               className="flex-1"
             >
-              📝 Register for Debate
+              ⚔️ הירשם לקרב!
+            </PrimaryButton>
+          )}
+
+          {isScheduled && !hasAvailableSpots && (
+            <PrimaryButton
+              variant="outline"
+              disabled
+              className="flex-1 opacity-50 cursor-not-allowed"
+            >
+              🚫 דיון מלא
             </PrimaryButton>
           )}
 

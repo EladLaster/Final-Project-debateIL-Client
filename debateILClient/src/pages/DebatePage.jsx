@@ -3,6 +3,7 @@ import {
   getDebateById,
   getArgumentsWithUserInfo,
   getVotesForDebate,
+  getDebateParticipants,
 } from "../data/mockData";
 import ContentCard from "../components/basic-ui/ContentCard.jsx";
 import StatusBadge from "../components/basic-ui/StatusBadge.jsx";
@@ -17,6 +18,7 @@ export default function DebatePage() {
   const debate = getDebateById(debateId);
   const debateArguments = getArgumentsWithUserInfo(debateId);
   const votes = getVotesForDebate(debateId);
+  const participants = getDebateParticipants(debateId);
 
   if (!debate) {
     return (
@@ -101,7 +103,16 @@ export default function DebatePage() {
           </div>
           <div>
             <span className="font-medium">👥 Participants:</span>
-            <div>{votes.length} voting</div>
+            <div className="space-y-1">
+              <div>
+                🥊 {participants.user1?.firstName}{" "}
+                {participants.user1?.lastName}
+              </div>
+              <div>
+                🥊 {participants.user2?.firstName}{" "}
+                {participants.user2?.lastName}
+              </div>
+            </div>
           </div>
         </div>
 

@@ -56,6 +56,8 @@ export const mockDebates = [
     start_time: "2025-09-16T14:00:00Z",
     end_time: "2025-09-16T16:00:00Z",
     status: "live",
+    user1_id: 1,
+    user2_id: 2,
   },
   {
     id: 2,
@@ -63,6 +65,8 @@ export const mockDebates = [
     start_time: "2025-09-16T18:00:00Z",
     end_time: "2025-09-16T20:00:00Z",
     status: "scheduled",
+    user1_id: 3,
+    user2_id: null, // מקום פנוי!
   },
   {
     id: 3,
@@ -70,6 +74,8 @@ export const mockDebates = [
     start_time: "2025-09-16T15:30:00Z",
     end_time: "2025-09-16T17:30:00Z",
     status: "live",
+    user1_id: 1,
+    user2_id: 5,
   },
   {
     id: 4,
@@ -77,6 +83,8 @@ export const mockDebates = [
     start_time: "2025-09-17T10:00:00Z",
     end_time: "2025-09-17T12:00:00Z",
     status: "scheduled",
+    user1_id: null, // מקום פנוי!
+    user2_id: null, // מקום פנוי!
   },
   {
     id: 5,
@@ -84,6 +92,8 @@ export const mockDebates = [
     start_time: "2025-09-15T19:00:00Z",
     end_time: "2025-09-15T21:00:00Z",
     status: "finished",
+    user1_id: 4,
+    user2_id: 5,
   },
   {
     id: 6,
@@ -91,11 +101,22 @@ export const mockDebates = [
     start_time: "2025-09-14T16:00:00Z",
     end_time: "2025-09-14T18:00:00Z",
     status: "finished",
+    user1_id: 1,
+    user2_id: 3,
+  },
+  {
+    id: 7,
+    topic: "Cryptocurrency - the future of money?",
+    start_time: "2025-09-18T20:00:00Z",
+    end_time: "2025-09-18T22:00:00Z",
+    status: "scheduled",
+    user1_id: 2,
+    user2_id: null, // מקום פנוי!
   },
 ];
 
 export const mockArguments = [
-  // Arguments for debate 1 (AI replacing doctors)
+  // Arguments for debate 1 (AI replacing doctors) - user1: David (id=1), user2: Sarah (id=2)
   {
     id: 1,
     debate_id: 1,
@@ -113,19 +134,19 @@ export const mockArguments = [
   {
     id: 3,
     debate_id: 1,
-    user_id: 3,
+    user_id: 1,
     text: "AI could handle routine diagnoses, freeing doctors to focus on complex cases and patient interaction. It's not replacement, it's augmentation.",
     timestamp: "2025-09-16T14:12:00Z",
   },
   {
     id: 4,
     debate_id: 1,
-    user_id: 4,
+    user_id: 2,
     text: "What happens when AI makes a mistake? Medical liability and accountability are huge concerns when lives are at stake.",
     timestamp: "2025-09-16T14:15:00Z",
   },
 
-  // Arguments for debate 3 (Digital vs traditional education)
+  // Arguments for debate 3 (Digital vs traditional education) - user1: David (id=1), user2: Alex (id=5)
   {
     id: 5,
     debate_id: 3,
@@ -143,32 +164,55 @@ export const mockArguments = [
   {
     id: 7,
     debate_id: 3,
-    user_id: 2,
+    user_id: 5,
     text: "The COVID pandemic proved that digital education can work effectively when properly implemented. Many students actually performed better online.",
     timestamp: "2025-09-16T15:45:00Z",
   },
 
-  // Arguments for finished debate 5 (Free university education)
+  // Arguments for finished debate 5 (Free university education) - user1: Rachel (id=4), user2: Alex (id=5)
   {
     id: 8,
     debate_id: 5,
-    user_id: 3,
+    user_id: 4,
     text: "Free university education reduces inequality and gives everyone equal opportunity regardless of economic background. It's an investment in society's future.",
     timestamp: "2025-09-15T19:10:00Z",
   },
   {
     id: 9,
     debate_id: 5,
-    user_id: 4,
+    user_id: 5,
     text: "Someone has to pay for it through taxes. This could burden taxpayers and might lead to overcrowded universities with reduced quality.",
     timestamp: "2025-09-15T19:15:00Z",
   },
   {
     id: 10,
     debate_id: 5,
-    user_id: 5,
+    user_id: 4,
     text: "Countries like Germany and Finland have proven that free higher education can work effectively while maintaining high standards.",
     timestamp: "2025-09-15T19:25:00Z",
+  },
+
+  // Arguments for finished debate 6 (Remote work) - user1: David (id=1), user2: Michael (id=3)
+  {
+    id: 11,
+    debate_id: 6,
+    user_id: 1,
+    text: "Remote work offers better work-life balance and eliminates commute time, leading to increased productivity and employee satisfaction.",
+    timestamp: "2025-09-14T16:10:00Z",
+  },
+  {
+    id: 12,
+    debate_id: 6,
+    user_id: 3,
+    text: "Office work fosters collaboration, creativity, and company culture. Face-to-face interactions are crucial for team building and innovation.",
+    timestamp: "2025-09-14T16:15:00Z",
+  },
+  {
+    id: 13,
+    debate_id: 6,
+    user_id: 1,
+    text: "Technology has advanced enough to make remote collaboration seamless. Many companies have successfully transitioned to fully remote operations.",
+    timestamp: "2025-09-14T16:25:00Z",
   },
 ];
 
@@ -240,15 +284,71 @@ export const getDebateStats = () => {
   };
 };
 
-// Enhanced debate data with participant counts and additional info
+// Get participants (user1 and user2) for a debate
+export const getDebateParticipants = (debateId) => {
+  const debate = getDebateById(debateId);
+  if (!debate) return { user1: null, user2: null };
+
+  return {
+    user1: getUserById(debate.user1_id),
+    user2: getUserById(debate.user2_id),
+  };
+};
+
+// Check if a user is a participant in a debate
+export const isUserParticipant = (debateId, userId) => {
+  const debate = getDebateById(debateId);
+  return debate && (debate.user1_id === userId || debate.user2_id === userId);
+};
+
+// Check if debate has available spots
+export const getDebateAvailableSpots = (debateId) => {
+  const debate = getDebateById(debateId);
+  if (!debate) return 0;
+  
+  let spots = 0;
+  if (!debate.user1_id) spots++;
+  if (!debate.user2_id) spots++;
+  return spots;
+};
+
+// Check if debate is full
+export const isDebateFull = (debateId) => {
+  return getDebateAvailableSpots(debateId) === 0;
+};
+
+// Get debate registration status
+export const getDebateRegistrationStatus = (debateId) => {
+  const debate = getDebateById(debateId);
+  if (!debate) return "not-found";
+  
+  const availableSpots = getDebateAvailableSpots(debateId);
+  
+  if (availableSpots === 2) return "open"; // דיון ללא משתתפים
+  if (availableSpots === 1) return "one-spot"; // מקום אחד פנוי
+  return "full"; // מלא
+};
+
+// Enhanced debate data with participant info and additional details
 export const getEnhancedDebates = () => {
-  return mockDebates.map((debate) => ({
-    ...debate,
-    participants_count: getVotesForDebate(debate.id).length,
-    arguments_count: getArgumentsForDebate(debate.id).length,
-    recent_activity: mockArguments
-      .filter((arg) => arg.debate_id === debate.id)
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
-      ?.timestamp,
-  }));
+  return mockDebates.map((debate) => {
+    const participants = getDebateParticipants(debate.id);
+    const availableSpots = getDebateAvailableSpots(debate.id);
+    const registrationStatus = getDebateRegistrationStatus(debate.id);
+    
+    return {
+      ...debate,
+      user1: participants.user1,
+      user2: participants.user2,
+      participants_count: 2 - availableSpots, // מספר משתתפים בפועל
+      available_spots: availableSpots,
+      registration_status: registrationStatus,
+      is_full: isDebateFull(debate.id),
+      arguments_count: getArgumentsForDebate(debate.id).length,
+      recent_activity: mockArguments
+        .filter((arg) => arg.debate_id === debate.id)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
+        ?.timestamp,
+    };
+  });
 };
