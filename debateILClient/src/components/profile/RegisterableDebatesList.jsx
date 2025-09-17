@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import ContentCard from "../basic-ui/ContentCard";
 import PrimaryButton from "../basic-ui/PrimaryButton";
-import { getAvatarById } from "../../utils/randomAvatar";
+import { getAvatarById } from "../../api/randomAvatar";
 
 export default function RegisterableDebatesList({ debates }) {
   const navigate = useNavigate();

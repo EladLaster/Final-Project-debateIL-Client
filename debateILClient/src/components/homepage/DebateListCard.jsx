@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ContentCard from "../basic-ui/ContentCard.jsx";
 import PrimaryButton from "../basic-ui/PrimaryButton.jsx";
 import StatusBadge from "../basic-ui/StatusBadge.jsx";
-import { getAvatarById } from "../../utils/randomAvatar";
+import { getAvatarById } from "../../api/randomAvatar.js";
 
 export default function DebateListCard({ debate }) {
   const navigate = useNavigate();
