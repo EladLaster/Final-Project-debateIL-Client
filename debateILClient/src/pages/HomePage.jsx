@@ -1,12 +1,21 @@
-import { getEnhancedDebates, getDebateStats } from "../data/mockData";
+import { getEnhancedDebates } from "../data/mockData";
 import LiveDebatesList from "../components/homepage/LiveDebatesList.jsx";
-import RegisterableDebatesList from "../components/profile/RegisterableDebatesList.jsx";
-import FinishedDebatesList from "../components/profile/FinishedDebatesList.jsx";
+import RegisterableDebatesList from "../components/homepage/RegisterableDebatesList.jsx";
+import FinishedDebatesList from "../components/homepage/FinishedDebatesList.jsx";
+import DebateStats from "../components/homepage/DebateStats.jsx";
 
 export default function HomePage() {
-  // Get all debates for the new component structure
+  // Get all debates and filter them for each component
   const allDebates = getEnhancedDebates();
-  const stats = getDebateStats();
+
+  // Filter debates by status for each component
+  const liveDebates = allDebates.filter((debate) => debate.status === "live");
+  const registerableDebates = allDebates.filter(
+    (debate) => debate.status === "scheduled" && debate.available_spots > 0
+  );
+  const finishedDebates = allDebates.filter(
+    (debate) => debate.status === "finished"
+  );
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -19,83 +28,13 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Live Debates Section */}
-      <LiveDebatesList debates={allDebates} />
+      {/* Each component gets only its relevant debates */}
+      <LiveDebatesList debates={liveDebates} />
+      <RegisterableDebatesList debates={registerableDebates} />
+      <FinishedDebatesList debates={finishedDebates} />
 
-      {/* Registerable Debates Section */}
-      <RegisterableDebatesList debates={allDebates} />
-
-      {/* Finished Debates Section */}
-      <FinishedDebatesList debates={allDebates} />
-
-      {/* Quick Stats */}
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">•</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Live Debates
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.liveDebates}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">⏰</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Scheduled Debates
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.scheduledDebates}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">👥</span>
-                </div>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total Users
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.totalUsers}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Stats component */}
+      <DebateStats />
     </div>
   );
 }
