@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Header from "./components/Header.jsx";
+import MainNavigation from "./components/navigation/MainNavigation.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import DebatePage from "./pages/DebatePage.jsx";
 import ReplayPage from "./pages/ReplayPage.jsx";
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-white">
-        <Header />
+        <MainNavigation />
         <main className="py-6">
           <Routes>
             <Route path="/" element={<HomePage />} />

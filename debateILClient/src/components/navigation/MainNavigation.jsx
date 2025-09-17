@@ -1,9 +1,9 @@
 import { NavLink } from "react-router-dom";
-import logoImg from "../assets/logo.png";
+import logoImg from "../../assets/logo.png";
 import { useState } from "react";
-import { brandColors } from "../data/brandColors";
+import { brandColors } from "../../data/brandColors";
 
-export default function Header() {
+export default function MainNavigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navLinks = [
     { to: "/", label: "Home" },
