@@ -58,6 +58,8 @@ export const mockDebates = [
     status: "live",
     user1_id: 1,
     user2_id: 2,
+    score_user1: 0, // Live debate - no scores yet
+    score_user2: 0,
   },
   {
     id: 2,
@@ -67,6 +69,8 @@ export const mockDebates = [
     status: "scheduled",
     user1_id: 3,
     user2_id: null, // Available spot
+    score_user1: null,
+    score_user2: null,
   },
   {
     id: 3,
@@ -76,6 +80,8 @@ export const mockDebates = [
     status: "live",
     user1_id: 1,
     user2_id: 5,
+    score_user1: 0, // Live debate - no scores yet
+    score_user2: 0,
   },
   {
     id: 4,
@@ -85,6 +91,8 @@ export const mockDebates = [
     status: "scheduled",
     user1_id: null, // Available spot
     user2_id: null, // Available spot
+    score_user1: null,
+    score_user2: null,
   },
   {
     id: 5,
@@ -94,6 +102,8 @@ export const mockDebates = [
     status: "finished",
     user1_id: 4,
     user2_id: 5,
+    score_user1: 78, // Rachel won this debate
+    score_user2: 65,
   },
   {
     id: 6,
@@ -103,6 +113,8 @@ export const mockDebates = [
     status: "finished",
     user1_id: 1,
     user2_id: 3,
+    score_user1: 82, // David won this debate
+    score_user2: 71,
   },
   {
     id: 7,
@@ -112,6 +124,8 @@ export const mockDebates = [
     status: "scheduled",
     user1_id: 2,
     user2_id: null, // Available spot
+    score_user1: null,
+    score_user2: null,
   },
 ];
 
@@ -284,6 +298,61 @@ export const getDebateStats = () => {
   };
 };
 
+// Get user statistics including win/loss record
+export const getUserStats = (userId) => {
+  const userDebates = mockDebates.filter(
+    (debate) => debate.user1_id === userId || debate.user2_id === userId
+  );
+
+  const finishedDebates = userDebates.filter((d) => d.status === "finished");
+  const liveDebates = userDebates.filter((d) => d.status === "live");
+  const scheduledDebates = userDebates.filter((d) => d.status === "scheduled");
+
+  let wins = 0;
+  let losses = 0;
+  let draws = 0;
+  let totalScore = 0;
+
+  finishedDebates.forEach((debate) => {
+    const scores = getDebateScores(debate.id);
+    if (scores.hasScores) {
+      if (scores.isDraw) {
+        draws++;
+      } else if (scores.winner?.userId === userId) {
+        wins++;
+      } else {
+        losses++;
+      }
+
+      // Add user's score to total
+      if (debate.user1_id === userId) {
+        totalScore += scores.user1Score;
+      } else {
+        totalScore += scores.user2Score;
+      }
+    }
+  });
+
+  return {
+    totalDebates: userDebates.length,
+    finishedDebates: finishedDebates.length,
+    liveDebates: liveDebates.length,
+    scheduledDebates: scheduledDebates.length,
+    wins,
+    losses,
+    draws,
+    winRate:
+      finishedDebates.length > 0
+        ? ((wins / finishedDebates.length) * 100).toFixed(1)
+        : 0,
+    averageScore:
+      finishedDebates.length > 0
+        ? (totalScore / finishedDebates.length).toFixed(1)
+        : 0,
+    totalScore,
+  };
+};
+
 // Get participants (user1 and user2) for a debate
 export const getDebateParticipants = (debateId) => {
   const debate = getDebateById(debateId);
@@ -299,6 +368,43 @@ export const getDebateParticipants = (debateId) => {
 export const isUserParticipant = (debateId, userId) => {
   const debate = getDebateById(debateId);
   return debate && (debate.user1_id === userId || debate.user2_id === userId);
+};
+
+// Get debate scores and winner info
+export const getDebateScores = (debateId) => {
+  const debate = getDebateById(debateId);
+  if (!debate || debate.status !== "finished") {
+    return {
+      hasScores: false,
+      user1Score: null,
+      user2Score: null,
+      winner: null,
+      isDraw: false,
+    };
+  }
+
+  const user1Score = debate.score_user1 || 0;
+  const user2Score = debate.score_user2 || 0;
+
+  let winner = null;
+  let isDraw = false;
+
+  if (user1Score > user2Score) {
+    winner = { userId: debate.user1_id, score: user1Score };
+  } else if (user2Score > user1Score) {
+    winner = { userId: debate.user2_id, score: user2Score };
+  } else {
+    isDraw = true;
+  }
+
+  return {
+    hasScores: true,
+    user1Score,
+    user2Score,
+    winner,
+    isDraw,
+    scoreDifference: Math.abs(user1Score - user2Score),
+  };
 };
 
 // Get debate registration status with availability info
@@ -334,6 +440,7 @@ export const getEnhancedDebates = () => {
   return mockDebates.map((debate) => {
     const participants = getDebateParticipants(debate.id);
     const availability = getDebateAvailability(debate.id);
+    const scores = getDebateScores(debate.id);
 
     return {
       ...debate,
@@ -348,6 +455,10 @@ export const getEnhancedDebates = () => {
         .filter((arg) => arg.debate_id === debate.id)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
         ?.timestamp,
+      // Score information
+      scores: scores,
+      winner: scores.winner,
+      is_draw: scores.isDraw,
     };
   });
 };

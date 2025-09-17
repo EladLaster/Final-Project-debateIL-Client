@@ -83,8 +83,22 @@ export default function DebateListCard({ debate }) {
             <div className="flex items-center justify-between">
               <div className="text-lg font-bold">
                 {debate.user1 ? (
-                  <span className="text-blue-600">
+                  <span
+                    className={`${
+                      debate.scores?.winner?.userId === debate.user1.id
+                        ? "text-green-600"
+                        : "text-blue-600"
+                    }`}
+                  >
                     🥊 {debate.user1.firstName} {debate.user1.lastName}
+                    {debate.scores?.hasScores && (
+                      <span className="ml-2 text-sm font-medium">
+                        ({debate.scores.user1Score})
+                      </span>
+                    )}
+                    {debate.scores?.winner?.userId === debate.user1.id && (
+                      <span className="ml-1">👑</span>
+                    )}
                   </span>
                 ) : (
                   <span className="text-gray-400">
@@ -93,12 +107,31 @@ export default function DebateListCard({ debate }) {
                 )}
               </div>
             </div>
-            <div className="text-center text-gray-500 font-bold">VS</div>
+            <div className="text-center text-gray-500 font-bold">
+              VS
+              {debate.is_draw && (
+                <div className="text-xs text-orange-600 font-medium">DRAW!</div>
+              )}
+            </div>
             <div className="flex items-center justify-between">
               <div className="text-lg font-bold">
                 {debate.user2 ? (
-                  <span className="text-red-600">
+                  <span
+                    className={`${
+                      debate.scores?.winner?.userId === debate.user2.id
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
                     🥊 {debate.user2.firstName} {debate.user2.lastName}
+                    {debate.scores?.hasScores && (
+                      <span className="ml-2 text-sm font-medium">
+                        ({debate.scores.user2Score})
+                      </span>
+                    )}
+                    {debate.scores?.winner?.userId === debate.user2.id && (
+                      <span className="ml-1">👑</span>
+                    )}
                   </span>
                 ) : (
                   <span className="text-gray-400">

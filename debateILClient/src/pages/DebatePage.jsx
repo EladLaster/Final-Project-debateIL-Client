@@ -4,6 +4,7 @@ import {
   getArgumentsWithUserInfo,
   getVotesForDebate,
   getDebateParticipants,
+  getDebateScores,
 } from "../data/mockData";
 import ContentCard from "../components/basic-ui/ContentCard.jsx";
 import StatusBadge from "../components/basic-ui/StatusBadge.jsx";
@@ -19,6 +20,7 @@ export default function DebatePage() {
   const debateArguments = getArgumentsWithUserInfo(debateId);
   const votes = getVotesForDebate(debateId);
   const participants = getDebateParticipants(debateId);
+  const scores = getDebateScores(debateId);
 
   if (!debate) {
     return (
@@ -102,16 +104,49 @@ export default function DebatePage() {
             </div>
           </div>
           <div>
-            <span className="font-medium">👥 Participants:</span>
+            <span className="font-medium">👥 Battle Results:</span>
             <div className="space-y-1">
-              <div>
+              <div
+                className={`flex items-center space-x-2 ${
+                  scores.winner?.userId === participants.user1?.id
+                    ? "font-bold text-green-600"
+                    : ""
+                }`}
+              >
                 🥊 {participants.user1?.firstName}{" "}
                 {participants.user1?.lastName}
+                {scores.hasScores && (
+                  <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                    {scores.user1Score} pts
+                  </span>
+                )}
+                {scores.winner?.userId === participants.user1?.id && (
+                  <span className="ml-1">👑 WINNER</span>
+                )}
               </div>
-              <div>
+              <div
+                className={`flex items-center space-x-2 ${
+                  scores.winner?.userId === participants.user2?.id
+                    ? "font-bold text-green-600"
+                    : ""
+                }`}
+              >
                 🥊 {participants.user2?.firstName}{" "}
                 {participants.user2?.lastName}
+                {scores.hasScores && (
+                  <span className="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
+                    {scores.user2Score} pts
+                  </span>
+                )}
+                {scores.winner?.userId === participants.user2?.id && (
+                  <span className="ml-1">👑 WINNER</span>
+                )}
               </div>
+              {scores.isDraw && (
+                <div className="text-orange-600 font-medium text-sm">
+                  🤝 It's a draw!
+                </div>
+              )}
             </div>
           </div>
         </div>
