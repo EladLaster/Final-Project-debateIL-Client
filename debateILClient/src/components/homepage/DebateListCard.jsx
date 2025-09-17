@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ContentCard from "../basic-ui/ContentCard.jsx";
 import PrimaryButton from "../basic-ui/PrimaryButton.jsx";
 import StatusBadge from "../basic-ui/StatusBadge.jsx";
+import { getAvatarById } from "../../utils/randomAvatar";
 
 export default function DebateListCard({ debate }) {
   const navigate = useNavigate();
@@ -79,66 +80,74 @@ export default function DebateListCard({ debate }) {
           <h4 className="text-sm font-medium text-gray-700 mb-3">
             ⚔️ Fighters:
           </h4>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-lg font-bold">
-                {debate.user1 ? (
-                  <span
-                    className={`${
-                      debate.scores?.winner?.userId === debate.user1.id
-                        ? "text-green-600"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    🥊 {debate.user1.firstName} {debate.user1.lastName}
-                    {debate.scores?.hasScores && (
-                      <span className="ml-2 text-sm font-medium">
-                        ({debate.scores.user1Score})
-                      </span>
-                    )}
-                    {debate.scores?.winner?.userId === debate.user1.id && (
-                      <span className="ml-1">👑</span>
-                    )}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">
-                    🎯 Waiting for fighter...
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="text-center text-gray-500 font-bold">
-              VS
-              {debate.is_draw && (
-                <div className="text-xs text-orange-600 font-medium">DRAW!</div>
+          <div className="flex items-center justify-center gap-12 mb-2">
+            {/* User 1 Avatar */}
+            {debate.user1 && (
+              <img
+                src={getAvatarById(debate.user1.id)}
+                alt={debate.user1.firstName}
+                className="w-20 h-20 rounded-full border-2 border-blue-400 shadow"
+              />
+            )}
+            {/* VS label */}
+            <div className="text-2xl font-bold text-gray-500">VS</div>
+            {/* User 2 Avatar */}
+            {debate.user2 && (
+              <img
+                src={getAvatarById(debate.user2.id)}
+                alt={debate.user2.firstName}
+                className="w-20 h-20 rounded-full border-2 border-red-400 shadow"
+              />
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-12">
+            {/* User 1 Name */}
+            <div className="text-lg font-bold flex flex-col items-center">
+              {debate.user1 ? (
+                <span
+                  className={`${
+                    debate.scores?.winner?.userId === debate.user1.id
+                      ? "text-green-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  🥊 {debate.user1.firstName} {debate.user1.lastName}
+                  {debate.scores?.hasScores && (
+                    <span className="ml-2 text-sm font-medium">
+                      ({debate.scores.user1Score})
+                    </span>
+                  )}
+                  {debate.scores?.winner?.userId === debate.user1.id && (
+                    <span className="ml-1">👑</span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-gray-400">🎯 Waiting for fighter...</span>
               )}
             </div>
-            <div className="flex items-center justify-between">
-              <div className="text-lg font-bold">
-                {debate.user2 ? (
-                  <span
-                    className={`${
-                      debate.scores?.winner?.userId === debate.user2.id
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    🥊 {debate.user2.firstName} {debate.user2.lastName}
-                    {debate.scores?.hasScores && (
-                      <span className="ml-2 text-sm font-medium">
-                        ({debate.scores.user2Score})
-                      </span>
-                    )}
-                    {debate.scores?.winner?.userId === debate.user2.id && (
-                      <span className="ml-1">👑</span>
-                    )}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">
-                    🎯 Waiting for fighter...
-                  </span>
-                )}
-              </div>
+            {/* User 2 Name */}
+            <div className="text-lg font-bold flex flex-col items-center">
+              {debate.user2 ? (
+                <span
+                  className={`${
+                    debate.scores?.winner?.userId === debate.user2.id
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  🥊 {debate.user2.firstName} {debate.user2.lastName}
+                  {debate.scores?.hasScores && (
+                    <span className="ml-2 text-sm font-medium">
+                      ({debate.scores.user2Score})
+                    </span>
+                  )}
+                  {debate.scores?.winner?.userId === debate.user2.id && (
+                    <span className="ml-1">👑</span>
+                  )}
+                </span>
+              ) : (
+                <span className="text-gray-400">🎯 Waiting for fighter...</span>
+              )}
             </div>
           </div>
         </div>
