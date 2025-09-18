@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
+
 export default function ProfilePage() {
   const { id } = useParams();
+
   return (
     <section>
       <h1 className="text-2xl mb-4">Profile #{id}</h1>
