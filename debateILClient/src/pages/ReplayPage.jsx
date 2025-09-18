@@ -26,7 +26,7 @@ export default function ReplayPage() {
       </h2>
       <div className="bg-gray-50 rounded-xl p-4 shadow space-y-4">
         {argumentsList.map((arg, idx) => {
-          // user1 תמיד בצד שמאל, user2 תמיד בצד ימין
+          // user1 always on left side, user2 always on right side
           const isUser1 = arg.user?.id === user1?.id;
           return (
             <div

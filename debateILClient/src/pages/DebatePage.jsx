@@ -171,12 +171,12 @@ export default function DebatePage() {
               <ArgumentCard
                 key={argument.id}
                 argument={argument}
-                onVote={(argumentId) =>
-                  console.log("Vote on argument:", argumentId)
-                }
-                onReply={(argumentId) =>
-                  console.log("Reply to argument:", argumentId)
-                }
+                onVote={(argumentId) => {
+                  // TODO: Implement voting functionality
+                }}
+                onReply={(argumentId) => {
+                  // TODO: Implement reply functionality
+                }}
               />
             ))}
           </div>

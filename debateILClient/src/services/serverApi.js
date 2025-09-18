@@ -21,7 +21,6 @@ const normalizeError = (error) => {
 export async function login(email, password) {
   try {
     const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
-    console.log("Login response:", response.data);
 
     if (response.data.success) {
       return response.data.user; // Return user data from server
@@ -37,7 +36,6 @@ export async function login(email, password) {
 export async function register(userData) {
   try {
     const response = await api.post(API_ENDPOINTS.REGISTER, userData);
-    console.log("Register response:", response.data);
 
     if (response.data.success) {
       return response.data.user; // Return user data from server
@@ -89,7 +87,6 @@ export async function getDebateStats() {
 export async function createDebate(debateData) {
   try {
     const response = await api.post(API_ENDPOINTS.DEBATES, debateData);
-    console.log("Create debate response:", response.data);
 
     if (response.data.success) {
       return response.data.newDebate;

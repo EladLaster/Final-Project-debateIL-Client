@@ -76,7 +76,6 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
       };
 
       const newDebate = await createDebate(debateData);
-      console.log("Debate created:", newDebate);
 
       // Reset form
       setFormData({

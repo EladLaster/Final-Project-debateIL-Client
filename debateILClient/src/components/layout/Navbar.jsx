@@ -12,14 +12,12 @@ function Navbar() {
 
   // Update user state when authStore changes
   useEffect(() => {
-    console.log("Navbar: authStore.activeUser changed:", authStore.activeUser);
     setUser(authStore.activeUser);
   }, [authStore.activeUser]);
 
   // Listen for auth state changes
   useEffect(() => {
     const handleAuthStateChange = (event) => {
-      console.log("Navbar: Received authStateChanged event:", event.detail);
       setUser(event.detail.user);
     };
 
@@ -87,9 +85,9 @@ function Navbar() {
                   }}
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
-                  <UserAvatar 
-                    user={user} 
-                    size="medium" 
+                  <UserAvatar
+                    user={user}
+                    size="medium"
                     className="border-2"
                     style={{ borderColor: brandColors.primary }}
                   />
@@ -136,7 +134,7 @@ function Navbar() {
                         style={{ color: brandColors.primary }}
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        פרופיל שלי
+                        My Profile
                       </NavLink>
                       <button
                         className="block w-full text-left px-4 py-2 text-sm transition hover:opacity-80"
@@ -146,7 +144,7 @@ function Navbar() {
                           setUserMenuOpen(false);
                         }}
                       >
-                        התנתק
+                        Logout
                       </button>
                     </div>
                   </div>
@@ -163,7 +161,7 @@ function Navbar() {
                   }}
                   to="/login"
                 >
-                  התחבר
+                  Login
                 </NavLink>
 
                 <NavLink
@@ -175,7 +173,7 @@ function Navbar() {
                   }}
                   to="/register"
                 >
-                  הרשם
+                  Register
                 </NavLink>
               </div>
             )}

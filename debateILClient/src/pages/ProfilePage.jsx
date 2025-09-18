@@ -1,11 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  ProfileCard,
-  UserStats,
-  UserDebateHistory,
-  EditProfile,
-} from "../components/profile";
+import ProfileCard from "../components/profile/ProfileCard";
+import UserStats from "../components/profile/UserStats";
+import UserDebateHistory from "../components/profile/UserDebateHistory";
+import EditProfile from "../components/profile/EditProfile";
 import { authStore } from "../stores/authStore";
 import { getDebates } from "../services/serverApi";
 
@@ -77,7 +75,6 @@ export default function ProfilePage() {
       }
 
       setIsEditing(false);
-      console.log("Profile saved:", formData);
     } catch (error) {
       console.error("Error saving profile:", error);
     }

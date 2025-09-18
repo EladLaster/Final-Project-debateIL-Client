@@ -10,7 +10,7 @@ export default function DebateGrid({
   titleColor,
   renderMiddleContent,
   renderButton,
-  getWinner, // פונקציה אופציונלית להחזיר מידע על הזוכה
+  getWinner, // Optional function to return winner information
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 

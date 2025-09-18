@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Navbar, Footer } from "./components/layout";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 import HomePage from "./pages/HomePage.jsx";
 import DebatePage from "./pages/DebatePage.jsx";
 import ReplayPage from "./pages/ReplayPage.jsx";

@@ -96,7 +96,7 @@ export default function LoginPage() {
               color: brandColors.accent,
             }}
           >
-            התחבר
+            Login
           </button>
         </form>
 

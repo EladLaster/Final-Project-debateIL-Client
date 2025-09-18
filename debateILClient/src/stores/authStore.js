@@ -12,7 +12,6 @@ class AuthStore {
 
   handleLogin = async (email, password) => {
     const user = await login(email, password);
-    console.log("Login response:", user);
 
     // Ensure user has required fields
     const userWithDefaults = {
@@ -24,10 +23,8 @@ class AuthStore {
       ...user,
     };
 
-    console.log("User with defaults:", userWithDefaults);
     localStorage.activeUser = JSON.stringify(userWithDefaults);
     this.activeUser = userWithDefaults;
-    console.log("AuthStore activeUser updated:", this.activeUser);
 
     // Dispatch custom event for UI updates
     window.dispatchEvent(
@@ -42,7 +39,6 @@ class AuthStore {
   handleRegister = async (userData) => {
     try {
       const user = await register(userData);
-      console.log("Register response:", user);
 
       // Ensure user has required fields
       const userWithDefaults = {
@@ -55,7 +51,6 @@ class AuthStore {
         ...user,
       };
 
-      console.log("User with defaults:", userWithDefaults);
       localStorage.activeUser = JSON.stringify(userWithDefaults);
       this.activeUser = userWithDefaults;
       return userWithDefaults;
@@ -68,7 +63,6 @@ class AuthStore {
   handleLogout = () => {
     localStorage.removeItem("activeUser");
     this.activeUser = null;
-    console.log("AuthStore activeUser cleared:", this.activeUser);
   };
 }
 

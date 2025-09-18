@@ -112,7 +112,9 @@ const DEBATE_CONFIGS = {
     getButton: (debate) => (
       <PrimaryButton
         variant="primary"
-        onClick={() => console.log("Registering for debate:", debate.id)}
+        onClick={() => {
+          /* TODO: Implement debate registration */
+        }}
         className="w-full text-sm py-2"
       >
         ⚔️ Join Battle!

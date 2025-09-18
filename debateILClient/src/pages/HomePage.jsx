@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { DebateSection, DebateStats } from "../components/homepage";
+import DebateSection from "../components/homepage/DebateSection";
+import DebateStats from "../components/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
 import { authStore } from "../stores/authStore";
 import CreateDebateModal from "../components/debate-room/CreateDebateModal";
@@ -26,7 +27,7 @@ function HomePage() {
 
     async function load() {
       try {
-        const list = await getDebates(); // מושך את כולם מהשרת
+        const list = await getDebates(); // Fetch all debates from server
         if (!alive) return;
         setAllDebates(Array.isArray(list) ? list : []);
         setError("");
@@ -38,7 +39,7 @@ function HomePage() {
     }
 
     load();
-    // אופציונלי: ריענון כל 5 שניות כדי לשמור על “לייב”
+    // Optional: Refresh every 5 seconds to keep live updates
     const id = setInterval(load, 5000);
     return () => {
       alive = false;
@@ -48,13 +49,8 @@ function HomePage() {
 
   // Auto-refresh when user login status changes
   useEffect(() => {
-    console.log(
-      "HomePage - authStore.activeUser changed:",
-      authStore.activeUser
-    );
     if (authStore.activeUser) {
       // User just logged in, refresh debates
-      console.log("HomePage - User logged in, refreshing debates");
       loadDebates();
     }
   }, [authStore.activeUser?.id]); // Use id to detect actual user changes
@@ -70,7 +66,7 @@ function HomePage() {
     return Math.max(0, maxParticipants - joinedCount);
   };
 
-  // בדיוק אותם פילטרים כמו אצלך
+  // Filter debates by status
   const liveDebates = useMemo(
     () => allDebates.filter((debate) => debate.status === "live"),
     [allDebates]
@@ -94,7 +90,6 @@ function HomePage() {
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   const handleCreateDebateSuccess = (newDebate) => {
-    console.log("New debate created:", newDebate);
     // Refresh the debates list
     loadDebates();
   };

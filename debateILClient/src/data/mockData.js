@@ -97,7 +97,7 @@ export const mockUsers = [
 // ...existing code...
 
 export const mockDebates = [
-  // Live Debates - דיונים פעילים כרגע
+  // Live Debates - Currently active debates
   {
     id: 1,
     topic: "Should Israel implement a 4-day work week?",
@@ -130,7 +130,7 @@ export const mockDebates = [
     final_score: null,
   },
 
-  // Scheduled/Available Debates - דיונים פתוחים להרשמה
+  // Scheduled/Available Debates - Open for registration
   {
     id: 3,
     topic:
@@ -196,7 +196,7 @@ export const mockDebates = [
     final_score: null,
   },
 
-  // Finished Debates - דיונים שהסתיימו
+  // Finished Debates - Completed debates
   {
     id: 7,
     topic: "Remote work vs Office culture: The future of Israeli high-tech",
