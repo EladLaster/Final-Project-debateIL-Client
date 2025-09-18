@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { brandColors } from "../../data/brandColors";
 import { authStore } from "../../stores/authStore";
+import { isAdmin } from "../../utils/adminAuth";
 import UserAvatar from "../basic-ui/UserAvatar";
 import logoImg from "../../assets/logo.png";
 
@@ -137,6 +138,16 @@ function Navbar() {
                       >
                         My Profile
                       </NavLink>
+                      {isAdmin(user) && (
+                        <NavLink
+                          to="/admin"
+                          className="block px-4 py-2 text-sm transition hover:opacity-80"
+                          style={{ color: brandColors.primary }}
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          🛡️ Admin Panel
+                        </NavLink>
+                      )}
                       <button
                         className="block w-full text-left px-4 py-2 text-sm transition hover:opacity-80"
                         style={{ color: brandColors.primary }}
