@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import LiveDebatesList from "../components/homepage/LiveDebatesList.jsx";
-import RegisterableDebatesList from "../components/homepage/RegisterableDebatesList.jsx";
-import FinishedDebatesList from "../components/homepage/FinishedDebatesList.jsx";
-import DebateStats from "../components/homepage/DebateStats.jsx";
+import {
+  LiveDebatesList,
+  RegisterableDebatesList,
+  FinishedDebatesList,
+  DebateStats,
+} from "../components/homepage";
 import { getDebates } from "../services/serverApi";
 
 export default function HomePage() {
