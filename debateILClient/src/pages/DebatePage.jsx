@@ -1,218 +1,248 @@
-import { useParams, Link } from "react-router-dom";
-import {
-  getDebateById,
-  getArgumentsWithUserInfo,
-  getDebateParticipants,
-  getDebateScores,
-} from "../data/mockData";
-import ContentCard from "../components/basic-ui/ContentCard.jsx";
-import StatusBadge from "../components/basic-ui/StatusBadge.jsx";
-import PrimaryButton from "../components/basic-ui/PrimaryButton.jsx";
-import ArgumentCard from "../components/debate-room/ArgumentCard.jsx";
+import { useState, useRef, useEffect } from "react";
 
 export default function DebatePage() {
-  const { id } = useParams();
-  const debateId = parseInt(id);
+  // Demo users
+  const user1 = {
+    id: 1,
+    firstName: "Alice",
+    avatar: "", // Place for image in the future
+  };
+  const user2 = {
+    id: 2,
+    firstName: "Bob",
+    avatar: "",
+  };
+  // Audience with image placeholder (avatar field for future image)
+  const audience = [
+    { id: 101, avatar: "" },
+    { id: 102, avatar: "" },
+    { id: 103, avatar: "" },
+    { id: 104, avatar: "" },
+    { id: 105, avatar: "" },
+  ];
 
-  // Get debate data
-  const debate = getDebateById(debateId);
-  const debateArguments = getArgumentsWithUserInfo(debateId);
-  // const votes = getVotesForDebate(debateId); // TODO: Implement voting functionality
-  const participants = getDebateParticipants(debateId);
-  const scores = getDebateScores(debateId);
+  // Demo arguments
+  const [debateArguments, setDebateArguments] = useState([
+    { id: 1, user: user1, text: "Hello! I believe that..." },
+    { id: 2, user: user2, text: "I disagree, because..." },
+    { id: 3, user: user1, text: "But consider this..." },
+    { id: 4, user: user2, text: "Good point, but still..." },
+  ]);
+  const [newArgument, setNewArgument] = useState("");
+  const [currentUser, setCurrentUser] = useState(user1); // Switch to user2 for testing
 
-  if (!debate) {
-    return (
-      <div className="p-6">
-        <ContentCard className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Debate Not Found
-          </h1>
-          <p className="text-gray-600 mb-6">
-            The debate you're looking for doesn't exist or has been removed.
-          </p>
-          <Link to="/">
-            <PrimaryButton>← Back to Home</PrimaryButton>
-          </Link>
-        </ContentCard>
-      </div>
-    );
-  }
+  // Demo votes
+  const [votes, setVotes] = useState({ user1: 7, user2: 3 });
+  const [hasVoted, setHasVoted] = useState(false);
 
-  const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  // Auto scroll
+  const chatEndRef = useRef(null);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [debateArguments]);
+
+  // Vote bar calculation
+  const totalVotes = votes.user1 + votes.user2;
+  const user1Percent = totalVotes ? Math.round((votes.user1 / totalVotes) * 100) : 50;
+  const user2Percent = totalVotes ? Math.round((votes.user2 / totalVotes) * 100) : 50;
+
+  // Add argument
+  const handleAddArgument = (e) => {
+    e.preventDefault();
+    if (!newArgument.trim()) return;
+    setDebateArguments((prev) => [
+      ...prev,
+      { id: prev.length + 1, user: currentUser, text: newArgument },
+    ]);
+    setNewArgument("");
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  // Vote
+  const handleVote = (side) => {
+    if (hasVoted) return;
+    setVotes((prev) => ({
+      ...prev,
+      [side]: prev[side] + 1,
+    }));
+    setHasVoted(true);
   };
-
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      live: { text: "🔴 Live Now", variant: "live" },
-      scheduled: { text: "⏰ Scheduled", variant: "scheduled" },
-      finished: { text: "✅ Finished", variant: "finished" },
-    };
-
-    const config = statusConfig[status] || { text: status, variant: "default" };
-    return <StatusBadge variant={config.variant}>{config.text}</StatusBadge>;
-  };
-
-  const isLive = debate.status === "live";
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Back Navigation */}
-      <div className="mb-6">
-        <Link
-          to="/"
-          className="text-blue-600 hover:text-blue-800 flex items-center"
-        >
-          ← Back to Debates
-        </Link>
-      </div>
-
-      {/* Debate Header */}
-      <ContentCard className="p-6 mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
-              {debate.topic}
-            </h1>
-            {getStatusBadge(debate.status)}
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-100 to-gray-100">
+      {/* Vote Bar */}
+      <div className="w-full max-w-4xl mx-auto mt-8 mb-4">
+        <div className="flex h-10 rounded-full overflow-hidden shadow-2xl border-4 border-gray-300 relative">
+          <div
+            className="flex items-center justify-end pr-4 text-white font-extrabold text-lg bg-blue-700 transition-all"
+            style={{ width: `${user1Percent}%` }}
+          >
+            {user1.firstName} {user1Percent}%
+          </div>
+          <div
+            className="flex items-center justify-start pl-4 text-white font-extrabold text-lg bg-red-700 transition-all"
+            style={{ width: `${user2Percent}%` }}
+          >
+            {user2Percent}% {user2.firstName}
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">📅 Date:</span>
-            <div>{formatDate(debate.start_time)}</div>
+      {/* Debaters Avatars - OUTSIDE the ring */}
+      <div className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-8 mb-2" style={{marginTop: 0}}>
+        <div className="flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full bg-white border-8 border-blue-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-blue-200">
+            {user1.avatar ? (
+              <img src={user1.avatar} alt="user1" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span className="text-blue-300">+</span>
+            )}
           </div>
-          <div>
-            <span className="font-medium">⏰ Time:</span>
-            <div>
-              {formatTime(debate.start_time)} - {formatTime(debate.end_time)}
-            </div>
+          <div className="text-center font-extrabold text-blue-700 text-lg tracking-wide drop-shadow-lg mt-2">{user1.firstName}</div>
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full bg-white border-8 border-red-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-red-200">
+            {user2.avatar ? (
+              <img src={user2.avatar} alt="user2" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span className="text-red-300">+</span>
+            )}
           </div>
-          <div>
-            <span className="font-medium">👥 Battle Results:</span>
-            <div className="space-y-1">
-              <div
-                className={`flex items-center space-x-2 ${
-                  scores.winner?.userId === participants.user1?.id
-                    ? "font-bold text-green-600"
-                    : ""
-                }`}
-              >
-                🥊 {participants.user1?.firstName}{" "}
-                {participants.user1?.lastName}
-                {scores.hasScores && (
-                  <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                    {scores.user1Score} pts
-                  </span>
-                )}
-                {scores.winner?.userId === participants.user1?.id && (
-                  <span className="ml-1">👑 WINNER</span>
-                )}
-              </div>
-              <div
-                className={`flex items-center space-x-2 ${
-                  scores.winner?.userId === participants.user2?.id
-                    ? "font-bold text-green-600"
-                    : ""
-                }`}
-              >
-                🥊 {participants.user2?.firstName}{" "}
-                {participants.user2?.lastName}
-                {scores.hasScores && (
-                  <span className="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
-                    {scores.user2Score} pts
-                  </span>
-                )}
-                {scores.winner?.userId === participants.user2?.id && (
-                  <span className="ml-1">👑 WINNER</span>
-                )}
-              </div>
-              {scores.isDraw && (
-                <div className="text-orange-600 font-medium text-sm">
-                  🤝 It's a draw!
-                </div>
+          <div className="text-center font-extrabold text-red-700 text-lg tracking-wide drop-shadow-lg mt-2">{user2.firstName}</div>
+        </div>
+      </div>
+
+      {/* Main Debate Arena */}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {/* Boxing ring frame */}
+        <div
+          className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-6 px-2"
+          style={{
+            border: "6px solid #222",
+            borderRadius: "2.5rem",
+            boxShadow: "0 0 0 8px #e0e7ef, 0 8px 32px 0 rgba(0,0,0,0.10)",
+            background: "linear-gradient(135deg, #f8fafc 80%, #e0e7ef 100%)",
+            position: "relative",
+            minHeight: "38vh",
+            maxHeight: "38vh",
+            overflow: "hidden",
+            marginBottom: "0.5rem"
+          }}
+        >
+          {/* Chat Area */}
+          <div className="relative w-full flex flex-col items-center h-full">
+            <div
+              className="flex flex-col-reverse overflow-y-auto w-full h-full px-2 py-2"
+              style={{
+                scrollbarWidth: "none",
+                background: "transparent",
+                minWidth: "260px",
+                maxHeight: "32vh",
+              }}
+            >
+              <div ref={chatEndRef}></div>
+              {debateArguments.length > 0 ? (
+                debateArguments
+                  .slice()
+                  .reverse()
+                  .map((argument) => (
+                    <div
+                      key={argument.id}
+                      className={`flex items-end mb-4 ${
+                        argument.user.id === user1.id ? "justify-start" : "justify-end"
+                      }`}
+                    >
+                      {/* Bubble + Avatar */}
+                      {argument.user.id === user1.id && (
+                        <>
+                          <div className="flex items-end">
+                            <div className="rounded-3xl bg-blue-100 px-6 py-3 shadow text-left max-w-xs mr-2 text-base border-2 border-blue-300 text-blue-900 font-semibold">
+                              <div className="mb-1 text-blue-700 font-bold">{argument.user.firstName}</div>
+                              <div>{argument.text}</div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {argument.user.id === user2.id && (
+                        <>
+                          <div className="rounded-3xl bg-red-100 px-6 py-3 shadow text-right max-w-xs ml-2 text-base border-2 border-red-300 text-red-900 font-semibold">
+                            <div className="mb-1 text-red-700 font-bold">{argument.user.firstName}</div>
+                            <div>{argument.text}</div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div className="text-gray-400 text-center py-8">No arguments yet.</div>
               )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Live indicator */}
-        {isLive && (
-          <div className="mt-4 flex items-center space-x-2 text-red-600">
-            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-            <span className="font-medium">Discussion in progress</span>
-          </div>
-        )}
-      </ContentCard>
+      {/* Input box BELOW the ring */}
+      <form
+        onSubmit={handleAddArgument}
+        className="w-full max-w-4xl mx-auto flex items-center justify-center px-2 pb-2 mt-2"
+        style={{ pointerEvents: "auto" }}
+      >
+        <input
+          type="text"
+          value={newArgument}
+          onChange={(e) => setNewArgument(e.target.value)}
+          placeholder="Type your argument..."
+          className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
+            currentUser.id === user1.id
+              ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
+              : "border-red-700 focus:ring-2 focus:ring-red-400"
+          }`}
+          style={{ maxWidth: 600 }}
+        />
+        <button
+          type="submit"
+          className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
+            currentUser.id === user1.id
+              ? "bg-blue-700 text-white hover:bg-blue-900"
+              : "bg-red-700 text-white hover:bg-red-900"
+          } transition`}
+        >
+          Send
+        </button>
+      </form>
 
-      {/* Arguments Section */}
-      <ContentCard className="p-6 mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          💬 Arguments ({debateArguments.length})
-        </h2>
-
-        {debateArguments.length > 0 ? (
-          <div className="space-y-4">
-            {debateArguments.map((argument) => (
-              <ArgumentCard
-                key={argument.id}
-                argument={argument}
-                onVote={(argumentId) => {
-                  // TODO: Implement voting functionality
-                }}
-                onReply={(argumentId) => {
-                  // TODO: Implement reply functionality
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center py-8">
-            No arguments yet. Be the first to contribute!
-          </p>
-        )}
-      </ContentCard>
-
-      {/* Action Buttons */}
-      <div className="flex space-x-4 justify-center">
-        {isLive && (
-          <>
-            <PrimaryButton variant="secondary" size="large">
-              🎤 Add Argument
-            </PrimaryButton>
-            <PrimaryButton variant="primary" size="large">
-              👍 Vote
-            </PrimaryButton>
-          </>
-        )}
-
-        {debate.status === "finished" && (
-          <Link to={`/replay/${debate.id}`}>
-            <PrimaryButton variant="outline" size="large">
-              🔄 Watch Replay
-            </PrimaryButton>
-          </Link>
-        )}
-
-        {debate.status === "scheduled" && (
-          <PrimaryButton variant="primary" size="large">
-            📝 Register for Debate
-          </PrimaryButton>
-        )}
+      {/* Audience & Voting */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-4 pb-4">
+        <div className="flex items-center gap-6 mb-6">
+          {audience.map((a) => (
+            <span
+              key={a.id}
+              className="w-20 h-20 rounded-full bg-white border-8 border-gray-400 flex items-center justify-center text-4xl shadow-lg"
+              title={`Audience #${a.id}`}
+            >
+              {a.avatar ? (
+                <img src={a.avatar} alt={`Audience #${a.id}`} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span className="text-gray-300">+</span>
+              )}
+            </span>
+          ))}
+        </div>
+        <div className="flex gap-10">
+          <button
+            className="bg-blue-700 text-white px-10 py-3 rounded-full text-xl font-extrabold shadow-xl hover:bg-blue-900 transition"
+            disabled={hasVoted}
+            onClick={() => handleVote("user1")}
+          >
+            Vote {user1.firstName}
+          </button>
+          <button
+            className="bg-red-700 text-white px-10 py-3 rounded-full text-xl font-extrabold shadow-xl hover:bg-red-900 transition"
+            disabled={hasVoted}
+            onClick={() => handleVote("user2")}
+          >
+            Vote {user2.firstName}
+          </button>
+        </div>
       </div>
     </div>
   );
