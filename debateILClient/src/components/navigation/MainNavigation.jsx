@@ -4,11 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { brandColors } from "../../data/brandColors";
 import { observer } from "mobx-react";
 import { authStore } from "../../stores/authStore";
+import { getAvatarById } from "../../api/randomAvatar";
 
 function MainNavigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+
+  // Debug: Log user data
+  console.log("MainNavigation - activeUser:", authStore.activeUser);
+  console.log("MainNavigation - localStorage:", localStorage.activeUser);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -23,27 +28,33 @@ function MainNavigation() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/debate/1", label: "Live Debate" },
-    { to: "/replay/1", label: "Replay" },
-    { to: "/profile/1", label: "Profile" },
-    { to: "/admin", label: "Admin" },
-  ];
+  const navLinks = [{ to: "/", label: "Home" }];
   return (
     <header style={{ background: brandColors.bgLight }}>
       <div className="mx-auto flex h-16 max-w-screen-xl items-center gap-8 px-4 sm:px-6 lg:px-8">
-        <NavLink className="block" to="/">
+        <NavLink className="flex items-center space-x-3" to="/">
           <span className="sr-only">Home</span>
           <img
             src={logoImg}
             alt="DebateIL Logo"
-            className="h-12"
+            className="h-14 w-auto"
             style={{
-              borderRadius: 8,
-              border: `2px solid ${brandColors.primary}`,
+              borderRadius: 12,
+              border: `3px solid ${brandColors.primary}`,
+              boxShadow: `0 2px 8px rgba(0,0,0,0.1)`,
             }}
           />
+          <div className="hidden sm:block">
+            <h1
+              className="text-xl font-bold"
+              style={{ color: brandColors.primary }}
+            >
+              DebateIL
+            </h1>
+            <p className="text-xs" style={{ color: brandColors.secondary }}>
+              Where Ideas Collide
+            </p>
+          </div>
         </NavLink>
 
         <div className="flex flex-1 items-center justify-end md:justify-between">
@@ -69,17 +80,31 @@ function MainNavigation() {
               // User is logged in - show user menu
               <div className="relative" ref={userMenuRef}>
                 <button
-                  className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition hover:opacity-80"
+                  className="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition hover:opacity-80 border-2"
                   style={{
-                    background: brandColors.primary,
-                    color: brandColors.accent,
+                    background: brandColors.accent,
+                    color: brandColors.primary,
+                    borderColor: brandColors.primary,
                   }}
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
-                  <span>👤</span>
-                  <span>
-                    {authStore.activeUser.name || authStore.activeUser.email}
-                  </span>
+                  <img
+                    src={getAvatarById(authStore.activeUser.id || 1)}
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full border-2"
+                    style={{ borderColor: brandColors.primary }}
+                  />
+                  <div className="hidden sm:block text-left">
+                    <div className="font-semibold">
+                      {authStore.activeUser.firstName ||
+                        authStore.activeUser.name ||
+                        authStore.activeUser.email?.split("@")[0] ||
+                        "User"}
+                    </div>
+                    <div className="text-xs opacity-75">
+                      {authStore.activeUser.email || "user@example.com"}
+                    </div>
+                  </div>
                   <svg
                     className={`w-4 h-4 transition-transform ${
                       userMenuOpen ? "rotate-180" : ""

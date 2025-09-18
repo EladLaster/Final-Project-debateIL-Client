@@ -1,11 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  LiveDebatesList,
-  RegisterableDebatesList,
-  FinishedDebatesList,
-  DebateStats,
-} from "../components/homepage";
+import { DebateSection, DebateStats } from "../components/homepage";
 import { getDebates } from "../services/serverApi";
+import { authStore } from "../stores/authStore";
 
 export default function HomePage() {
   const [allDebates, setAllDebates] = useState([]);
@@ -68,6 +64,15 @@ export default function HomePage() {
   if (loading) return <div className="p-6">Loading open debates…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
+  const handleTestLogin = async () => {
+    try {
+      await authStore.handleLogin("test@example.com", "password");
+      console.log("Test login successful");
+    } catch (error) {
+      console.error("Test login failed:", error);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
@@ -77,11 +82,23 @@ export default function HomePage() {
         <p className="text-gray-600">
           Join active debates or register for upcoming discussions
         </p>
+
+        {/* Debug: Test login button */}
+        {!authStore.activeUser && (
+          <div className="mt-4">
+            <button
+              onClick={handleTestLogin}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Test Login (for debugging)
+            </button>
+          </div>
+        )}
       </div>
 
-      <LiveDebatesList debates={liveDebates} />
-      <RegisterableDebatesList debates={registerableDebates} />
-      <FinishedDebatesList debates={finishedDebates} />
+      <DebateSection debates={liveDebates} type="live" />
+      <DebateSection debates={registerableDebates} type="registerable" />
+      <DebateSection debates={finishedDebates} type="finished" />
 
       <DebateStats />
     </div>

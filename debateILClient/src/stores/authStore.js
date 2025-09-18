@@ -12,10 +12,22 @@ class AuthStore {
 
   handleLogin = async (email, password) => {
     const user = await login(email, password);
-    console.log(user);
-    localStorage.activeUser = JSON.stringify(user);
-    this.activeUser = user;
-    return user;
+    console.log("Login response:", user);
+
+    // Ensure user has required fields
+    const userWithDefaults = {
+      id: user.id || Math.floor(Math.random() * 1000) + 1,
+      email: user.email || email,
+      firstName: user.firstName || user.name || email.split("@")[0],
+      lastName: user.lastName || "",
+      name: user.name || user.firstName || email.split("@")[0],
+      ...user,
+    };
+
+    console.log("User with defaults:", userWithDefaults);
+    localStorage.activeUser = JSON.stringify(userWithDefaults);
+    this.activeUser = userWithDefaults;
+    return userWithDefaults;
   };
 
   handleRegister = async () => {
