@@ -3,7 +3,7 @@ import LiveDebatesList from "../components/homepage/LiveDebatesList.jsx";
 import RegisterableDebatesList from "../components/homepage/RegisterableDebatesList.jsx";
 import FinishedDebatesList from "../components/homepage/FinishedDebatesList.jsx";
 import DebateStats from "../components/homepage/DebateStats.jsx";
-import { getDebates } from "../../services/serverApi"; // שים לב לנתיב
+import { getDebates } from "../services/serverApi";
 
 export default function HomePage() {
   const [allDebates, setAllDebates] = useState([]);
@@ -52,7 +52,8 @@ export default function HomePage() {
   const registerableDebates = useMemo(
     () =>
       allDebates.filter(
-        (debate) => debate.status === "scheduled" && getAvailableSpots(debate) > 0
+        (debate) =>
+          debate.status === "scheduled" && getAvailableSpots(debate) > 0
       ),
     [allDebates]
   );

@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import {
   getDebateById,
   getArgumentsWithUserInfo,
-  getVotesForDebate,
   getDebateParticipants,
   getDebateScores,
 } from "../data/mockData";
@@ -18,7 +17,7 @@ export default function DebatePage() {
   // Get debate data
   const debate = getDebateById(debateId);
   const debateArguments = getArgumentsWithUserInfo(debateId);
-  const votes = getVotesForDebate(debateId);
+  // const votes = getVotesForDebate(debateId); // TODO: Implement voting functionality
   const participants = getDebateParticipants(debateId);
   const scores = getDebateScores(debateId);
 

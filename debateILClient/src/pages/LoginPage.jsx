@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../data/brandColors";
 import logoImg from "../assets/logo.png";
-import { authStore } from "../stores/authStore.js";
+import { authStore } from "../stores/authStore";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -10,7 +10,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user =  await authStore.handleLogin(email, password);
+    const user = await authStore.handleLogin(email, password);
     console.log(user);
     navigate("/");
   };

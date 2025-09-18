@@ -1,10 +1,28 @@
 import { NavLink } from "react-router-dom";
 import logoImg from "../../assets/logo.png";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { brandColors } from "../../data/brandColors";
+import { observer } from "mobx-react";
+import { authStore } from "../../stores/authStore";
 
-export default function MainNavigation() {
+function MainNavigation() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/debate/1", label: "Live Debate" },
@@ -47,30 +65,96 @@ export default function MainNavigation() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <div className="sm:flex sm:gap-4">
-              <NavLink
-                className="block rounded-md px-5 py-2.5 text-sm font-medium transition"
-                style={{
-                  background: brandColors.secondary,
-                  color: brandColors.accent,
-                }}
-                to="/login"
-              >
-                Login
-              </NavLink>
+            {authStore.activeUser ? (
+              // User is logged in - show user menu
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition hover:opacity-80"
+                  style={{
+                    background: brandColors.primary,
+                    color: brandColors.accent,
+                  }}
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <span>👤</span>
+                  <span>
+                    {authStore.activeUser.name || authStore.activeUser.email}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      userMenuOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-              <NavLink
-                className="hidden rounded-md px-5 py-2.5 text-sm font-medium transition sm:block"
-                style={{
-                  background: brandColors.primary,
-                  color: brandColors.accent,
-                  marginLeft: 8,
-                }}
-                to="/register"
-              >
-                Register
-              </NavLink>
-            </div>
+                {userMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-50"
+                    style={{
+                      background: brandColors.bgLight,
+                      border: `1px solid ${brandColors.primary}`,
+                    }}
+                  >
+                    <div className="py-1">
+                      <NavLink
+                        to={`/profile/${authStore.activeUser.id}`}
+                        className="block px-4 py-2 text-sm transition hover:opacity-80"
+                        style={{ color: brandColors.primary }}
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        פרופיל שלי
+                      </NavLink>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm transition hover:opacity-80"
+                        style={{ color: brandColors.primary }}
+                        onClick={() => {
+                          authStore.handleLogout();
+                          setUserMenuOpen(false);
+                        }}
+                      >
+                        התנתק
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // User is not logged in - show login/register buttons
+              <div className="sm:flex sm:gap-4">
+                <NavLink
+                  className="block rounded-md px-5 py-2.5 text-sm font-medium transition"
+                  style={{
+                    background: brandColors.secondary,
+                    color: brandColors.accent,
+                  }}
+                  to="/login"
+                >
+                  Login
+                </NavLink>
+
+                <NavLink
+                  className="hidden rounded-md px-5 py-2.5 text-sm font-medium transition sm:block"
+                  style={{
+                    background: brandColors.primary,
+                    color: brandColors.accent,
+                    marginLeft: 8,
+                  }}
+                  to="/register"
+                >
+                  Register
+                </NavLink>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -120,32 +204,82 @@ export default function MainNavigation() {
                       </NavLink>
                     </li>
                   ))}
-                  <li>
-                    <NavLink
-                      className="block rounded-md px-5 py-2.5 text-sm font-medium mb-2"
-                      style={{
-                        background: brandColors.secondary,
-                        color: brandColors.accent,
-                      }}
-                      to="/login"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Login
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink
-                      className="block rounded-md px-5 py-2.5 text-sm font-medium"
-                      style={{
-                        background: brandColors.primary,
-                        color: brandColors.accent,
-                      }}
-                      to="/register"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Register
-                    </NavLink>
-                  </li>
+                  {authStore.activeUser ? (
+                    // User is logged in - show user info and logout
+                    <>
+                      <li
+                        className="border-t pt-2 mt-2"
+                        style={{ borderColor: brandColors.primary }}
+                      >
+                        <div
+                          className="px-4 py-2 text-sm"
+                          style={{ color: brandColors.primary }}
+                        >
+                          מחובר כ:{" "}
+                          {authStore.activeUser.name ||
+                            authStore.activeUser.email}
+                        </div>
+                      </li>
+                      <li>
+                        <NavLink
+                          className="block rounded-md px-5 py-2.5 text-sm font-medium mb-2"
+                          style={{
+                            background: brandColors.primary,
+                            color: brandColors.accent,
+                          }}
+                          to={`/profile/${authStore.activeUser.id}`}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          פרופיל שלי
+                        </NavLink>
+                      </li>
+                      <li>
+                        <button
+                          className="block w-full rounded-md px-5 py-2.5 text-sm font-medium text-left"
+                          style={{
+                            background: brandColors.secondary,
+                            color: brandColors.accent,
+                          }}
+                          onClick={() => {
+                            authStore.handleLogout();
+                            setMenuOpen(false);
+                          }}
+                        >
+                          התנתק
+                        </button>
+                      </li>
+                    </>
+                  ) : (
+                    // User is not logged in - show login/register
+                    <>
+                      <li>
+                        <NavLink
+                          className="block rounded-md px-5 py-2.5 text-sm font-medium mb-2"
+                          style={{
+                            background: brandColors.secondary,
+                            color: brandColors.accent,
+                          }}
+                          to="/login"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          Login
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          className="block rounded-md px-5 py-2.5 text-sm font-medium"
+                          style={{
+                            background: brandColors.primary,
+                            color: brandColors.accent,
+                          }}
+                          to="/register"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          Register
+                        </NavLink>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </nav>
             )}
@@ -155,3 +289,6 @@ export default function MainNavigation() {
     </header>
   );
 }
+
+const MainNavigationWithObserver = observer(MainNavigation);
+export default MainNavigationWithObserver;

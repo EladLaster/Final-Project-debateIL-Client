@@ -10,7 +10,7 @@ export default function ReplayPage() {
   const { id } = useParams();
   const debateId = Number(id);
   const debate = getDebateById(debateId);
-  const { user1, user2 } = getDebateParticipants(debateId);
+  const { user1 } = getDebateParticipants(debateId);
   const argumentsList = getArgumentsWithUserInfo(debateId);
 
   if (!debate) {
