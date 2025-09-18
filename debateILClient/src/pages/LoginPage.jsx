@@ -2,15 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../data/brandColors";
 import logoImg from "../assets/logo.png";
-
+import { authStore } from "../stores/authStore.js";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // No authentication, just redirect
+    const user =  await authStore.handleLogin(email, password);
+    console.log(user);
     navigate("/");
   };
 
