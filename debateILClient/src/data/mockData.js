@@ -93,8 +93,6 @@ export const mockUsers = [
     updatedAt: "2025-09-16T12:30:00Z",
   },
 ];
-// This function is no longer used - avatars are handled by UserAvatar component
-// ...existing code...
 
 export const mockDebates = [
   // Live Debates - Currently active debates

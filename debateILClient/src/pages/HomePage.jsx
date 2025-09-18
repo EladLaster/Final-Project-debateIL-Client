@@ -14,13 +14,16 @@ function HomePage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
 
-  const loadDebates = async () => {
+  const loadDebates = async (showLoading = false) => {
     try {
+      if (showLoading) setLoading(true);
       const list = await getDebates();
       setAllDebates(Array.isArray(list) ? list : []);
       setError("");
     } catch (e) {
       setError(e?.message || "Failed to load debates");
+    } finally {
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -29,7 +32,7 @@ function HomePage() {
 
     async function load() {
       try {
-        const list = await getDebates(); // Fetch all debates from server
+        const list = await getDebates();
         if (!alive) return;
         setAllDebates(Array.isArray(list) ? list : []);
         setError("");
@@ -41,7 +44,7 @@ function HomePage() {
     }
 
     load();
-    // Optional: Refresh every 5 seconds to keep live updates
+    // Refresh every 5 seconds to keep live updates
     const id = setInterval(load, 5000);
     return () => {
       alive = false;
@@ -55,7 +58,7 @@ function HomePage() {
       // User just logged in, refresh debates
       loadDebates();
     }
-  }, [authStore.activeUser?.id]); // Use id to detect actual user changes
+  }, [authStore.activeUser?.id]);
 
   // Calculate available spots based on database schema (user1_id, user2_id)
   const getAvailableSpots = (debate) => {
@@ -88,8 +91,29 @@ function HomePage() {
     [allDebates]
   );
 
-  if (loading) return <div className="p-6">Loading open debates…</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <div className="text-lg text-gray-600">Loading debates...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="text-center py-12">
+          <div className="text-red-600 text-lg mb-4">⚠️ {error}</div>
+          <PrimaryButton onClick={() => loadDebates(true)}>
+            Try Again
+          </PrimaryButton>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreateDebateSuccess = (newDebate) => {
     // Refresh the debates list

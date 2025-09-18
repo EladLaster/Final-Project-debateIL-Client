@@ -79,7 +79,7 @@ function Navbar() {
               // User is logged in - show user menu
               <div className="relative" ref={userMenuRef}>
                 <button
-                  className="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition hover:opacity-80 border-2"
+                  className="flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-4 py-2 text-sm font-medium transition hover:opacity-80 border-2 touch-manipulation"
                   style={{
                     background: brandColors.accent,
                     color: brandColors.primary,
@@ -165,9 +165,9 @@ function Navbar() {
               </div>
             ) : (
               // User is not logged in - show login/register buttons
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4">
                 <NavLink
-                  className="block rounded-md px-5 py-2.5 text-sm font-medium transition"
+                  className="block rounded-md px-3 sm:px-5 py-2.5 text-sm font-medium transition touch-manipulation"
                   style={{
                     background: brandColors.secondary,
                     color: brandColors.accent,
@@ -178,11 +178,10 @@ function Navbar() {
                 </NavLink>
 
                 <NavLink
-                  className="hidden rounded-md px-5 py-2.5 text-sm font-medium transition sm:block"
+                  className="hidden rounded-md px-3 sm:px-5 py-2.5 text-sm font-medium transition sm:block touch-manipulation"
                   style={{
                     background: brandColors.primary,
                     color: brandColors.accent,
-                    marginLeft: 8,
                   }}
                   to="/register"
                 >

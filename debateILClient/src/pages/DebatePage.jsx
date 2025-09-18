@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import {
   getDebateById,
   getArgumentsWithUserInfo,
@@ -13,13 +14,45 @@ import ArgumentCard from "../components/debate-room/ArgumentCard.jsx";
 export default function DebatePage() {
   const { id } = useParams();
   const debateId = parseInt(id);
+  const [votes, setVotes] = useState({});
+  const [replies, setReplies] = useState({});
 
   // Get debate data
   const debate = getDebateById(debateId);
   const debateArguments = getArgumentsWithUserInfo(debateId);
-  // const votes = getVotesForDebate(debateId); // TODO: Implement voting functionality
   const participants = getDebateParticipants(debateId);
   const scores = getDebateScores(debateId);
+
+  // Handle voting functionality
+  const handleVote = (argumentId) => {
+    setVotes((prev) => ({
+      ...prev,
+      [argumentId]: (prev[argumentId] || 0) + 1,
+    }));
+    // In a real app, this would send to the server
+    console.log(`Voted for argument ${argumentId}`);
+  };
+
+  // Handle reply functionality
+  const handleReply = (argumentId) => {
+    const replyText = prompt("Enter your reply:");
+    if (replyText) {
+      setReplies((prev) => ({
+        ...prev,
+        [argumentId]: [
+          ...(prev[argumentId] || []),
+          {
+            id: Date.now(),
+            text: replyText,
+            timestamp: new Date().toISOString(),
+            author: "You",
+          },
+        ],
+      }));
+      // In a real app, this would send to the server
+      console.log(`Replied to argument ${argumentId}: ${replyText}`);
+    }
+  };
 
   if (!debate) {
     return (
@@ -171,12 +204,8 @@ export default function DebatePage() {
               <ArgumentCard
                 key={argument.id}
                 argument={argument}
-                onVote={(argumentId) => {
-                  // TODO: Implement voting functionality
-                }}
-                onReply={(argumentId) => {
-                  // TODO: Implement reply functionality
-                }}
+                onVote={handleVote}
+                onReply={handleReply}
               />
             ))}
           </div>
