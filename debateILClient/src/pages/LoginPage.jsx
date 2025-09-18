@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../data/brandColors";
 import logoImg from "../assets/logo.png";
@@ -10,9 +10,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = await authStore.handleLogin(email, password);
-    console.log(user);
-    navigate("/");
+    try {
+      await authStore.handleLogin(email, password);
+      navigate("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -93,9 +96,23 @@ export default function LoginPage() {
               color: brandColors.accent,
             }}
           >
-            Login
+            התחבר
           </button>
         </form>
+
+        {/* Register Link */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-medium hover:underline"
+              style={{ color: brandColors.primary }}
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

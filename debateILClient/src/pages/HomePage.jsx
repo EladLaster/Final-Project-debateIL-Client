@@ -2,11 +2,24 @@ import { useEffect, useMemo, useState } from "react";
 import { DebateSection, DebateStats } from "../components/homepage";
 import { getDebates } from "../services/serverApi";
 import { authStore } from "../stores/authStore";
+import CreateDebateModal from "../components/debate-room/CreateDebateModal";
+import PrimaryButton from "../components/basic-ui/PrimaryButton";
 
-export default function HomePage() {
+function HomePage() {
   const [allDebates, setAllDebates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const loadDebates = async () => {
+    try {
+      const list = await getDebates();
+      setAllDebates(Array.isArray(list) ? list : []);
+      setError("");
+    } catch (e) {
+      setError(e?.message || "Failed to load debates");
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -33,12 +46,28 @@ export default function HomePage() {
     };
   }, []);
 
-  // אם אין available_spots מהשרת – מחשבים מיידית (ברירת מחדל 2 מקומות)
-  const getAvailableSpots = (d) => {
-    if (typeof d?.available_spots === "number") return d.available_spots;
-    const max = d?.max_participants ?? 2;
-    const joined = d?.participants_count ?? 0;
-    return Math.max(0, max - joined);
+  // Auto-refresh when user login status changes
+  useEffect(() => {
+    console.log(
+      "HomePage - authStore.activeUser changed:",
+      authStore.activeUser
+    );
+    if (authStore.activeUser) {
+      // User just logged in, refresh debates
+      console.log("HomePage - User logged in, refreshing debates");
+      loadDebates();
+    }
+  }, [authStore.activeUser?.id]); // Use id to detect actual user changes
+
+  // Calculate available spots based on database schema (user1_id, user2_id)
+  const getAvailableSpots = (debate) => {
+    const maxParticipants = 2; // Each debate has max 2 participants
+    let joinedCount = 0;
+
+    if (debate.user1_id) joinedCount++;
+    if (debate.user2_id) joinedCount++;
+
+    return Math.max(0, maxParticipants - joinedCount);
   };
 
   // בדיוק אותם פילטרים כמו אצלך
@@ -64,36 +93,38 @@ export default function HomePage() {
   if (loading) return <div className="p-6">Loading open debates…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
-  const handleTestLogin = async () => {
-    try {
-      await authStore.handleLogin("test@example.com", "password");
-      console.log("Test login successful");
-    } catch (error) {
-      console.error("Test login failed:", error);
-    }
+  const handleCreateDebateSuccess = (newDebate) => {
+    console.log("New debate created:", newDebate);
+    // Refresh the debates list
+    loadDebates();
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          DebateIL - Open Debates
-        </h1>
-        <p className="text-gray-600">
-          Join active debates or register for upcoming discussions
-        </p>
-
-        {/* Debug: Test login button */}
-        {!authStore.activeUser && (
-          <div className="mt-4">
-            <button
-              onClick={handleTestLogin}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Test Login (for debugging)
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              DebateIL - Open Debates
+            </h1>
+            <p className="text-gray-600">
+              Join active debates or register for upcoming discussions
+            </p>
           </div>
-        )}
+
+          {/* Create Debate Button */}
+          {authStore.activeUser && (
+            <div className="mt-4 sm:mt-0">
+              <PrimaryButton
+                variant="primary"
+                size="large"
+                onClick={() => setShowCreateModal(true)}
+              >
+                🎯 Create New Debate
+              </PrimaryButton>
+            </div>
+          )}
+        </div>
       </div>
 
       <DebateSection debates={liveDebates} type="live" />
@@ -101,6 +132,15 @@ export default function HomePage() {
       <DebateSection debates={finishedDebates} type="finished" />
 
       <DebateStats />
+
+      {/* Create Debate Modal */}
+      <CreateDebateModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={handleCreateDebateSuccess}
+      />
     </div>
   );
 }
+
+export default HomePage;

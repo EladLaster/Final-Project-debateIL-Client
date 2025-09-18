@@ -93,13 +93,7 @@ export const mockUsers = [
     updatedAt: "2025-09-16T12:30:00Z",
   },
 ];
-// Utility to get avatar URL based on last two digits of user id
-export function getAvatarById(userId) {
-  const lastTwoDigits = userId % 100;
-  // You can switch between men/women or use only one for simplicity
-  const gender = lastTwoDigits % 2 === 0 ? "men" : "women";
-  return `https://randomuser.me/api/portraits/${gender}/${lastTwoDigits}.jpg`;
-}
+// This function is no longer used - avatars are handled by UserAvatar component
 // ...existing code...
 
 export const mockDebates = [

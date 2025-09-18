@@ -3,8 +3,8 @@ import {
   getDebateById,
   getDebateParticipants,
   getArgumentsWithUserInfo,
-  getAvatarById,
 } from "../data/mockData";
+import UserAvatar from "../components/basic-ui/UserAvatar";
 
 export default function ReplayPage() {
   const { id } = useParams();
@@ -34,9 +34,7 @@ export default function ReplayPage() {
               className={`chat ${isUser1 ? "chat-start" : "chat-end"}`}
             >
               <div className="chat-image avatar">
-                <div className="w-10 rounded-full">
-                  <img alt="Chat avatar" src={getAvatarById(arg.user?.id)} />
-                </div>
+                <UserAvatar user={arg.user} size="large" />
               </div>
               <div className="chat-header">
                 {arg.user?.firstName}

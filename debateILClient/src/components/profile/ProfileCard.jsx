@@ -1,4 +1,4 @@
-import { getAvatarById } from "../../api/randomAvatar";
+import UserAvatar from "../basic-ui/UserAvatar";
 import ContentCard from "../basic-ui/ContentCard";
 import PrimaryButton from "../basic-ui/PrimaryButton";
 
@@ -28,10 +28,10 @@ export default function ProfileCard({ user, isOwnProfile = false }) {
         {/* Avatar Section */}
         <div className="flex-shrink-0">
           <div className="relative">
-            <img
-              src={getAvatarById(user.id)}
-              alt={`${user.firstName || user.name}'s avatar`}
-              className="w-24 h-24 rounded-full border-4 border-blue-200 shadow-lg"
+            <UserAvatar
+              user={user}
+              size="2xl"
+              className="border-4 border-blue-200 shadow-lg"
             />
             {isOwnProfile && (
               <button className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 transition-colors">

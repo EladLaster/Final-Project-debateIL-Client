@@ -21,18 +21,32 @@ const normalizeError = (error) => {
 export async function login(email, password) {
   try {
     const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
-    return response.data;
+    console.log("Login response:", response.data);
+
+    if (response.data.success) {
+      return response.data.user; // Return user data from server
+    } else {
+      throw new Error(response.data.message || "Login failed");
+    }
   } catch (error) {
-    // Fallback for development - create mock user if server is not available
-    console.warn("Server not available, using mock user:", error.message);
-    return {
-      id: Math.floor(Math.random() * 1000) + 1,
-      email: email,
-      firstName: email.split("@")[0],
-      lastName: "User",
-      name: email.split("@")[0],
-      success: true,
-    };
+    console.error("Login error:", error);
+    throw normalizeError(error);
+  }
+}
+
+export async function register(userData) {
+  try {
+    const response = await api.post(API_ENDPOINTS.REGISTER, userData);
+    console.log("Register response:", response.data);
+
+    if (response.data.success) {
+      return response.data.user; // Return user data from server
+    } else {
+      throw new Error(response.data.message || "Registration failed");
+    }
+  } catch (error) {
+    console.error("Register error:", error);
+    throw normalizeError(error);
   }
 }
 
@@ -69,6 +83,22 @@ export async function getDebateStats() {
     return data;
   } catch (err) {
     throw normalizeError(err);
+  }
+}
+
+export async function createDebate(debateData) {
+  try {
+    const response = await api.post(API_ENDPOINTS.DEBATES, debateData);
+    console.log("Create debate response:", response.data);
+
+    if (response.data.success) {
+      return response.data.newDebate;
+    } else {
+      throw new Error(response.data.message || "Failed to create debate");
+    }
+  } catch (error) {
+    console.error("Create debate error:", error);
+    throw normalizeError(error);
   }
 }
 

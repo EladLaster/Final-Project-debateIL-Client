@@ -1,5 +1,5 @@
 import ContentCard from "../basic-ui/ContentCard";
-import { getAvatarById } from "../../api/randomAvatar";
+import UserAvatar from "../basic-ui/UserAvatar";
 
 export default function DebateCard({
   debate,
@@ -27,10 +27,10 @@ export default function DebateCard({
           {debate.user1 ? (
             <div className="text-center">
               <div className="relative">
-                <img
-                  src={getAvatarById(debate.user1.id)}
-                  alt={debate.user1.firstName}
-                  className={`w-12 h-12 rounded-full border-2 mx-auto mb-1 ${
+                <UserAvatar
+                  user={debate.user1}
+                  size="large"
+                  className={`mx-auto mb-1 ${
                     winner?.id === debate.user1.id
                       ? "border-yellow-400"
                       : "border-blue-400"
@@ -60,10 +60,10 @@ export default function DebateCard({
           {debate.user2 ? (
             <div className="text-center">
               <div className="relative">
-                <img
-                  src={getAvatarById(debate.user2.id)}
-                  alt={debate.user2.firstName}
-                  className={`w-12 h-12 rounded-full border-2 mx-auto mb-1 ${
+                <UserAvatar
+                  user={debate.user2}
+                  size="large"
+                  className={`mx-auto mb-1 ${
                     winner?.id === debate.user2.id
                       ? "border-yellow-400"
                       : "border-red-400"

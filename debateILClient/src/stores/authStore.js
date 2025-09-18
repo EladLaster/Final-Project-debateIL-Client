@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { login } from "../services/serverApi";
+import { login, register } from "../services/serverApi";
 
 class AuthStore {
   constructor() {
@@ -27,16 +27,48 @@ class AuthStore {
     console.log("User with defaults:", userWithDefaults);
     localStorage.activeUser = JSON.stringify(userWithDefaults);
     this.activeUser = userWithDefaults;
+    console.log("AuthStore activeUser updated:", this.activeUser);
+
+    // Dispatch custom event for UI updates
+    window.dispatchEvent(
+      new CustomEvent("authStateChanged", {
+        detail: { user: userWithDefaults },
+      })
+    );
+
     return userWithDefaults;
   };
 
-  handleRegister = async () => {
-    // ...השלם כאן את הפונקציה...
+  handleRegister = async (userData) => {
+    try {
+      const user = await register(userData);
+      console.log("Register response:", user);
+
+      // Ensure user has required fields
+      const userWithDefaults = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        name: user.firstName,
+        ...user,
+      };
+
+      console.log("User with defaults:", userWithDefaults);
+      localStorage.activeUser = JSON.stringify(userWithDefaults);
+      this.activeUser = userWithDefaults;
+      return userWithDefaults;
+    } catch (error) {
+      console.error("Register error:", error);
+      throw error;
+    }
   };
 
   handleLogout = () => {
     localStorage.removeItem("activeUser");
     this.activeUser = null;
+    console.log("AuthStore activeUser cleared:", this.activeUser);
   };
 }
 

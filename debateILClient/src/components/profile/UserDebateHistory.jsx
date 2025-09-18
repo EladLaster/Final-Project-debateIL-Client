@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import ContentCard from "../basic-ui/ContentCard";
 import PrimaryButton from "../basic-ui/PrimaryButton";
 import StatusBadge from "../basic-ui/StatusBadge";
-import { getAvatarById } from "../../api/randomAvatar";
+import UserAvatar from "../basic-ui/UserAvatar";
 
 export default function UserDebateHistory({ userId, debates = [] }) {
   const navigate = useNavigate();
@@ -108,10 +108,10 @@ export default function UserDebateHistory({ userId, debates = [] }) {
                 {/* Opponent Info */}
                 <div className="flex items-center space-x-3">
                   <div className="text-center">
-                    <img
-                      src={getAvatarById(opponent?.id || 1)}
-                      alt={opponent?.firstName || "Opponent"}
-                      className="w-10 h-10 rounded-full border-2 border-gray-200"
+                    <UserAvatar
+                      user={opponent}
+                      size="large"
+                      className="border-2 border-gray-200"
                     />
                     <p className="text-xs text-gray-600 mt-1">
                       vs {opponent?.firstName || "TBD"}

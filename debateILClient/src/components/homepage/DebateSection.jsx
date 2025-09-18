@@ -29,7 +29,12 @@ const DEBATE_CONFIGS = {
             <div>
               <span className="font-medium text-red-700 block">👥</span>
               <div className="text-lg font-bold text-red-800">
-                {debate.participants_count || 2}/2
+                {(() => {
+                  let count = 0;
+                  if (debate.user1_id) count++;
+                  if (debate.user2_id) count++;
+                  return `${count}/2`;
+                })()}
               </div>
             </div>
             <div>
@@ -92,7 +97,12 @@ const DEBATE_CONFIGS = {
             <div className="text-center">
               <span className="font-medium text-blue-700 block">👥</span>
               <div className="text-lg font-bold text-blue-800">
-                {2 - (debate.participants_count || 0)}/2
+                {(() => {
+                  let count = 0;
+                  if (debate.user1_id) count++;
+                  if (debate.user2_id) count++;
+                  return `${2 - count}/2`;
+                })()}
               </div>
             </div>
           </div>
