@@ -58,11 +58,23 @@ export default function ProfileCard({ user, isOwnProfile = false }) {
           <div className="mb-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">
               {user.firstName} {user.lastName}
+              {!user.firstName && !user.lastName && (
+                <span className="text-red-500 text-sm block">
+                  DEBUG: User ID {user.id}
+                </span>
+              )}
             </h1>
             <p className="text-gray-600">
-              @{user.username || user.email?.split("@")[0]}
+              @{user.username || user.email?.split("@")[0] || "unknown"}
             </p>
-            <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {user.email || "No email"}
+            </p>
+            {user.debug && (
+              <p className="text-red-500 text-sm mt-2 bg-red-50 p-2 rounded">
+                {user.debug}
+              </p>
+            )}
           </div>
 
           {/* User Stats */}

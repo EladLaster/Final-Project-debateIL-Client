@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { brandColors } from "../../data/brandColors";
-import { authStore } from "../../stores/authStore";
+import { authStore } from "../../stores";
 import { isAdmin } from "../../utils/adminAuth";
 import UserAvatar from "../basic-ui/UserAvatar";
 import logoImg from "../../assets/logo.png";
@@ -19,8 +19,15 @@ function Navbar() {
 
   // Listen for auth state changes
   useEffect(() => {
-    const handleAuthStateChange = (event) => {
-      setUser(event.detail.user);
+    const handleAuthStateChange = async (event) => {
+      if (event.detail.user) {
+        // User logged in - refresh profile from server
+        await authStore.refreshUserProfile();
+        setUser(authStore.activeUser);
+      } else {
+        // User logged out
+        setUser(null);
+      }
     };
 
     window.addEventListener("authStateChanged", handleAuthStateChange);
@@ -99,6 +106,11 @@ function Navbar() {
                         user.name ||
                         user.email?.split("@")[0] ||
                         "User"}
+                      {!user.firstName && !user.name && !user.email && (
+                        <span className="text-red-500 text-xs block">
+                          DEBUG: {user.id}
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs opacity-75">
                       {user.email || "user@example.com"}

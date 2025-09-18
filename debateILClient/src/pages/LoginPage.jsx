@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../data/brandColors";
 import logoImg from "../assets/logo.png";
-import { authStore } from "../stores/authStore";
+import { authStore } from "../stores";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");

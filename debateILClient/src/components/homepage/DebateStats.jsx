@@ -1,7 +1,24 @@
-import { getDebateStats } from "../../data/mockData.js";
+import { getDebateStats } from "../../stores";
+import { useState, useEffect } from "react";
 
 export default function DebateStats() {
-  const stats = getDebateStats();
+  const [stats, setStats] = useState({
+    liveDebates: 0,
+    scheduledDebates: 0,
+    totalUsers: 0,
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const serverStats = await getDebateStats();
+        setStats(serverStats);
+      } catch (error) {
+        console.error("Error loading stats:", error);
+      }
+    };
+    loadStats();
+  }, []);
 
   const statItems = [
     {

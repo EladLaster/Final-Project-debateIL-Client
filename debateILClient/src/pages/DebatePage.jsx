@@ -1,11 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
-import {
-  getDebateById,
-  getArgumentsWithUserInfo,
-  getDebateParticipants,
-  getDebateScores,
-} from "../data/mockData";
+import { getDebate, getArgumentsForDebate } from "../stores";
 import ContentCard from "../components/basic-ui/ContentCard.jsx";
 import StatusBadge from "../components/basic-ui/StatusBadge.jsx";
 import PrimaryButton from "../components/basic-ui/PrimaryButton.jsx";

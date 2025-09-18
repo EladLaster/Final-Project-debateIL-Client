@@ -1,9 +1,5 @@
 import { useParams } from "react-router-dom";
-import {
-  getDebateById,
-  getDebateParticipants,
-  getArgumentsWithUserInfo,
-} from "../data/mockData";
+import { getDebate, getArgumentsForDebate } from "../stores";
 import UserAvatar from "../components/basic-ui/UserAvatar";
 
 export default function ReplayPage() {

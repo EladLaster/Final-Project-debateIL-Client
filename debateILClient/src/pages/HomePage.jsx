@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DebateSection from "../components/homepage/DebateSection";
 import DebateStats from "../components/homepage/DebateStats";
-import { getDebates } from "../services/serverApi";
-import { authStore } from "../stores/authStore";
+import { authStore, usersStore, getDebates } from "../stores";
 import CreateDebateModal from "../components/debate-room/CreateDebateModal";
 import PrimaryButton from "../components/basic-ui/PrimaryButton";
 
@@ -18,8 +17,12 @@ function HomePage() {
     try {
       if (showLoading) setLoading(true);
       const list = await getDebates();
-      setAllDebates(Array.isArray(list) ? list : []);
+      const debates = Array.isArray(list) ? list : [];
+      setAllDebates(debates);
       setError("");
+
+      // Preload all users for these debates
+      await usersStore.loadUsersForDebates(debates);
     } catch (e) {
       setError(e?.message || "Failed to load debates");
     } finally {
@@ -34,8 +37,12 @@ function HomePage() {
       try {
         const list = await getDebates();
         if (!alive) return;
-        setAllDebates(Array.isArray(list) ? list : []);
+        const debates = Array.isArray(list) ? list : [];
+        setAllDebates(debates);
         setError("");
+
+        // Preload all users for these debates
+        await usersStore.loadUsersForDebates(debates);
       } catch (e) {
         if (alive) setError(e?.message || "Failed to load debates");
       } finally {
@@ -150,11 +157,23 @@ function HomePage() {
         </div>
       </div>
 
-      <DebateSection debates={liveDebates} type="live" />
+      <DebateSection
+        debates={liveDebates}
+        type="live"
+        onDebateUpdate={loadDebates}
+      />
       {authStore.activeUser && (
         <>
-          <DebateSection debates={registerableDebates} type="registerable" />
-          <DebateSection debates={finishedDebates} type="finished" />
+          <DebateSection
+            debates={registerableDebates}
+            type="registerable"
+            onDebateUpdate={loadDebates}
+          />
+          <DebateSection
+            debates={finishedDebates}
+            type="finished"
+            onDebateUpdate={loadDebates}
+          />
         </>
       )}
 

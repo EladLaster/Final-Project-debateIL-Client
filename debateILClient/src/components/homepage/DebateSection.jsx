@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import PrimaryButton from "../basic-ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
-import { authStore } from "../../stores/authStore";
+import { authStore, registerForDebate } from "../../stores";
 
 // Configuration for different debate types
 const DEBATE_CONFIGS = {
@@ -114,7 +115,7 @@ const DEBATE_CONFIGS = {
       <PrimaryButton
         variant="primary"
         onClick={() => {
-          /* TODO: Implement debate registration */
+          /* This is now handled by the component's handleRegisterForDebate function */
         }}
         className="w-full text-sm py-2"
       >
@@ -200,8 +201,9 @@ const DEBATE_CONFIGS = {
   },
 };
 
-export default function DebateSection({ debates, type }) {
+export default function DebateSection({ debates, type, onDebateUpdate }) {
   const navigate = useNavigate();
+  const [registering, setRegistering] = useState({});
   const config = DEBATE_CONFIGS[type];
 
   if (!config) {
@@ -209,9 +211,69 @@ export default function DebateSection({ debates, type }) {
     return null;
   }
 
+  // Handle debate registration
+  const handleRegisterForDebate = async (debate) => {
+    if (!authStore.activeUser) {
+      navigate("/login");
+      return;
+    }
+
+    const debateId = debate.id;
+    setRegistering((prev) => ({ ...prev, [debateId]: true }));
+
+    try {
+      await registerForDebate(debateId, authStore.activeUser.id);
+
+      // Show success message
+      alert("🎉 Successfully registered for the debate! Good luck!");
+
+      // Refresh debates list
+      if (onDebateUpdate) {
+        onDebateUpdate();
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert(`❌ Registration failed: ${error.message}`);
+    } finally {
+      setRegistering((prev) => ({ ...prev, [debateId]: false }));
+    }
+  };
+
   const renderMiddleContent = (debate) => config.getMiddleContent(debate);
-  const renderButton = (debate) =>
-    config.getButton(debate, navigate, authStore);
+  const renderButton = (debate) => {
+    if (type === "registerable") {
+      const isRegistering = registering[debate.id];
+      const currentUserId = authStore.activeUser?.id;
+      const isAlreadyRegistered =
+        currentUserId &&
+        (debate.user1_id === currentUserId ||
+          debate.user2_id === currentUserId);
+
+      if (isAlreadyRegistered) {
+        return (
+          <PrimaryButton
+            variant="secondary"
+            disabled
+            className="w-full text-sm py-2"
+          >
+            ✅ Already Registered
+          </PrimaryButton>
+        );
+      }
+
+      return (
+        <PrimaryButton
+          variant="primary"
+          onClick={() => handleRegisterForDebate(debate)}
+          disabled={isRegistering}
+          className="w-full text-sm py-2"
+        >
+          {isRegistering ? "⏳ Joining..." : "⚔️ Join Battle!"}
+        </PrimaryButton>
+      );
+    }
+    return config.getButton(debate, navigate, authStore);
+  };
 
   return (
     <DebateGrid

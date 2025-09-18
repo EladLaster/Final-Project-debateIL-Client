@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createDebate } from "../../services/serverApi";
+import { createDebate } from "../../stores";
 import PrimaryButton from "../basic-ui/PrimaryButton";
 import ContentCard from "../basic-ui/ContentCard";
 

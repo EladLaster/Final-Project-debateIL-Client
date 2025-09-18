@@ -4,8 +4,7 @@ import ProfileCard from "../components/profile/ProfileCard";
 import UserStats from "../components/profile/UserStats";
 import UserDebateHistory from "../components/profile/UserDebateHistory";
 import EditProfile from "../components/profile/EditProfile";
-import { authStore } from "../stores/authStore";
-import { getDebates } from "../services/serverApi";
+import { authStore, getDebates, getUserById } from "../stores";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -28,23 +27,33 @@ export default function ProfilePage() {
       if (isOwnProfile && authStore.activeUser) {
         setUser(authStore.activeUser);
       } else {
-        // Mock user data for other profiles
-        setUser({
-          id: parseInt(id),
-          firstName: "John",
-          lastName: "Doe",
-          email: `user${id}@example.com`,
-          username: `user${id}`,
-          createdAt: "2024-01-15T10:30:00Z",
-          debatesWon: Math.floor(Math.random() * 20),
-          debatesParticipated: Math.floor(Math.random() * 50),
-          argumentsCount: Math.floor(Math.random() * 100),
-          votesReceived: Math.floor(Math.random() * 200),
-          winRate: `${Math.floor(Math.random() * 100)}%`,
-          averageScore: Math.floor(Math.random() * 100),
-          currentStreak: Math.floor(Math.random() * 10),
-          ranking: `#${Math.floor(Math.random() * 1000)}`,
-        });
+        // Try to get user from server first
+        try {
+          const userFromServer = await getUserById(id);
+          if (userFromServer) {
+            setUser(userFromServer);
+          } else {
+            // Show debug info instead of mock data
+            setUser({
+              id: id,
+              firstName: null,
+              lastName: null,
+              email: null,
+              username: null,
+              debug: `User ${id} not found on server`,
+            });
+          }
+        } catch (error) {
+          // Show debug info instead of mock data
+          setUser({
+            id: id,
+            firstName: null,
+            lastName: null,
+            email: null,
+            username: null,
+            debug: `Error loading user ${id}: ${error.message}`,
+          });
+        }
       }
 
       // Load user's debates
