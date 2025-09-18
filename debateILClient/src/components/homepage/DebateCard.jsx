@@ -1,5 +1,6 @@
 import ContentCard from "../basic-ui/ContentCard";
 import UserAvatar from "../basic-ui/UserAvatar";
+import { useState, useEffect } from "react";
 
 export default function DebateCard({
   debate,
@@ -7,7 +8,26 @@ export default function DebateCard({
   renderButton,
   getWinner,
 }) {
+  const [user1, setUser1] = useState(null);
+  const [user2, setUser2] = useState(null);
   const winner = getWinner ? getWinner(debate) : null;
+
+  // Load user details for display
+  useEffect(() => {
+    if (debate.user1_id) {
+      // For now, create a mock user object with the ID
+      setUser1({
+        id: debate.user1_id,
+        firstName: `User ${debate.user1_id.slice(0, 8)}`,
+      });
+    }
+    if (debate.user2_id) {
+      setUser2({
+        id: debate.user2_id,
+        firstName: `User ${debate.user2_id.slice(0, 8)}`,
+      });
+    }
+  }, [debate.user1_id, debate.user2_id]);
 
   return (
     <ContentCard className="p-6 h-full">
@@ -24,26 +44,26 @@ export default function DebateCard({
 
         {/* Participants */}
         <div className="flex items-center justify-around bg-gray-50 rounded-lg p-4 flex-grow">
-          {debate.user1 ? (
+          {user1 ? (
             <div className="text-center">
               <div className="relative">
                 <UserAvatar
-                  user={debate.user1}
+                  user={user1}
                   size="large"
                   className={`mx-auto mb-1 ${
-                    winner?.id === debate.user1.id
+                    winner?.id === user1.id
                       ? "border-yellow-400"
                       : "border-blue-400"
                   }`}
                 />
-                {winner?.id === debate.user1.id && (
+                {winner?.id === user1.id && (
                   <span className="absolute -top-1 -right-1 text-yellow-500 text-lg">
                     👑
                   </span>
                 )}
               </div>
               <span className="font-medium text-blue-600 text-sm block truncate">
-                {debate.user1.firstName}
+                {user1.firstName}
               </span>
             </div>
           ) : (
@@ -57,26 +77,26 @@ export default function DebateCard({
 
           <div className="text-lg font-bold text-gray-400">VS</div>
 
-          {debate.user2 ? (
+          {user2 ? (
             <div className="text-center">
               <div className="relative">
                 <UserAvatar
-                  user={debate.user2}
+                  user={user2}
                   size="large"
                   className={`mx-auto mb-1 ${
-                    winner?.id === debate.user2.id
+                    winner?.id === user2.id
                       ? "border-yellow-400"
                       : "border-red-400"
                   }`}
                 />
-                {winner?.id === debate.user2.id && (
+                {winner?.id === user2.id && (
                   <span className="absolute -top-1 -right-1 text-yellow-500 text-lg">
                     👑
                   </span>
                 )}
               </div>
               <span className="font-medium text-red-600 text-sm block truncate">
-                {debate.user2.firstName}
+                {user2.firstName}
               </span>
             </div>
           ) : (

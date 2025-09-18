@@ -27,21 +27,42 @@ export default function LoginPage() {
         className="w-full max-w-md bg-white rounded-lg shadow p-8 border-2"
         style={{ borderColor: brandColors.primary }}
       >
-        <div className="flex flex-col items-center mb-4">
-          <img
-            src={logoImg}
-            alt="DebateIL Logo"
-            className="h-100 mb-1"
-            style={{
-              borderRadius: 6,
-            }}
-          />
-          <h2
-            className="text-2xl font-bold text-center"
-            style={{ color: brandColors.primary }}
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-col items-center flex-1">
+            <img
+              src={logoImg}
+              alt="DebateIL Logo"
+              className="h-100 mb-1"
+              style={{
+                borderRadius: 6,
+              }}
+            />
+            <h2
+              className="text-2xl font-bold text-center"
+              style={{ color: brandColors.primary }}
+            >
+              Login
+            </h2>
+          </div>
+          <button
+            onClick={() => navigate("/")}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2"
+            title="Close"
           >
-            Login
-          </h2>
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

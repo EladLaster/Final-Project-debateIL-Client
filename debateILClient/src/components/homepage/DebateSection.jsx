@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../basic-ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
+import { authStore } from "../../stores/authStore";
 
 // Configuration for different debate types
 const DEBATE_CONFIGS = {
@@ -53,13 +54,13 @@ const DEBATE_CONFIGS = {
         </>
       );
     },
-    getButton: (debate, navigate) => (
+    getButton: (debate, navigate, authStore) => (
       <PrimaryButton
         variant="secondary"
         onClick={() => navigate(`/debate/${debate.id}`)}
         className="w-full text-sm py-2"
       >
-        🎯 Join Live!
+        {authStore?.activeUser ? "🎯 Join Live!" : "👁️ Watch Live"}
       </PrimaryButton>
     ),
   },
@@ -101,7 +102,7 @@ const DEBATE_CONFIGS = {
                   let count = 0;
                   if (debate.user1_id) count++;
                   if (debate.user2_id) count++;
-                  return `${2 - count}/2`;
+                  return `${count}/2`;
                 })()}
               </div>
             </div>
@@ -181,8 +182,19 @@ const DEBATE_CONFIGS = {
       </PrimaryButton>
     ),
     getWinner: (debate) => {
-      if (debate.winner_id === debate.user1?.id) return debate.user1;
-      if (debate.winner_id === debate.user2?.id) return debate.user2;
+      // Determine winner based on scores
+      if (debate.score_user1 > debate.score_user2) {
+        return {
+          id: debate.user1_id,
+          firstName: `User ${debate.user1_id?.slice(0, 8)}`,
+        };
+      }
+      if (debate.score_user2 > debate.score_user1) {
+        return {
+          id: debate.user2_id,
+          firstName: `User ${debate.user2_id?.slice(0, 8)}`,
+        };
+      }
       return null;
     },
   },
@@ -198,7 +210,8 @@ export default function DebateSection({ debates, type }) {
   }
 
   const renderMiddleContent = (debate) => config.getMiddleContent(debate);
-  const renderButton = (debate) => config.getButton(debate, navigate);
+  const renderButton = (debate) =>
+    config.getButton(debate, navigate, authStore);
 
   return (
     <DebateGrid

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DebateSection from "../components/homepage/DebateSection";
 import DebateStats from "../components/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
@@ -11,6 +12,7 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
 
   const loadDebates = async () => {
     try {
@@ -100,10 +102,12 @@ function HomePage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              DebateIL - Open Debates
+              DebateIL - Live Debates
             </h1>
             <p className="text-gray-600">
-              Join active debates or register for upcoming discussions
+              {authStore.activeUser
+                ? "Join active debates or register for upcoming discussions"
+                : "Watch live debates and vote for your favorite arguments"}
             </p>
           </div>
 
@@ -123,8 +127,37 @@ function HomePage() {
       </div>
 
       <DebateSection debates={liveDebates} type="live" />
-      <DebateSection debates={registerableDebates} type="registerable" />
-      <DebateSection debates={finishedDebates} type="finished" />
+      {authStore.activeUser && (
+        <>
+          <DebateSection debates={registerableDebates} type="registerable" />
+          <DebateSection debates={finishedDebates} type="finished" />
+        </>
+      )}
+
+      {!authStore.activeUser && (
+        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+            Want to see more debates?
+          </h3>
+          <p className="text-blue-600 mb-4">
+            Register to join upcoming debates and view finished discussions
+          </p>
+          <div className="flex gap-4 justify-center">
+            <PrimaryButton
+              variant="primary"
+              onClick={() => navigate("/register")}
+            >
+              Register Now
+            </PrimaryButton>
+            <PrimaryButton
+              variant="secondary"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </PrimaryButton>
+          </div>
+        </div>
+      )}
 
       <DebateStats />
 

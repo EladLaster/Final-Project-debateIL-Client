@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { brandColors } from "../../data/brandColors";
 import { authStore } from "../../stores/authStore";
@@ -9,6 +9,7 @@ function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState(authStore.activeUser);
   const userMenuRef = useRef(null);
+  const navigate = useNavigate();
 
   // Update user state when authStore changes
   useEffect(() => {
@@ -142,6 +143,7 @@ function Navbar() {
                         onClick={() => {
                           authStore.handleLogout();
                           setUserMenuOpen(false);
+                          navigate("/");
                         }}
                       >
                         Logout
