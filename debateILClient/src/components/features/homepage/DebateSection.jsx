@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import PrimaryButton from "../../ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
 import { authStore } from "../../../stores/authStore";
+import { registerForDebate } from "../../../stores/usersStore";
 
 // Configuration for different debate types
 const DEBATE_CONFIGS = {
@@ -110,11 +112,29 @@ const DEBATE_CONFIGS = {
         </>
       );
     },
-    getButton: (debate) => (
+    getButton: (debate, navigate, authStore, onRegisterSuccess) => (
       <PrimaryButton
         variant="primary"
-        onClick={() => {
-          /* TODO: Implement debate registration */
+        onClick={async () => {
+          if (!authStore?.activeUser) {
+            navigate("/login");
+            return;
+          }
+
+          if (!authStore.activeUser.id) {
+            alert("❌ User ID not found. Please log in again.");
+            return;
+          }
+
+          try {
+            await registerForDebate(debate.id, authStore.activeUser.id);
+            alert("🎉 Successfully registered for the debate!");
+            if (onRegisterSuccess) {
+              onRegisterSuccess();
+            }
+          } catch (error) {
+            alert(`❌ Failed to register: ${error.message}`);
+          }
         }}
         className="w-full text-sm py-2"
       >
@@ -200,7 +220,7 @@ const DEBATE_CONFIGS = {
   },
 };
 
-export default function DebateSection({ debates, type }) {
+export default function DebateSection({ debates, type, onRefresh }) {
   const navigate = useNavigate();
   const config = DEBATE_CONFIGS[type];
 
@@ -211,7 +231,7 @@ export default function DebateSection({ debates, type }) {
 
   const renderMiddleContent = (debate) => config.getMiddleContent(debate);
   const renderButton = (debate) =>
-    config.getButton(debate, navigate, authStore);
+    config.getButton(debate, navigate, authStore, onRefresh);
 
   return (
     <DebateGrid
