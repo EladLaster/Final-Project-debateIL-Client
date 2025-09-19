@@ -113,10 +113,31 @@ async function registerForDebate(debateId, userId) {
       updateData.user2_id = userId;
     }
 
+    // Convert userId to string if it's a number
+    if (typeof userId === "number") {
+      updateData.user1_id = updateData.user1_id?.toString();
+      updateData.user2_id = updateData.user2_id?.toString();
+    }
+
+    // Ensure userId is a string
+    if (updateData.user1_id) {
+      updateData.user1_id = updateData.user1_id.toString();
+    }
+    if (updateData.user2_id) {
+      updateData.user2_id = updateData.user2_id.toString();
+    }
+
     const response = await api.put(
       `${API_ENDPOINTS.DEBATES}/${debateId}`,
-      updateData
+      updateData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
     );
+
     if (response.data.success) {
       return response.data.updatedDebate;
     } else {

@@ -138,11 +138,23 @@ function HomePage() {
         </div>
       </div>
 
-      <DebateSection debates={liveDebates} type="live" />
+      <DebateSection
+        debates={liveDebates}
+        type="live"
+        onRefresh={loadDebates}
+      />
       {authStore.activeUser && (
         <>
-          <DebateSection debates={registerableDebates} type="registerable" />
-          <DebateSection debates={finishedDebates} type="finished" />
+          <DebateSection
+            debates={registerableDebates}
+            type="registerable"
+            onRefresh={loadDebates}
+          />
+          <DebateSection
+            debates={finishedDebates}
+            type="finished"
+            onRefresh={loadDebates}
+          />
         </>
       )}
 

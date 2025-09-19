@@ -1,4 +1,7 @@
 // Admin Authentication Utilities
+//
+// ⚠️  TEMPORARY SETUP: All logged-in users can access admin features
+// TODO: Implement proper admin authentication system later
 
 // List of admin user IDs (in production, this should come from the database)
 const ADMIN_USER_IDS = [
@@ -32,70 +35,33 @@ export function isAdminBySpecificEmail(email) {
 
 // Check if user is admin (combines all methods)
 export function isAdmin(user) {
-  if (!user) return false;
-
-  // Check by user ID
-  if (isAdminByUserId(user.id)) return true;
-
-  // Check by specific email
-  if (isAdminBySpecificEmail(user.email)) return true;
-
-  // Check by email domain
-  if (isAdminByEmail(user.email)) return true;
-
-  // Check by username (if you want to add admin usernames)
-  if (user.username && user.username.startsWith("admin_")) return true;
-
-  return false;
+  // TEMPORARY: Allow all logged-in users to see admin features
+  // TODO: Implement proper admin authentication later
+  return !!user; // Return true if user exists (is logged in)
 }
 
 // Get admin level (for future role-based permissions)
 export function getAdminLevel(user) {
   if (!isAdmin(user)) return "none";
 
-  // Super admin (can do everything)
-  if (user.id === "11111111-1111-1111-1111-111111111111") return "super";
-
-  // Lior is also super admin
-  if (user.email === "liorkk7@gmail.com") return "super";
-
-  // Regular admin
-  return "admin";
+  // TEMPORARY: All logged-in users are super admins
+  // TODO: Implement proper admin levels later
+  return "super";
 }
 
 // Check specific permissions
 export function hasAdminPermission(user, permission) {
-  const level = getAdminLevel(user);
-
-  switch (permission) {
-    case "view_users":
-    case "edit_users":
-    case "delete_users":
-      return level === "admin" || level === "super";
-
-    case "view_debates":
-    case "edit_debates":
-    case "delete_debates":
-      return level === "admin" || level === "super";
-
-    case "view_analytics":
-      return level === "admin" || level === "super";
-
-    case "system_settings":
-    case "manage_admins":
-      return level === "super";
-
-    default:
-      return false;
-  }
+  // TEMPORARY: All logged-in users have all permissions
+  // TODO: Implement proper permission system later
+  return !!user; // Return true if user exists (is logged in)
 }
 
 // Admin route protection
 export function requireAdmin(user, redirectTo = "/") {
-  if (!isAdmin(user)) {
-    // In a real app, you'd redirect here
-    throw new Error("Access denied: Admin privileges required");
+  // TEMPORARY: Allow all logged-in users to access admin routes
+  // TODO: Implement proper admin route protection later
+  if (!user) {
+    throw new Error("Access denied: Please log in first");
   }
   return true;
 }
-

@@ -17,7 +17,7 @@ class AuthStore {
 
       // Ensure user has required fields
       const userWithDefaults = {
-        id: user.id || Math.floor(Math.random() * 1000) + 1,
+        id: user.id, // Don't create random ID - use server ID only
         email: user.email || email,
         firstName: user.firstName || user.name || email.split("@")[0],
         lastName: user.lastName || "",
