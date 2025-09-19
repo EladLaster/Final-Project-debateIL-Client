@@ -6,30 +6,35 @@
 src/
 ├── api/                           # API utilities and external services
 │   └── randomAvatar.js           # Avatar generation from randomuser.me API
-├── components/                    # Reusable UI components
-│   ├── basic-ui/                 # Basic UI building blocks
+├── components/                    # React components
+│   ├── ui/                       # Basic UI components
 │   │   ├── ContentCard.jsx       # Container component for content sections
 │   │   ├── PrimaryButton.jsx     # Button component with variants
-│   │   └── StatusBadge.jsx       # Status badges for debates
-│   ├── debate-room/              # Debate-specific components
-│   │   └── ArgumentCard.jsx      # Display individual arguments in debates
-│   ├── homepage/                 # Homepage-specific components
-│   │   ├── DebateGrid.jsx        # Grid layout for displaying debates
-│   │   ├── DebateStats.jsx       # Platform statistics display
-│   │   ├── FinishedDebatesList.jsx # List of completed debates
-│   │   ├── LiveDebatesList.jsx   # List of currently active debates
-│   │   └── RegisterableDebatesList.jsx # List of debates open for registration
-│   ├── navigation/               # Navigation components
-│   │   └── MainNavigation.jsx    # Main header navigation with user menu
-│   └── profile/                  # Profile-related components
-│       └── README.md             # Documentation for profile components
-├── context/                      # React Context providers
-│   ├── themeContext.js           # Theme context definition
-│   └── ThemeContext.jsx          # Theme provider component
-├── data/                         # Static data and mock data
-│   ├── brandColors.js            # Brand color definitions and theme
-│   └── mockData.js               # Mock data for development and testing
-├── hooks/                        # Custom React hooks
+│   │   ├── StatusBadge.jsx       # Status badges for debates
+│   │   └── UserAvatar.jsx        # User avatar display
+│   ├── layout/                   # Layout components
+│   │   ├── Footer.jsx            # Footer component
+│   │   └── Navbar.jsx            # Navigation bar
+│   ├── features/                 # Feature-specific components
+│   │   ├── admin/                # Admin functionality
+│   │   │   └── AdminRoute.jsx    # Admin route protection
+│   │   ├── debate/               # Debate functionality
+│   │   │   ├── ArgumentCard.jsx  # Display individual arguments
+│   │   │   └── CreateDebateModal.jsx # Create debate modal
+│   │   ├── homepage/             # Homepage components
+│   │   │   ├── DebateCard.jsx    # Debate card display
+│   │   │   ├── DebateGrid.jsx    # Grid layout for debates
+│   │   │   ├── DebateSection.jsx # Debate section wrapper
+│   │   │   ├── DebateStats.jsx   # Platform statistics
+│   │   │   ├── EmptyState.jsx    # Empty state component
+│   │   │   └── NavigationButtons.jsx # Navigation buttons
+│   │   └── profile/              # Profile functionality
+│   │       ├── EditProfile.jsx   # Edit profile form
+│   │       ├── ProfileCard.jsx   # Profile display
+│   │       ├── UserDebateHistory.jsx # User debate history
+│   │       └── UserStats.jsx     # User statistics
+│   └── README.md                 # Components documentation
+├── hooks/                        # Custom React hooks (empty - ready for future hooks)
 │   ├── useAuth.js                # Authentication state and actions
 │   ├── useDebates.js             # Debates data management with loading states
 │   ├── useLocalStorage.js        # LocalStorage synchronization hook

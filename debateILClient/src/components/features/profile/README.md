@@ -12,8 +12,8 @@ This directory contains components related to user profiles and user management.
 ## Usage
 
 ```jsx
-import ProfileCard from "../components/profile/ProfileCard";
-import UserStats from "../components/profile/UserStats";
+import ProfileCard from "../components/features/profile/ProfileCard";
+import UserStats from "../components/features/profile/UserStats";
 ```
 
 ## Notes

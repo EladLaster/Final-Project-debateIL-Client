@@ -1,18 +1,69 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, memo } from "react";
+import { useParams } from "react-router-dom";
+import { validateArgument, sanitizeInput } from "../utils/validators";
+import { getDebate, getArgumentsForDebate } from "../stores/usersStore";
+import { authStore } from "../stores/authStore";
+import { usersStore } from "../stores/usersStore";
 
 export default function DebatePage() {
-  // Demo users
-  const user1 = {
-    id: 1,
-    firstName: "Alice",
-    avatar: "", // Place for image in the future
+  const { id } = useParams();
+  const [debate, setDebate] = useState(null);
+  const [debateArguments, setDebateArguments] = useState([]);
+  const [newArgument, setNewArgument] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [votes, setVotes] = useState({ user1: 0, user2: 0 });
+  const [hasVoted, setHasVoted] = useState(false);
+
+  // Load debate data
+  useEffect(() => {
+    loadDebateData();
+  }, [id]);
+
+  const loadDebateData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const debateData = await getDebate(id);
+      if (!debateData) {
+        setError("Debate not found");
+        return;
+      }
+
+      setDebate(debateData);
+
+      // Load arguments for the debate
+      const argumentsData = await getArgumentsForDebate(id);
+      setDebateArguments(argumentsData || []);
+
+      // Load user data for participants
+      if (debateData.user1_id || debateData.user2_id) {
+        await usersStore.loadUsersForDebates([debateData]);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to load debate");
+    } finally {
+      setLoading(false);
+    }
   };
-  const user2 = {
-    id: 2,
-    firstName: "Bob",
-    avatar: "",
-  };
-  // Audience with image placeholder (avatar field for future image)
+
+  // Auto scroll
+  const chatEndRef = useRef(null);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [debateArguments]);
+
+  // Get user data for participants
+  const user1 = debate?.user1_id
+    ? usersStore.getUserForComponent(debate.user1_id)
+    : null;
+  const user2 = debate?.user2_id
+    ? usersStore.getUserForComponent(debate.user2_id)
+    : null;
+  const currentUser = authStore.activeUser;
+
+  // Mock audience for now (could be loaded from server in the future)
   const audience = [
     { id: 101, avatar: "" },
     { id: 102, avatar: "" },
@@ -21,51 +72,105 @@ export default function DebatePage() {
     { id: 105, avatar: "" },
   ];
 
-  // Demo arguments
-  const [debateArguments, setDebateArguments] = useState([
-    { id: 1, user: user1, text: "Hello! I believe that..." },
-    { id: 2, user: user2, text: "I disagree, because..." },
-    { id: 3, user: user1, text: "But consider this..." },
-    { id: 4, user: user2, text: "Good point, but still..." },
-  ]);
-  const [newArgument, setNewArgument] = useState("");
-  const [currentUser, setCurrentUser] = useState(user1); // Switch to user2 for testing
-
-  // Demo votes
-  const [votes, setVotes] = useState({ user1: 7, user2: 3 });
-  const [hasVoted, setHasVoted] = useState(false);
-
-  // Auto scroll
-  const chatEndRef = useRef(null);
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [debateArguments]);
-
   // Vote bar calculation
   const totalVotes = votes.user1 + votes.user2;
-  const user1Percent = totalVotes ? Math.round((votes.user1 / totalVotes) * 100) : 50;
-  const user2Percent = totalVotes ? Math.round((votes.user2 / totalVotes) * 100) : 50;
+  const user1Percent = totalVotes
+    ? Math.round((votes.user1 / totalVotes) * 100)
+    : 50;
+  const user2Percent = totalVotes
+    ? Math.round((votes.user2 / totalVotes) * 100)
+    : 50;
 
-  // Add argument
-  const handleAddArgument = (e) => {
-    e.preventDefault();
-    if (!newArgument.trim()) return;
-    setDebateArguments((prev) => [
-      ...prev,
-      { id: prev.length + 1, user: currentUser, text: newArgument },
-    ]);
-    setNewArgument("");
-  };
+  // Add argument with validation
+  const handleAddArgument = useCallback(
+    (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        alert("Please log in to add arguments");
+        return;
+      }
+
+      // Sanitize and validate input
+      const sanitizedArgument = sanitizeInput(newArgument);
+      const validation = validateArgument(sanitizedArgument);
+
+      if (!validation.isValid) {
+        // Show validation error (could be improved with toast notification)
+        alert(validation.message);
+        return;
+      }
+
+      // TODO: Add API call to save argument to server
+      // For now, add to local state
+      setDebateArguments((prev) => [
+        ...prev,
+        {
+          id: Date.now(), // Temporary ID
+          user: currentUser,
+          text: sanitizedArgument,
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      setNewArgument("");
+    },
+    [newArgument, currentUser]
+  );
 
   // Vote
-  const handleVote = (side) => {
-    if (hasVoted) return;
-    setVotes((prev) => ({
-      ...prev,
-      [side]: prev[side] + 1,
-    }));
-    setHasVoted(true);
-  };
+  const handleVote = useCallback(
+    (side) => {
+      if (hasVoted || !currentUser) return;
+      setVotes((prev) => ({
+        ...prev,
+        [side]: prev[side] + 1,
+      }));
+      setHasVoted(true);
+    },
+    [hasVoted, currentUser]
+  );
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading debate...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No debate found
+  if (!debate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">🔍</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Debate Not Found
+          </h2>
+          <p className="text-gray-600">
+            The debate you're looking for doesn't exist.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-100 to-gray-100">
@@ -76,39 +181,61 @@ export default function DebatePage() {
             className="flex items-center justify-end pr-4 text-white font-extrabold text-lg bg-blue-700 transition-all"
             style={{ width: `${user1Percent}%` }}
           >
-            {user1.firstName} {user1Percent}%
+            {user1?.firstName || "User 1"} {user1Percent}%
           </div>
           <div
             className="flex items-center justify-start pl-4 text-white font-extrabold text-lg bg-red-700 transition-all"
             style={{ width: `${user2Percent}%` }}
           >
-            {user2Percent}% {user2.firstName}
+            {user2Percent}% {user2?.firstName || "User 2"}
           </div>
         </div>
       </div>
 
       {/* Debaters Avatars - OUTSIDE the ring */}
-      <div className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-8 mb-2" style={{marginTop: 0}}>
+      <div
+        className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-8 mb-2"
+        style={{ marginTop: 0 }}
+      >
         <div className="flex flex-col items-center">
           <div className="w-24 h-24 rounded-full bg-white border-8 border-blue-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-blue-200">
-            {user1.avatar ? (
-              <img src={user1.avatar} alt="user1" className="w-full h-full rounded-full object-cover" />
+            {user1?.avatar ? (
+              <img
+                src={user1.avatar}
+                alt="user1"
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               <span className="text-blue-300">+</span>
             )}
           </div>
-          <div className="text-center font-extrabold text-blue-700 text-lg tracking-wide drop-shadow-lg mt-2">{user1.firstName}</div>
+          <div className="text-center font-extrabold text-blue-700 text-lg tracking-wide drop-shadow-lg mt-2">
+            {user1?.firstName || "User 1"}
+          </div>
         </div>
         <div className="flex flex-col items-center">
           <div className="w-24 h-24 rounded-full bg-white border-8 border-red-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-red-200">
-            {user2.avatar ? (
-              <img src={user2.avatar} alt="user2" className="w-full h-full rounded-full object-cover" />
+            {user2?.avatar ? (
+              <img
+                src={user2.avatar}
+                alt="user2"
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               <span className="text-red-300">+</span>
             )}
           </div>
-          <div className="text-center font-extrabold text-red-700 text-lg tracking-wide drop-shadow-lg mt-2">{user2.firstName}</div>
+          <div className="text-center font-extrabold text-red-700 text-lg tracking-wide drop-shadow-lg mt-2">
+            {user2?.firstName || "User 2"}
+          </div>
         </div>
+      </div>
+
+      {/* Debate Title */}
+      <div className="w-full max-w-4xl mx-auto text-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-800 px-4">
+          {debate.topic || "Debate Topic"}
+        </h1>
       </div>
 
       {/* Main Debate Arena */}
@@ -125,7 +252,7 @@ export default function DebatePage() {
             minHeight: "38vh",
             maxHeight: "38vh",
             overflow: "hidden",
-            marginBottom: "0.5rem"
+            marginBottom: "0.5rem",
           }}
         >
           {/* Chat Area */}
@@ -148,15 +275,19 @@ export default function DebatePage() {
                     <div
                       key={argument.id}
                       className={`flex items-end mb-4 ${
-                        argument.user.id === user1.id ? "justify-start" : "justify-end"
+                        argument.user?.id === user1?.id
+                          ? "justify-start"
+                          : "justify-end"
                       }`}
                     >
                       {/* Bubble + Avatar */}
-                      {argument.user.id === user1.id && (
+                      {argument.user?.id === user1?.id && (
                         <>
                           <div className="flex items-end">
                             <div className="rounded-3xl bg-blue-100 px-6 py-3 shadow text-left max-w-xs mr-2 text-base border-2 border-blue-300 text-blue-900 font-semibold">
-                              <div className="mb-1 text-blue-700 font-bold">{argument.user.firstName}</div>
+                              <div className="mb-1 text-blue-700 font-bold">
+                                {argument.user?.firstName || "User"}
+                              </div>
                               <div>{argument.text}</div>
                             </div>
                           </div>
@@ -165,7 +296,9 @@ export default function DebatePage() {
                       {argument.user.id === user2.id && (
                         <>
                           <div className="rounded-3xl bg-red-100 px-6 py-3 shadow text-right max-w-xs ml-2 text-base border-2 border-red-300 text-red-900 font-semibold">
-                            <div className="mb-1 text-red-700 font-bold">{argument.user.firstName}</div>
+                            <div className="mb-1 text-red-700 font-bold">
+                              {argument.user.firstName}
+                            </div>
                             <div>{argument.text}</div>
                           </div>
                         </>
@@ -173,7 +306,9 @@ export default function DebatePage() {
                     </div>
                   ))
               ) : (
-                <div className="text-gray-400 text-center py-8">No arguments yet.</div>
+                <div className="text-gray-400 text-center py-8">
+                  No arguments yet.
+                </div>
               )}
             </div>
           </div>
@@ -192,7 +327,7 @@ export default function DebatePage() {
           onChange={(e) => setNewArgument(e.target.value)}
           placeholder="Type your argument..."
           className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
-            currentUser.id === user1.id
+            currentUser?.id === user1?.id
               ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
               : "border-red-700 focus:ring-2 focus:ring-red-400"
           }`}
@@ -201,7 +336,7 @@ export default function DebatePage() {
         <button
           type="submit"
           className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
-            currentUser.id === user1.id
+            currentUser?.id === user1?.id
               ? "bg-blue-700 text-white hover:bg-blue-900"
               : "bg-red-700 text-white hover:bg-red-900"
           } transition`}
@@ -220,7 +355,11 @@ export default function DebatePage() {
               title={`Audience #${a.id}`}
             >
               {a.avatar ? (
-                <img src={a.avatar} alt={`Audience #${a.id}`} className="w-full h-full rounded-full object-cover" />
+                <img
+                  src={a.avatar}
+                  alt={`Audience #${a.id}`}
+                  className="w-full h-full rounded-full object-cover"
+                />
               ) : (
                 <span className="text-gray-300">+</span>
               )}

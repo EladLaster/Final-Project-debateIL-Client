@@ -1,4 +1,4 @@
-import { brandColors } from "../../data/brandColors";
+import { brandColors } from "../../utils/brandColors";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

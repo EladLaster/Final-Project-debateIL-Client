@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ContentCard from "../basic-ui/ContentCard";
-import PrimaryButton from "../basic-ui/PrimaryButton";
+import ContentCard from "../../ui/ContentCard";
+import PrimaryButton from "../../ui/PrimaryButton";
 
 export default function EditProfile({ user, onSave, onCancel }) {
   const [formData, setFormData] = useState({

@@ -1,6 +1,6 @@
-import UserAvatar from "../basic-ui/UserAvatar";
-import ContentCard from "../basic-ui/ContentCard";
-import PrimaryButton from "../basic-ui/PrimaryButton";
+import UserAvatar from "../../ui/UserAvatar";
+import ContentCard from "../../ui/ContentCard";
+import PrimaryButton from "../../ui/PrimaryButton";
 
 export default function ProfileCard({ user, isOwnProfile = false }) {
   if (!user) {

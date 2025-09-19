@@ -1,4 +1,4 @@
-import StatusBadge from "../basic-ui/StatusBadge.jsx";
+import StatusBadge from "../../ui/StatusBadge.jsx";
 
 export default function ArgumentCard({ argument, onReply, onVote }) {
   const formatTime = (dateString) => {

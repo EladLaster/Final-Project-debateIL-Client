@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { brandColors } from "../data/brandColors";
+import { brandColors } from "../utils/brandColors";
 import logoImg from "../assets/logo.png";
 import { authStore } from "../stores/authStore";
-import PrimaryButton from "../components/basic-ui/PrimaryButton";
+import PrimaryButton from "../components/ui/PrimaryButton";
 
 export default function RegisterPage() {
   const navigate = useNavigate();

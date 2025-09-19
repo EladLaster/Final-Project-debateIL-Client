@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import DebateSection from "../components/homepage/DebateSection";
-import DebateStats from "../components/homepage/DebateStats";
+import DebateSection from "../components/features/homepage/DebateSection";
+import DebateStats from "../components/features/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
 import { authStore } from "../stores/authStore";
-import CreateDebateModal from "../components/debate-room/CreateDebateModal";
-import PrimaryButton from "../components/basic-ui/PrimaryButton";
+import CreateDebateModal from "../components/features/debate/CreateDebateModal";
+import PrimaryButton from "../components/ui/PrimaryButton";
+import { useErrorHandler } from "../utils/errorHandler";
 
 function HomePage() {
   const [allDebates, setAllDebates] = useState([]);
@@ -13,16 +14,21 @@ function HomePage() {
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const navigate = useNavigate();
+  const { handleError } = useErrorHandler();
 
-  const loadDebates = async () => {
+  const loadDebates = useCallback(async () => {
     try {
       const list = await getDebates();
       setAllDebates(Array.isArray(list) ? list : []);
       setError("");
     } catch (e) {
-      setError(e?.message || "Failed to load debates");
+      const friendlyError = handleError(e, {
+        action: "loadDebates",
+        component: "HomePage",
+      });
+      setError(friendlyError.message);
     }
-  };
+  }, []); // Remove handleError from dependencies
 
   useEffect(() => {
     let alive = true;
@@ -34,18 +40,21 @@ function HomePage() {
         setAllDebates(Array.isArray(list) ? list : []);
         setError("");
       } catch (e) {
-        if (alive) setError(e?.message || "Failed to load debates");
+        if (alive) {
+          const friendlyError = handleError(e, {
+            action: "loadDebates",
+            component: "HomePage",
+          });
+          setError(friendlyError.message);
+        }
       } finally {
         if (alive) setLoading(false);
       }
     }
 
     load();
-    // Optional: Refresh every 5 seconds to keep live updates
-    const id = setInterval(load, 5000);
     return () => {
       alive = false;
-      clearInterval(id);
     };
   }, []);
 
@@ -55,7 +64,7 @@ function HomePage() {
       // User just logged in, refresh debates
       loadDebates();
     }
-  }, [authStore.activeUser?.id]); // Use id to detect actual user changes
+  }, [authStore.activeUser?.id, loadDebates]); // Add loadDebates to dependencies
 
   // Calculate available spots based on database schema (user1_id, user2_id)
   const getAvailableSpots = (debate) => {
@@ -88,13 +97,16 @@ function HomePage() {
     [allDebates]
   );
 
+  const handleCreateDebateSuccess = useCallback(
+    (newDebate) => {
+      // Refresh the debates list
+      loadDebates();
+    },
+    [loadDebates]
+  );
+
   if (loading) return <div className="p-6">Loading open debates…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
-
-  const handleCreateDebateSuccess = (newDebate) => {
-    // Refresh the debates list
-    loadDebates();
-  };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -159,7 +171,7 @@ function HomePage() {
         </div>
       )}
 
-      <DebateStats />
+      <DebateStats debates={allDebates} />
 
       {/* Create Debate Modal */}
       <CreateDebateModal

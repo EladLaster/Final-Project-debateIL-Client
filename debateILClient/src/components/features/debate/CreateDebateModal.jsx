@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createDebate } from "../../services/serverApi";
-import PrimaryButton from "../basic-ui/PrimaryButton";
-import ContentCard from "../basic-ui/ContentCard";
+import { createDebate } from "../../../services/serverApi";
+import PrimaryButton from "../../ui/PrimaryButton";
+import ContentCard from "../../ui/ContentCard";
 
 export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({

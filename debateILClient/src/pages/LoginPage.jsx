@@ -1,6 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { brandColors } from "../data/brandColors";
+import { brandColors } from "../utils/brandColors";
 import logoImg from "../assets/logo.png";
 import { authStore } from "../stores/authStore";
 export default function LoginPage() {

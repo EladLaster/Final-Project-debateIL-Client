@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import PrimaryButton from "../basic-ui/PrimaryButton";
+import PrimaryButton from "../../ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
-import { authStore } from "../../stores/authStore";
+import { authStore } from "../../../stores/authStore";
 
 // Configuration for different debate types
 const DEBATE_CONFIGS = {

@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { login, register } from "../services/serverApi";
+import { handleAuthError } from "../utils/errorHandler";
 
 class AuthStore {
   constructor() {
@@ -11,29 +12,38 @@ class AuthStore {
   }
 
   handleLogin = async (email, password) => {
-    const user = await login(email, password);
+    try {
+      const user = await login(email, password);
 
-    // Ensure user has required fields
-    const userWithDefaults = {
-      id: user.id || Math.floor(Math.random() * 1000) + 1,
-      email: user.email || email,
-      firstName: user.firstName || user.name || email.split("@")[0],
-      lastName: user.lastName || "",
-      name: user.name || user.firstName || email.split("@")[0],
-      ...user,
-    };
+      // Ensure user has required fields
+      const userWithDefaults = {
+        id: user.id || Math.floor(Math.random() * 1000) + 1,
+        email: user.email || email,
+        firstName: user.firstName || user.name || email.split("@")[0],
+        lastName: user.lastName || "",
+        name: user.name || user.firstName || email.split("@")[0],
+        ...user,
+      };
 
-    localStorage.activeUser = JSON.stringify(userWithDefaults);
-    this.activeUser = userWithDefaults;
+      localStorage.activeUser = JSON.stringify(userWithDefaults);
+      this.activeUser = userWithDefaults;
 
-    // Dispatch custom event for UI updates
-    window.dispatchEvent(
-      new CustomEvent("authStateChanged", {
-        detail: { user: userWithDefaults },
-      })
-    );
+      // Dispatch custom event for UI updates
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", {
+          detail: { user: userWithDefaults },
+        })
+      );
 
-    return userWithDefaults;
+      return userWithDefaults;
+    } catch (error) {
+      const friendlyError = handleAuthError(error, {
+        action: "handleLogin",
+        component: "AuthStore",
+        data: { email },
+      });
+      throw new Error(friendlyError.message);
+    }
   };
 
   handleRegister = async (userData) => {
@@ -55,8 +65,12 @@ class AuthStore {
       this.activeUser = userWithDefaults;
       return userWithDefaults;
     } catch (error) {
-      console.error("Register error:", error);
-      throw error;
+      const friendlyError = handleAuthError(error, {
+        action: "handleRegister",
+        component: "AuthStore",
+        data: { email: userData.email },
+      });
+      throw new Error(friendlyError.message);
     }
   };
 

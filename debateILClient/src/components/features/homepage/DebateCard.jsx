@@ -1,5 +1,5 @@
-import ContentCard from "../basic-ui/ContentCard";
-import UserAvatar from "../basic-ui/UserAvatar";
+import ContentCard from "../../ui/ContentCard";
+import UserAvatar from "../../ui/UserAvatar";
 import { useState, useEffect } from "react";
 
 export default function DebateCard({

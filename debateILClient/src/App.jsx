@@ -6,6 +6,7 @@ import DebatePage from "./pages/DebatePage.jsx";
 import ReplayPage from "./pages/ReplayPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import AdminPanelPage from "./pages/AdminPanelPage.jsx";
+import AdminRoute from "./components/features/admin/AdminRoute.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
@@ -21,7 +22,14 @@ export default function App() {
             <Route path="/debate/:id" element={<DebatePage />} />
             <Route path="/replay/:id" element={<ReplayPage />} />
             <Route path="/profile/:id" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPanelPage />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPanelPage />
+                </AdminRoute>
+              }
+            />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="*" element={<NotFoundPage />} />

@@ -1,27 +1,27 @@
 import axios from "axios";
 import { APP_CONFIG, API_ENDPOINTS } from "../utils/constants";
+import { handleApiError } from "../utils/errorHandler";
 
 // API configuration
 const api = axios.create({
   baseURL: APP_CONFIG.API_BASE_URL,
-  withCredentials: true
+  withCredentials: true,
 });
 
-// Error handling utility
-const normalizeError = (error) => {
-  if (error.response) {
-    return new Error(error.response.data.message || "Server error");
-  }
-  if (error.request) {
-    return new Error("Network error - please check your connection");
-  }
-  return new Error(error.message || "An unexpected error occurred");
+// Error handling utility - now uses centralized error handler
+const normalizeError = (error, context = {}) => {
+  const friendlyError = handleApiError(error, context);
+  return new Error(friendlyError.message);
 };
 
 // Authentication API
 export async function login(email, password) {
   try {
-    const response = await api.post(API_ENDPOINTS.LOGIN, { email, password },{ withCredentials: true } );
+    const response = await api.post(
+      API_ENDPOINTS.LOGIN,
+      { email, password },
+      { withCredentials: true }
+    );
 
     if (response.data.success) {
       return response.data.user; // Return user data from server
@@ -29,8 +29,11 @@ export async function login(email, password) {
       throw new Error(response.data.message || "Login failed");
     }
   } catch (error) {
-    console.error("Login error:", error);
-    throw normalizeError(error);
+    throw normalizeError(error, {
+      action: "login",
+      component: "AuthAPI",
+      data: { email },
+    });
   }
 }
 
@@ -44,8 +47,11 @@ export async function register(userData) {
       throw new Error(response.data.message || "Registration failed");
     }
   } catch (error) {
-    console.error("Register error:", error);
-    throw normalizeError(error);
+    throw normalizeError(error, {
+      action: "register",
+      component: "AuthAPI",
+      data: { email: userData.email },
+    });
   }
 }
 
@@ -53,15 +59,17 @@ export async function register(userData) {
 export async function getDebates() {
   try {
     const { data } = await api.get(API_ENDPOINTS.DEBATES, {
-      withCredentials: true
+      withCredentials: true,
     });
     return data?.debates ?? [];
   } catch (err) {
     if (err?.response?.status === 404) return [];
-    throw normalizeError(err);
+    throw normalizeError(err, {
+      action: "getDebates",
+      component: "DebatesAPI",
+    });
   }
 }
-
 
 export async function getLiveDebates() {
   return getDebates({ status: "live" });
@@ -73,7 +81,11 @@ export async function getDebate(id) {
     // Expects { success, debate }
     return data?.debate;
   } catch (err) {
-    throw normalizeError(err);
+    throw normalizeError(err, {
+      action: "getDebate",
+      component: "DebatesAPI",
+      data: { debateId: id },
+    });
   }
 }
 
@@ -82,7 +94,10 @@ export async function getDebateStats() {
     const { data } = await api.get(API_ENDPOINTS.DEBATE_STATS);
     return data;
   } catch (err) {
-    throw normalizeError(err);
+    throw normalizeError(err, {
+      action: "getDebateStats",
+      component: "DebatesAPI",
+    });
   }
 }
 
@@ -96,8 +111,11 @@ export async function createDebate(debateData) {
       throw new Error(response.data.message || "Failed to create debate");
     }
   } catch (error) {
-    console.error("Create debate error:", error);
-    throw normalizeError(error);
+    throw normalizeError(error, {
+      action: "createDebate",
+      component: "DebatesAPI",
+      data: { topic: debateData.topic },
+    });
   }
 }
 

@@ -1,10 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import ProfileCard from "../components/profile/ProfileCard";
-import UserStats from "../components/profile/UserStats";
-import UserDebateHistory from "../components/profile/UserDebateHistory";
-import EditProfile from "../components/profile/EditProfile";
+import ProfileCard from "../components/features/profile/ProfileCard";
+import UserStats from "../components/features/profile/UserStats";
+import UserDebateHistory from "../components/features/profile/UserDebateHistory";
+import EditProfile from "../components/features/profile/EditProfile";
 import { authStore } from "../stores/authStore";
+import { usersStore } from "../stores/usersStore";
 import { getDebates } from "../services/serverApi";
 
 export default function ProfilePage() {
@@ -28,23 +29,21 @@ export default function ProfilePage() {
       if (isOwnProfile && authStore.activeUser) {
         setUser(authStore.activeUser);
       } else {
-        // Mock user data for other profiles
-        setUser({
-          id: parseInt(id),
-          firstName: "John",
-          lastName: "Doe",
-          email: `user${id}@example.com`,
-          username: `user${id}`,
-          createdAt: "2024-01-15T10:30:00Z",
-          debatesWon: Math.floor(Math.random() * 20),
-          debatesParticipated: Math.floor(Math.random() * 50),
-          argumentsCount: Math.floor(Math.random() * 100),
-          votesReceived: Math.floor(Math.random() * 200),
-          winRate: `${Math.floor(Math.random() * 100)}%`,
-          averageScore: Math.floor(Math.random() * 100),
-          currentStreak: Math.floor(Math.random() * 10),
-          ranking: `#${Math.floor(Math.random() * 1000)}`,
-        });
+        // Load user from usersStore
+        const userData = await usersStore.getUser(id);
+        if (userData) {
+          setUser(userData);
+        } else {
+          // Create a fallback user if not found
+          setUser({
+            id: id,
+            firstName: `User ${id.slice(0, 8)}`,
+            lastName: "",
+            email: `user${id.slice(0, 8)}@example.com`,
+            username: `user${id.slice(0, 8)}`,
+            bio: "This is a sample bio for the user.",
+          });
+        }
       }
 
       // Load user's debates
@@ -129,7 +128,7 @@ export default function ProfilePage() {
       ) : (
         <div className="space-y-6">
           <ProfileCard user={user} isOwnProfile={isOwnProfile} />
-          <UserStats user={user} />
+          <UserStats user={user} debates={userDebates} />
           <UserDebateHistory userId={id} debates={userDebates} />
         </div>
       )}

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import ContentCard from "../basic-ui/ContentCard";
-import PrimaryButton from "../basic-ui/PrimaryButton";
-import StatusBadge from "../basic-ui/StatusBadge";
-import UserAvatar from "../basic-ui/UserAvatar";
+import ContentCard from "../../ui/ContentCard";
+import PrimaryButton from "../../ui/PrimaryButton";
+import StatusBadge from "../../ui/StatusBadge";
+import UserAvatar from "../../ui/UserAvatar";
 
 export default function UserDebateHistory({ userId, debates = [] }) {
   const navigate = useNavigate();

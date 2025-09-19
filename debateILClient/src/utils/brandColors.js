@@ -5,3 +5,4 @@ export const brandColors = {
   text: "#22223b", // Dark
   bgLight: "#f5f7fa", // Light background
 };
+
