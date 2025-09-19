@@ -4,6 +4,7 @@ import { APP_CONFIG, API_ENDPOINTS } from "../utils/constants";
 // API configuration
 const api = axios.create({
   baseURL: APP_CONFIG.API_BASE_URL,
+  withCredentials: true
 });
 
 // Error handling utility
@@ -20,7 +21,7 @@ const normalizeError = (error) => {
 // Authentication API
 export async function login(email, password) {
   try {
-    const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
+    const response = await api.post(API_ENDPOINTS.LOGIN, { email, password },{ withCredentials: true } );
 
     if (response.data.success) {
       return response.data.user; // Return user data from server
@@ -51,15 +52,16 @@ export async function register(userData) {
 // Debates API
 export async function getDebates() {
   try {
-    const { data } = await api.get(API_ENDPOINTS.DEBATES);
-    // Expects { success, debates }
+    const { data } = await api.get(API_ENDPOINTS.DEBATES, {
+      withCredentials: true
+    });
     return data?.debates ?? [];
   } catch (err) {
-    // If server returns 404 when no results - return [] so UI doesn't crash
     if (err?.response?.status === 404) return [];
     throw normalizeError(err);
   }
 }
+
 
 export async function getLiveDebates() {
   return getDebates({ status: "live" });
