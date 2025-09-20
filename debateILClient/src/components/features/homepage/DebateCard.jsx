@@ -15,42 +15,26 @@ export default function DebateCard({
 
   // Load user details for display
   useEffect(() => {
-    const loadUsers = async () => {
+    const loadUsers = () => {
       if (debate.user1_id) {
-        try {
-          const userData = await usersStore.getUser(debate.user1_id);
-          if (userData) {
-            setUser1(userData);
-          } else {
-            // Fallback to mock user if not found
-            setUser1({
-              id: debate.user1_id,
-              firstName: `User ${debate.user1_id.slice(0, 8)}`,
-            });
-          }
-        } catch (error) {
-          console.error("Error loading user1:", error);
+        const userData = usersStore.getUserForComponent(debate.user1_id);
+        if (userData) {
+          setUser1(userData);
+        } else {
+          // Fallback to mock user if not found
           setUser1({
             id: debate.user1_id,
             firstName: `User ${debate.user1_id.slice(0, 8)}`,
           });
         }
       }
-      
+
       if (debate.user2_id) {
-        try {
-          const userData = await usersStore.getUser(debate.user2_id);
-          if (userData) {
-            setUser2(userData);
-          } else {
-            // Fallback to mock user if not found
-            setUser2({
-              id: debate.user2_id,
-              firstName: `User ${debate.user2_id.slice(0, 8)}`,
-            });
-          }
-        } catch (error) {
-          console.error("Error loading user2:", error);
+        const userData = usersStore.getUserForComponent(debate.user2_id);
+        if (userData) {
+          setUser2(userData);
+        } else {
+          // Fallback to mock user if not found
           setUser2({
             id: debate.user2_id,
             firstName: `User ${debate.user2_id.slice(0, 8)}`,

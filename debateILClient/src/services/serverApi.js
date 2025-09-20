@@ -119,6 +119,54 @@ export async function createDebate(debateData) {
   }
 }
 
+export async function registerToDebate(debateId) {
+  try {
+    const response = await api.post(
+      `${API_ENDPOINTS.DEBATES}/${debateId}/register`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.success) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to register to debate");
+    }
+  } catch (error) {
+    throw normalizeError(error, {
+      action: "registerToDebate",
+      component: "DebatesAPI",
+      data: { debateId },
+    });
+  }
+}
+
+export async function finishDebate(debateId, scores = {}) {
+  try {
+    const response = await api.post(
+      `${API_ENDPOINTS.DEBATES}/${debateId}/finish`,
+      scores,
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.success) {
+      return response.data;
+    } else {
+      throw new Error(response.data.message || "Failed to finish debate");
+    }
+  } catch (error) {
+    throw normalizeError(error, {
+      action: "finishDebate",
+      component: "DebatesAPI",
+      data: { debateId, scores },
+    });
+  }
+}
+
 // Users API
 export async function getAllUsers() {
   try {
@@ -145,6 +193,21 @@ export async function getUserById(userId) {
       action: "getUserById",
       component: "UsersAPI",
       data: { userId },
+    });
+  }
+}
+
+export async function deleteDebate(debateId) {
+  try {
+    const { data } = await api.delete(`/api/debates/${debateId}`, {
+      withCredentials: true,
+    });
+    return data?.success ?? false;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "deleteDebate",
+      component: "DebatesAPI",
+      data: { debateId },
     });
   }
 }

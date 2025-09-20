@@ -159,19 +159,37 @@ const DEBATE_CONFIGS = {
       };
 
       const getWinner = (debate) => {
-        if (debate.winner_id === debate.user1?.id) return debate.user1;
-        if (debate.winner_id === debate.user2?.id) return debate.user2;
+        // Determine winner based on actual scores
+        if (debate.score_user1 > debate.score_user2) {
+          return {
+            id: debate.user1_id,
+            firstName: `User ${debate.user1_id?.slice(0, 8)}`,
+            score: debate.score_user1
+          };
+        }
+        if (debate.score_user2 > debate.score_user1) {
+          return {
+            id: debate.user2_id,
+            firstName: `User ${debate.user2_id?.slice(0, 8)}`,
+            score: debate.score_user2
+          };
+        }
         return null;
       };
 
       const winner = getWinner(debate);
+      const finalScore = `${debate.score_user1 || 0}-${debate.score_user2 || 0}`;
 
       return (
         <>
           {winner && (
-            <div className="flex items-center justify-center space-x-2 text-yellow-600 text-sm bg-yellow-50 border border-yellow-200 rounded-lg p-2">
-              <span className="text-lg">👑</span>
-              <span className="font-medium">Winner: {winner.firstName}</span>
+            <div className="flex items-center justify-center space-x-3 text-yellow-600 text-lg bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-3">
+              <span className="text-2xl">👑</span>
+              <div className="text-center">
+                <div className="font-bold text-xl">Winner: {winner.firstName}</div>
+                <div className="text-sm text-yellow-700">Score: {winner.score}</div>
+              </div>
+              <span className="text-2xl">🏆</span>
             </div>
           )}
 
@@ -185,7 +203,7 @@ const DEBATE_CONFIGS = {
             <div className="text-center">
               <span className="font-medium text-gray-700 block">⭐</span>
               <div className="text-lg font-bold text-gray-800">
-                {debate.final_score || "0-0"}
+                {finalScore}
               </div>
             </div>
           </div>
@@ -202,7 +220,7 @@ const DEBATE_CONFIGS = {
       </PrimaryButton>
     ),
     getWinner: (debate) => {
-      // Determine winner based on scores
+      // Determine winner based on actual scores
       if (debate.score_user1 > debate.score_user2) {
         return {
           id: debate.user1_id,

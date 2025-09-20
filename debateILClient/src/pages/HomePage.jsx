@@ -4,6 +4,7 @@ import DebateSection from "../components/features/homepage/DebateSection";
 import DebateStats from "../components/features/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
 import { authStore } from "../stores/authStore";
+import { usersStore } from "../stores/usersStore";
 import CreateDebateModal from "../components/features/debate/CreateDebateModal";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useErrorHandler } from "../utils/errorHandler";
@@ -20,6 +21,12 @@ function HomePage() {
     try {
       const list = await getDebates();
       setAllDebates(Array.isArray(list) ? list : []);
+      
+      // Load user data for all debates
+      if (Array.isArray(list) && list.length > 0) {
+        await usersStore.loadUsersForDebates(list);
+      }
+      
       setError("");
     } catch (e) {
       const friendlyError = handleError(e, {
@@ -38,6 +45,12 @@ function HomePage() {
         const list = await getDebates(); // Fetch all debates from server
         if (!alive) return;
         setAllDebates(Array.isArray(list) ? list : []);
+        
+        // Load user data for all debates
+        if (Array.isArray(list) && list.length > 0) {
+          await usersStore.loadUsersForDebates(list);
+        }
+        
         setError("");
       } catch (e) {
         if (alive) {

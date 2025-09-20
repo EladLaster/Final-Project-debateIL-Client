@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { getDebates } from "../stores/usersStore";
+import { getDebates, finishDebateForUser } from "../stores/usersStore";
 import { usersStore } from "../stores/usersStore";
 import { authStore } from "../stores/authStore";
-import { getAllUsers } from "../services/serverApi";
+import { getAllUsers, deleteDebate } from "../services/serverApi";
+import { getAllArguments, deleteArgument } from "../services/argumentsApi";
 import { getAdminLevel, hasAdminPermission } from "../utils/adminAuth";
 import ContentCard from "../components/ui/ContentCard";
 import PrimaryButton from "../components/ui/PrimaryButton";
@@ -11,6 +12,7 @@ import UserAvatar from "../components/ui/UserAvatar";
 export default function AdminPanelPage() {
   const [debates, setDebates] = useState([]);
   const [users, setUsers] = useState([]);
+  const [allArguments, setAllArguments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -61,6 +63,10 @@ export default function AdminPanelPage() {
       // Load all users from server
       const allUsers = await getAllUsers();
       setUsers(allUsers || []);
+
+      // Load all arguments from server
+      const argumentsData = await getAllArguments();
+      setAllArguments(argumentsData || []);
 
       setStats({
         totalUsers: allUsers?.length || 0,
@@ -116,6 +122,61 @@ export default function AdminPanelPage() {
     setShowUserModal(true);
     // Here you would implement the actual action (edit, delete, etc.)
     console.log(`Admin action: ${action} on user ${user.id}`);
+  };
+
+  const handleDeleteArgument = async (argumentId) => {
+    if (!window.confirm("Are you sure you want to delete this argument?")) {
+      return;
+    }
+
+    try {
+      await deleteArgument(argumentId);
+      // Remove from local state
+      setAllArguments((prev) => prev.filter((arg) => arg.id !== argumentId));
+      alert("Argument deleted successfully!");
+    } catch (error) {
+      alert(`Failed to delete argument: ${error.message}`);
+    }
+  };
+
+  const handleDeleteDebate = async (debateId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this debate? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await deleteDebate(debateId);
+      // Remove from local state
+      setDebates((prev) => prev.filter((debate) => debate.id !== debateId));
+      alert("Debate deleted successfully!");
+    } catch (error) {
+      alert(`Failed to delete debate: ${error.message}`);
+    }
+  };
+
+  const handleFinishDebate = async (debateId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to finish this debate? This will end the debate and move it to finished status."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const updatedDebate = await finishDebateForUser(debateId);
+      // Update local state
+      setDebates((prev) =>
+        prev.map((debate) => (debate.id === debateId ? updatedDebate : debate))
+      );
+      alert("Debate finished successfully!");
+    } catch (error) {
+      alert(`Failed to finish debate: ${error.message}`);
+    }
   };
 
   const canManageDebates = hasAdminPermission(currentUser, "edit_debates");
@@ -211,6 +272,7 @@ export default function AdminPanelPage() {
               { id: "overview", label: "Overview" },
               { id: "debates", label: "Debates" },
               { id: "users", label: "Users" },
+              { id: "arguments", label: "Arguments" },
               { id: "analytics", label: "Analytics" },
             ].map((tab) => (
               <button
@@ -311,10 +373,17 @@ export default function AdminPanelPage() {
                       {formatDate(debate.start_time)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {debate.participants_count || 0}
+                      {
+                        [debate.user1_id, debate.user2_id].filter(Boolean)
+                          .length
+                      }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {debate.messages_count || 0}
+                      {
+                        allArguments.filter(
+                          (arg) => arg.debate?.id === debate.id
+                        ).length
+                      }
                     </td>
                     {canManageDebates && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -325,8 +394,16 @@ export default function AdminPanelPage() {
                           >
                             Edit
                           </button>
+                          {debate.status === "live" && (
+                            <button
+                              onClick={() => handleFinishDebate(debate.id)}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              Finish
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleDebateAction(debate, "delete")}
+                            onClick={() => handleDeleteDebate(debate.id)}
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -428,6 +505,90 @@ export default function AdminPanelPage() {
                         </div>
                       </td>
                     )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ContentCard>
+      )}
+
+      {activeTab === "arguments" && (
+        <ContentCard className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">All Arguments</h2>
+            <div className="flex space-x-3">
+              <PrimaryButton onClick={loadAdminData}>Refresh</PrimaryButton>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Author
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Debate
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Text
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {allArguments.map((argument) => (
+                  <tr key={argument.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <UserAvatar
+                          user={argument.author}
+                          size="small"
+                          className="mr-3"
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {argument.author?.firstName}{" "}
+                            {argument.author?.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            @{argument.author?.username || argument.author?.id}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 max-w-xs truncate">
+                        {argument.debate?.topic}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {getStatusBadge(argument.debate?.status)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-md truncate">
+                        {argument.text}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(argument.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleDeleteArgument(argument.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

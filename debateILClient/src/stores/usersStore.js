@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import axios from "axios";
 import { APP_CONFIG, API_ENDPOINTS } from "../utils/constants";
+import { registerToDebate, finishDebate } from "../services/serverApi";
 
 // API configuration
 const api = axios.create({
@@ -89,60 +90,17 @@ async function createDebate(debateData) {
 
 async function registerForDebate(debateId, userId) {
   try {
-    const currentDebate = await getDebate(debateId);
+    const response = await registerToDebate(debateId);
+    return response.debate;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}
 
-    if (!currentDebate) {
-      throw new Error("Debate not found");
-    }
-
-    if (
-      currentDebate.user1_id === userId ||
-      currentDebate.user2_id === userId
-    ) {
-      throw new Error("You are already registered for this debate");
-    }
-
-    if (currentDebate.user1_id && currentDebate.user2_id) {
-      throw new Error("This debate is already full");
-    }
-
-    const updateData = {};
-    if (!currentDebate.user1_id) {
-      updateData.user1_id = userId;
-    } else if (!currentDebate.user2_id) {
-      updateData.user2_id = userId;
-    }
-
-    // Convert userId to string if it's a number
-    if (typeof userId === "number") {
-      updateData.user1_id = updateData.user1_id?.toString();
-      updateData.user2_id = updateData.user2_id?.toString();
-    }
-
-    // Ensure userId is a string
-    if (updateData.user1_id) {
-      updateData.user1_id = updateData.user1_id.toString();
-    }
-    if (updateData.user2_id) {
-      updateData.user2_id = updateData.user2_id.toString();
-    }
-
-    const response = await api.put(
-      `${API_ENDPOINTS.DEBATES}/${debateId}`,
-      updateData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
-    );
-
-    if (response.data.success) {
-      return response.data.updatedDebate;
-    } else {
-      throw new Error(response.data.message || "Failed to register for debate");
-    }
+async function finishDebateForUser(debateId, scores = {}) {
+  try {
+    const response = await finishDebate(debateId, scores);
+    return response.debate;
   } catch (error) {
     throw normalizeError(error);
   }
@@ -173,16 +131,20 @@ class UsersStore {
     // Fetch from server
     this.loadingUsers.add(userId);
     try {
+      console.log("Fetching user data for ID:", userId);
       const userData = await getUserById(userId);
+      console.log("Received user data:", userData);
       if (userData) {
         userCache.set(userId, userData);
         return userData;
       } else {
         // User not found on server
+        console.log("User not found on server for ID:", userId);
         return null;
       }
     } catch (error) {
       // Server error
+      console.error("Error fetching user data for ID:", userId, error);
       return null;
     } finally {
       this.loadingUsers.delete(userId);
@@ -266,4 +228,5 @@ export {
   getArgumentsForDebate,
   createDebate,
   registerForDebate,
+  finishDebateForUser,
 };

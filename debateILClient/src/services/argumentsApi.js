@@ -29,11 +29,11 @@ export async function getArgumentsForDebate(debateId) {
     const { data } = await api.get(`/api/debates/${debateId}/arguments`, {
       withCredentials: true,
     });
-    
+
     if (data?.success === false) {
       return [];
     }
-    
+
     return data?.arguments ?? [];
   } catch (err) {
     if (err?.response?.status === 404) return [];
@@ -108,7 +108,7 @@ export async function updateArgument(argumentId, text) {
  */
 export async function deleteArgument(argumentId) {
   try {
-    const { data } = await api.delete(`/api/arguments/${argumentId}`, {
+    const { data } = await api.delete(`/api/debates/arguments/${argumentId}`, {
       withCredentials: true,
     });
 
@@ -122,6 +122,29 @@ export async function deleteArgument(argumentId) {
       action: "deleteArgument",
       component: "ArgumentsAPI",
       data: { argumentId },
+    });
+  }
+}
+
+/**
+ * Get all arguments (for admin panel)
+ * @returns {Promise<Array>} Array of all arguments
+ */
+export async function getAllArguments() {
+  try {
+    const { data } = await api.get(`/api/debates/arguments`, {
+      withCredentials: true,
+    });
+
+    if (data?.success === false) {
+      return [];
+    }
+
+    return data?.arguments ?? [];
+  } catch (error) {
+    throw normalizeError(error, {
+      action: "getAllArguments",
+      component: "ArgumentsAPI",
     });
   }
 }
