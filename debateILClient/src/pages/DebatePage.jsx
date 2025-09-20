@@ -365,29 +365,29 @@ export default function DebatePage() {
           className="w-full max-w-4xl mx-auto flex items-center justify-center px-2 pb-2 mt-2"
           style={{ pointerEvents: "auto" }}
         >
-        <input
-          type="text"
-          value={newArgument}
-          onChange={(e) => setNewArgument(e.target.value)}
-          placeholder="Type your argument..."
-          className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
-            currentUser?.id === user1?.id
-              ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
-              : "border-red-700 focus:ring-2 focus:ring-red-400"
-          }`}
-          style={{ maxWidth: 600 }}
-        />
-        <button
-          type="submit"
-          disabled={isSubmittingArgument}
-          className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
-            currentUser?.id === user1?.id
-              ? "bg-blue-700 text-white hover:bg-blue-900"
-              : "bg-red-700 text-white hover:bg-red-900"
-          } transition disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          {isSubmittingArgument ? "Sending..." : "Send"}
-        </button>
+          <input
+            type="text"
+            value={newArgument}
+            onChange={(e) => setNewArgument(e.target.value)}
+            placeholder="Type your argument..."
+            className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
+              currentUser?.id === user1?.id
+                ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
+                : "border-red-700 focus:ring-2 focus:ring-red-400"
+            }`}
+            style={{ maxWidth: 600 }}
+          />
+          <button
+            type="submit"
+            disabled={isSubmittingArgument}
+            className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
+              currentUser?.id === user1?.id
+                ? "bg-blue-700 text-white hover:bg-blue-900"
+                : "bg-red-700 text-white hover:bg-red-900"
+            } transition disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isSubmittingArgument ? "Sending..." : "Send"}
+          </button>
         </form>
       )}
 
