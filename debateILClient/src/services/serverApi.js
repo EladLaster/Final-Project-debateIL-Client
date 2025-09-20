@@ -134,4 +134,19 @@ export async function getAllUsers() {
   }
 }
 
+export async function getUserById(userId) {
+  try {
+    const { data } = await api.get(`/api/users/users/${userId}`, {
+      withCredentials: true,
+    });
+    return data?.user ?? null;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "getUserById",
+      component: "UsersAPI",
+      data: { userId },
+    });
+  }
+}
+
 export { api };

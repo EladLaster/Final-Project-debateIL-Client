@@ -1,18 +1,22 @@
-// Simple avatar system - just get random avatar and cache it
+// Enhanced avatar system with gender support
 
-export async function getRandomAvatarUrl() {
+export async function getRandomAvatarUrl(gender = "male") {
   try {
-    const response = await fetch("https://randomuser.me/api/");
+    // Use gender parameter to get appropriate avatar
+    const genderParam = gender === "female" ? "female" : "male";
+    const response = await fetch(`https://randomuser.me/api/?gender=${genderParam}`);
     const data = await response.json();
     return data.results[0].picture.medium;
   } catch {
-    // fallback image if API fails
-    return "https://randomuser.me/api/portraits/lego/1.jpg";
+    // fallback image if API fails - use gender-appropriate fallback
+    const fallbackId = Math.floor(Math.random() * 100) + 1;
+    const fallbackGender = gender === "female" ? "women" : "men";
+    return `https://randomuser.me/api/portraits/${fallbackGender}/${fallbackId}.jpg`;
   }
 }
 
 // Get avatar for user - cache it in localStorage
-export async function getAvatarForUser(userId) {
+export async function getAvatarForUser(userId, gender = "male") {
   const cacheKey = `avatar_${userId}`;
   const cachedAvatar = localStorage.getItem(cacheKey);
 
@@ -21,9 +25,14 @@ export async function getAvatarForUser(userId) {
   }
 
   // Get new avatar and cache it
-  const avatarUrl = await getRandomAvatarUrl();
+  const avatarUrl = await getRandomAvatarUrl(gender);
   localStorage.setItem(cacheKey, avatarUrl);
   return avatarUrl;
+}
+
+// Generate avatar for new user registration
+export async function generateAvatarForRegistration(gender = "male") {
+  return await getRandomAvatarUrl(gender);
 }
 
 // Simple fallback avatar with initials

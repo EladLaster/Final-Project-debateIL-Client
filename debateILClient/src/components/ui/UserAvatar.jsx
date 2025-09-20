@@ -11,10 +11,14 @@ export default function UserAvatar({
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    if (user?.id) {
-      getAvatarForUser(user.id).then(setAvatarUrl);
+    if (user?.avatarUrl) {
+      // Use the avatar URL from the user data (from server)
+      setAvatarUrl(user.avatarUrl);
+    } else if (user?.id) {
+      // Fallback to generating avatar if no avatarUrl
+      getAvatarForUser(user.id, user.gender).then(setAvatarUrl);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.avatarUrl, user?.gender]);
 
   if (!user) {
     return (
