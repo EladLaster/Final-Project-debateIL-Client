@@ -3,32 +3,16 @@ import ContentCard from "../../ui/ContentCard";
 import PrimaryButton from "../../ui/PrimaryButton";
 import StatusBadge from "../../ui/StatusBadge";
 import UserAvatar from "../../ui/UserAvatar";
+import { formatDate } from "../../../utils/formatters";
 
 export default function UserDebateHistory({ userId, debates = [] }) {
   const navigate = useNavigate();
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      live: { text: "🔴 Live", variant: "live" },
-      scheduled: { text: "⏰ Scheduled", variant: "scheduled" },
-      finished: { text: "✅ Finished", variant: "finished" },
-    };
-    return statusConfig[status] || { text: status, variant: "default" };
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
   };
 
   const getResultBadge = (debate, userId) => {
@@ -36,7 +20,7 @@ export default function UserDebateHistory({ userId, debates = [] }) {
 
     if (debate.winner_id === userId) {
       return <span className="text-green-600 font-semibold">👑 Won</span>;
-    } else if (debate.user1?.id === userId || debate.user2?.id === userId) {
+    } else if (debate.user1_id === userId || debate.user2_id === userId) {
       return <span className="text-red-600 font-semibold">❌ Lost</span>;
     }
     return <span className="text-gray-600">-</span>;
@@ -67,8 +51,12 @@ export default function UserDebateHistory({ userId, debates = [] }) {
       <div className="space-y-4">
         {debates.map((debate) => {
           const opponent =
-            debate.user1?.id === userId ? debate.user2 : debate.user1;
-          const statusConfig = getStatusBadge(debate.status);
+            debate.user1_id === userId ? debate.user2 : debate.user1;
+          const statusConfig = {
+            live: { text: "🔴 Live", variant: "live" },
+            scheduled: { text: "⏰ Scheduled", variant: "scheduled" },
+            finished: { text: "✅ Finished", variant: "finished" },
+          }[debate.status] || { text: debate.status, variant: "default" };
 
           return (
             <div

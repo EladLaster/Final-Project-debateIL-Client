@@ -1,6 +1,23 @@
 import { useState, useEffect } from "react";
 import { getAvatarForUser, getInitialsAvatar } from "../../api/randomAvatar";
 
+const getSizeClasses = (size) => {
+  switch (size) {
+    case "small":
+      return "w-6 h-6 text-xs";
+    case "medium":
+      return "w-8 h-8 text-sm";
+    case "large":
+      return "w-12 h-12 text-base";
+    case "xl":
+      return "w-16 h-16 text-lg";
+    case "2xl":
+      return "w-24 h-24 text-xl";
+    default:
+      return "w-8 h-8 text-sm";
+  }
+};
+
 export default function UserAvatar({
   user,
   size = "medium",
@@ -31,23 +48,6 @@ export default function UserAvatar({
       </div>
     );
   }
-
-  const getSizeClasses = (size) => {
-    switch (size) {
-      case "small":
-        return "w-6 h-6 text-xs";
-      case "medium":
-        return "w-8 h-8 text-sm";
-      case "large":
-        return "w-12 h-12 text-base";
-      case "xl":
-        return "w-16 h-16 text-lg";
-      case "2xl":
-        return "w-24 h-24 text-xl";
-      default:
-        return "w-8 h-8 text-sm";
-    }
-  };
 
   const getBorderClasses = () => {
     if (!showBorder) return "";

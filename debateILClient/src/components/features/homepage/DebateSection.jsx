@@ -3,7 +3,8 @@ import { useState } from "react";
 import PrimaryButton from "../../ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
 import { authStore } from "../../../stores/authStore";
-import { registerForDebate } from "../../../stores/usersStore";
+import { registerForDebate, usersStore } from "../../../stores/usersStore";
+import { formatDate, formatDateTime } from "../../../utils/formatters";
 
 // Configuration for different debate types
 const DEBATE_CONFIGS = {
@@ -74,15 +75,6 @@ const DEBATE_CONFIGS = {
     buttonText: "⚔️ Join Battle!",
     buttonVariant: "primary",
     getMiddleContent: (debate) => {
-      const formatDateTime = (dateString) => {
-        return new Date(dateString).toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      };
-
       return (
         <>
           <div className="flex items-center justify-center space-x-2 text-blue-600 text-sm">
@@ -150,35 +142,33 @@ const DEBATE_CONFIGS = {
     buttonText: "🎬 Watch Replay",
     buttonVariant: "secondary",
     getMiddleContent: (debate) => {
-      const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-      };
-
       const getWinner = (debate) => {
         // Determine winner based on actual scores
         if (debate.score_user1 > debate.score_user2) {
+          const userData = usersStore.getUserForComponent(debate.user1_id);
           return {
             id: debate.user1_id,
-            firstName: `User ${debate.user1_id?.slice(0, 8)}`,
-            score: debate.score_user1
+            firstName:
+              userData?.firstName || `User ${debate.user1_id?.slice(0, 8)}`,
+            score: debate.score_user1,
           };
         }
         if (debate.score_user2 > debate.score_user1) {
+          const userData = usersStore.getUserForComponent(debate.user2_id);
           return {
             id: debate.user2_id,
-            firstName: `User ${debate.user2_id?.slice(0, 8)}`,
-            score: debate.score_user2
+            firstName:
+              userData?.firstName || `User ${debate.user2_id?.slice(0, 8)}`,
+            score: debate.score_user2,
           };
         }
         return null;
       };
 
       const winner = getWinner(debate);
-      const finalScore = `${debate.score_user1 || 0}-${debate.score_user2 || 0}`;
+      const finalScore = `${debate.score_user1 || 0}-${
+        debate.score_user2 || 0
+      }`;
 
       return (
         <>
@@ -186,8 +176,12 @@ const DEBATE_CONFIGS = {
             <div className="flex items-center justify-center space-x-3 text-yellow-600 text-lg bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-3">
               <span className="text-2xl">👑</span>
               <div className="text-center">
-                <div className="font-bold text-xl">Winner: {winner.firstName}</div>
-                <div className="text-sm text-yellow-700">Score: {winner.score}</div>
+                <div className="font-bold text-xl">
+                  Winner: {winner.firstName}
+                </div>
+                <div className="text-sm text-yellow-700">
+                  Score: {winner.score}
+                </div>
               </div>
               <span className="text-2xl">🏆</span>
             </div>
@@ -222,15 +216,19 @@ const DEBATE_CONFIGS = {
     getWinner: (debate) => {
       // Determine winner based on actual scores
       if (debate.score_user1 > debate.score_user2) {
+        const userData = usersStore.getUserForComponent(debate.user1_id);
         return {
           id: debate.user1_id,
-          firstName: `User ${debate.user1_id?.slice(0, 8)}`,
+          firstName:
+            userData?.firstName || `User ${debate.user1_id?.slice(0, 8)}`,
         };
       }
       if (debate.score_user2 > debate.score_user1) {
+        const userData = usersStore.getUserForComponent(debate.user2_id);
         return {
           id: debate.user2_id,
-          firstName: `User ${debate.user2_id?.slice(0, 8)}`,
+          firstName:
+            userData?.firstName || `User ${debate.user2_id?.slice(0, 8)}`,
         };
       }
       return null;

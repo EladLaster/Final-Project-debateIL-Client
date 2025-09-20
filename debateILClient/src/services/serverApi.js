@@ -197,6 +197,26 @@ export async function getUserById(userId) {
   }
 }
 
+export async function updateUserProfile(profileData) {
+  try {
+    const { data } = await api.put(`/api/users/profile`, profileData, {
+      withCredentials: true,
+    });
+    
+    if (data?.success) {
+      return data.user;
+    } else {
+      throw new Error(data?.message || "Failed to update profile");
+    }
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "updateUserProfile",
+      component: "UsersAPI",
+      data: { profileData },
+    });
+  }
+}
+
 export async function deleteDebate(debateId) {
   try {
     const { data } = await api.delete(`/api/debates/${debateId}`, {

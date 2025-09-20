@@ -5,6 +5,7 @@ import { authStore } from "../stores/authStore";
 import { getAllUsers, deleteDebate } from "../services/serverApi";
 import { getAllArguments, deleteArgument } from "../services/argumentsApi";
 import { getAdminLevel, hasAdminPermission } from "../utils/adminAuth";
+import { formatDate, getStatusBadgeClass } from "../utils/formatters";
 import ContentCard from "../components/ui/ContentCard";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import UserAvatar from "../components/ui/UserAvatar";
@@ -80,34 +81,6 @@ export default function AdminPanelPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("he-IL", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getStatusBadge = (status) => {
-    const colors = {
-      live: "bg-green-100 text-green-800",
-      scheduled: "bg-blue-100 text-blue-800",
-      finished: "bg-gray-100 text-gray-800",
-    };
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          colors[status] || "bg-gray-100 text-gray-800"
-        }`}
-      >
-        {status}
-      </span>
-    );
   };
 
   const handleDebateAction = (debate, action) => {
@@ -306,7 +279,9 @@ export default function AdminPanelPage() {
                     <h3 className="font-medium">{debate.topic}</h3>
                     <p className="text-sm text-gray-600">
                       {formatDate(debate.start_time)} •{" "}
-                      {getStatusBadge(debate.status)}
+                      <span className={getStatusBadgeClass(debate.status)}>
+                        {debate.status}
+                      </span>
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
@@ -367,7 +342,9 @@ export default function AdminPanelPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(debate.status)}
+                      <span className={getStatusBadgeClass(debate.status)}>
+                        {debate.status}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(debate.start_time)}
@@ -568,7 +545,13 @@ export default function AdminPanelPage() {
                         {argument.debate?.topic}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {getStatusBadge(argument.debate?.status)}
+                        <span
+                          className={getStatusBadgeClass(
+                            argument.debate?.status
+                          )}
+                        >
+                          {argument.debate?.status}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -678,7 +661,9 @@ export default function AdminPanelPage() {
                     </p>
                     <p className="text-sm text-gray-500">
                       {formatDate(debate.start_time)} •{" "}
-                      {getStatusBadge(debate.status)}
+                      <span className={getStatusBadgeClass(debate.status)}>
+                        {debate.status}
+                      </span>
                     </p>
                   </div>
                   <div className="flex-shrink-0 text-sm text-gray-500">

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getDebate, getArgumentsForDebate } from "../stores/usersStore";
 import { usersStore } from "../stores/usersStore";
 import UserAvatar from "../components/ui/UserAvatar";
+import { formatDateTime } from "../utils/formatters";
 
 export default function ReplayPage() {
   const { id } = useParams();
@@ -110,13 +111,13 @@ export default function ReplayPage() {
             <div>
               <span className="font-medium text-gray-700">📅 Start Time:</span>
               <div className="text-gray-600">
-                {new Date(debate.start_time).toLocaleString()}
+                {formatDateTime(debate.start_time)}
               </div>
             </div>
             <div>
               <span className="font-medium text-gray-700">🏁 End Time:</span>
               <div className="text-gray-600">
-                {new Date(debate.end_time).toLocaleString()}
+                {formatDateTime(debate.end_time)}
               </div>
             </div>
           </div>
@@ -179,10 +180,18 @@ export default function ReplayPage() {
                       : "Unknown User"}
                     {arg.createdAt && (
                       <span className="ml-2">
-                        {new Date(arg.createdAt).toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {(() => {
+                          const date = new Date(arg.createdAt);
+                          const hours = date
+                            .getHours()
+                            .toString()
+                            .padStart(2, "0");
+                          const minutes = date
+                            .getMinutes()
+                            .toString()
+                            .padStart(2, "0");
+                          return `${hours}:${minutes}`;
+                        })()}
                       </span>
                     )}
                   </div>
