@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getDebates } from "../stores/usersStore";
 import { usersStore } from "../stores/usersStore";
 import { authStore } from "../stores/authStore";
+import { getAllUsers } from "../services/serverApi";
 import { getAdminLevel, hasAdminPermission } from "../utils/adminAuth";
 import ContentCard from "../components/ui/ContentCard";
 import PrimaryButton from "../components/ui/PrimaryButton";
@@ -57,12 +58,12 @@ export default function AdminPanelPage() {
         if (debate.user2_id) userIds.add(debate.user2_id);
       });
 
-      // Load user data
-      const usersData = await usersStore.loadUsersForDebates(debatesData || []);
-      setUsers(usersData || []);
+      // Load all users from server
+      const allUsers = await getAllUsers();
+      setUsers(allUsers || []);
 
       setStats({
-        totalUsers: userIds.size,
+        totalUsers: allUsers?.length || 0,
         totalDebates,
         liveDebates,
         finishedDebates,

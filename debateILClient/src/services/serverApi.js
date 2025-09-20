@@ -119,4 +119,19 @@ export async function createDebate(debateData) {
   }
 }
 
+// Users API
+export async function getAllUsers() {
+  try {
+    const { data } = await api.get("/api/users/users", {
+      withCredentials: true,
+    });
+    return data?.users ?? [];
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "getAllUsers",
+      component: "UsersAPI",
+    });
+  }
+}
+
 export { api };
