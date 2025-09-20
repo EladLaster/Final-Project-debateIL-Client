@@ -138,7 +138,6 @@ export default function DebatePage() {
         setDebateArguments((prev) => [...prev, newArgumentData]);
         setNewArgument("");
       } catch (error) {
-        console.error("Error creating argument:", error);
         alert(error.message || "Failed to add argument");
       } finally {
         setIsSubmittingArgument(false);
@@ -164,7 +163,6 @@ export default function DebatePage() {
         });
         setHasVoted(true);
       } catch (error) {
-        console.error("Error voting:", error);
         alert(error.message || "Failed to vote");
       } finally {
         setIsVoting(false);

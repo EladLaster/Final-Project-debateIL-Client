@@ -87,7 +87,6 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
       onSuccess?.(newDebate);
       onClose();
     } catch (error) {
-      console.error("Error creating debate:", error);
       setErrors({ general: error.message || "Failed to create debate" });
     } finally {
       setIsLoading(false);

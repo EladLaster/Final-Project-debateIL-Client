@@ -70,14 +70,12 @@ export default function AdminPanelPage() {
     setSelectedDebate(debate);
     setShowDebateModal(true);
     // Here you would implement the actual action (edit, delete, etc.)
-    console.log(`Admin action: ${action} on debate ${debate.id}`);
   };
 
   const handleUserAction = (user, action) => {
     setSelectedUser(user);
     setShowUserModal(true);
     // Here you would implement the actual action (edit, delete, etc.)
-    console.log(`Admin action: ${action} on user ${user.id}`);
   };
 
   const handleDelete = async (id, type, deleteFn, setStateFn) => {

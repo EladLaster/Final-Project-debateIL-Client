@@ -131,20 +131,16 @@ class UsersStore {
     // Fetch from server
     this.loadingUsers.add(userId);
     try {
-      console.log("Fetching user data for ID:", userId);
       const userData = await getUserById(userId);
-      console.log("Received user data:", userData);
       if (userData) {
         userCache.set(userId, userData);
         return userData;
       } else {
         // User not found on server
-        console.log("User not found on server for ID:", userId);
         return null;
       }
     } catch (error) {
-      // Server error
-      console.error("Error fetching user data for ID:", userId, error);
+      // Server error - user not found or server issue
       return null;
     } finally {
       this.loadingUsers.delete(userId);

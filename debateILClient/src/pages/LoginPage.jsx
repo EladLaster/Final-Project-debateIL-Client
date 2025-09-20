@@ -14,7 +14,7 @@ export default function LoginPage() {
       await authStore.handleLogin(email, password);
       navigate("/");
     } catch (error) {
-      console.error("Login failed:", error);
+      // Error handled by authStore
     }
   };
 

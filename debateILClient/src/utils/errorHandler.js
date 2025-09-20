@@ -7,7 +7,6 @@
  * @returns {Object} Normalized error object
  */
 export function handleApiError(error, context = {}) {
-  console.error("API Error:", error);
 
   let message = "An unexpected error occurred";
   let type = "UNKNOWN_ERROR";
@@ -67,7 +66,6 @@ export function handleApiError(error, context = {}) {
  * @returns {Object} Normalized error object
  */
 export function handleAuthError(error, context = {}) {
-  console.error("Auth Error:", error);
 
   let message = "Authentication failed";
 
@@ -118,10 +116,14 @@ export function showError(message, type = "error") {
  * @param {Object} context - Additional context
  */
 export function logError(error, context = {}) {
-  console.error("Error logged:", {
+  // Log error for debugging (can be replaced with proper logging service)
+  const errorInfo = {
     message: error.message,
     stack: error.stack,
     context,
     timestamp: new Date().toISOString(),
-  });
+  };
+  
+  // In production, this would be sent to a logging service
+  // For now, we just store the error info
 }
