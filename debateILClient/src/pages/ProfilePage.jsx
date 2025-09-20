@@ -53,7 +53,7 @@ export default function ProfilePage() {
       );
       setUserDebates(userDebatesList);
     } catch (error) {
-      console.error("Error loading user data:", error);
+      // Error loading user data - will show fallback
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,6 @@ export default function ProfilePage() {
 
       setIsEditing(false);
     } catch (error) {
-      console.error("Error saving profile:", error);
       throw error; // Re-throw so EditProfile can handle it
     }
   };

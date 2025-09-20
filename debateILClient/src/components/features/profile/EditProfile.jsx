@@ -61,7 +61,7 @@ export default function EditProfile({ user, onSave, onCancel }) {
     try {
       await onSave(formData);
     } catch (error) {
-      console.error("Error saving profile:", error);
+      // Error handled by parent component
     } finally {
       setIsLoading(false);
     }

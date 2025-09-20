@@ -85,7 +85,6 @@ export default function RegisterPage() {
       await authStore.handleRegister(userData);
       navigate("/");
     } catch (error) {
-      console.error("Registration error:", error);
       setErrors({ general: error.message || "Registration failed" });
     } finally {
       setIsLoading(false);

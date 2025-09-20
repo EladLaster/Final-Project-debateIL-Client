@@ -241,7 +241,6 @@ export default function DebateSection({ debates, type, onRefresh }) {
   const config = DEBATE_CONFIGS[type];
 
   if (!config) {
-    console.error(`Unknown debate type: ${type}`);
     return null;
   }
 
