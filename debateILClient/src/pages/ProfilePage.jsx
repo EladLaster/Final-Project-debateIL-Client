@@ -63,7 +63,7 @@ export default function ProfilePage() {
     try {
       // Update user data on server
       const updatedUser = await updateUserProfile(formData);
-      
+
       // Update local state
       setUser(updatedUser);
 
