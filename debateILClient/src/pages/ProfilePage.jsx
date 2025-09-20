@@ -6,7 +6,7 @@ import UserDebateHistory from "../components/features/profile/UserDebateHistory"
 import EditProfile from "../components/features/profile/EditProfile";
 import { authStore } from "../stores/authStore";
 import { usersStore } from "../stores/usersStore";
-import { getDebates } from "../services/serverApi";
+import { getDebates, updateUserProfile } from "../services/serverApi";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -25,14 +25,14 @@ export default function ProfilePage() {
     try {
       setLoading(true);
 
-      // For now, use the current user or create a mock user
-      if (isOwnProfile && authStore.activeUser) {
-        setUser(authStore.activeUser);
+      // Always load fresh user data from server
+      const userData = await usersStore.getUser(id);
+      if (userData) {
+        setUser(userData);
       } else {
-        // Load user from usersStore
-        const userData = await usersStore.getUser(id);
-        if (userData) {
-          setUser(userData);
+        // If server data not available, use authStore for own profile
+        if (isOwnProfile && authStore.activeUser) {
+          setUser(authStore.activeUser);
         } else {
           // Create a fallback user if not found
           setUser({
@@ -49,9 +49,7 @@ export default function ProfilePage() {
       // Load user's debates
       const allDebates = await getDebates();
       const userDebatesList = allDebates.filter(
-        (debate) =>
-          debate.user1?.id?.toString() === id ||
-          debate.user2?.id?.toString() === id
+        (debate) => debate.user1_id === id || debate.user2_id === id
       );
       setUserDebates(userDebatesList);
     } catch (error) {
@@ -63,8 +61,10 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async (formData) => {
     try {
-      // Update user data
-      const updatedUser = { ...user, ...formData };
+      // Update user data on server
+      const updatedUser = await updateUserProfile(formData);
+
+      // Update local state
       setUser(updatedUser);
 
       // Update authStore if it's the current user
@@ -76,6 +76,7 @@ export default function ProfilePage() {
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving profile:", error);
+      throw error; // Re-throw so EditProfile can handle it
     }
   };
 
@@ -127,7 +128,11 @@ export default function ProfilePage() {
         />
       ) : (
         <div className="space-y-6">
-          <ProfileCard user={user} isOwnProfile={isOwnProfile} />
+          <ProfileCard
+            user={user}
+            isOwnProfile={isOwnProfile}
+            onEditProfile={() => setIsEditing(true)}
+          />
           <UserStats user={user} debates={userDebates} />
           <UserDebateHistory userId={id} debates={userDebates} />
         </div>

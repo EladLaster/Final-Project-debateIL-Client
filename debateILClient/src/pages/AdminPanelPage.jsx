@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { getDebates } from "../stores/usersStore";
+import { getDebates, finishDebateForUser } from "../stores/usersStore";
 import { usersStore } from "../stores/usersStore";
 import { authStore } from "../stores/authStore";
-import { getAllUsers } from "../services/serverApi";
+import { getAllUsers, deleteDebate } from "../services/serverApi";
+import { getAllArguments, deleteArgument } from "../services/argumentsApi";
 import { getAdminLevel, hasAdminPermission } from "../utils/adminAuth";
+import { formatDate, getStatusBadgeClass } from "../utils/formatters";
 import ContentCard from "../components/ui/ContentCard";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import UserAvatar from "../components/ui/UserAvatar";
@@ -11,9 +13,10 @@ import UserAvatar from "../components/ui/UserAvatar";
 export default function AdminPanelPage() {
   const [debates, setDebates] = useState([]);
   const [users, setUsers] = useState([]);
+  const [allArguments, setAllArguments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("debates");
   const [selectedDebate, setSelectedDebate] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDebateModal, setShowDebateModal] = useState(false);
@@ -22,8 +25,6 @@ export default function AdminPanelPage() {
     totalUsers: 0,
     totalDebates: 0,
     liveDebates: 0,
-    finishedDebates: 0,
-    scheduledDebates: 0,
   });
 
   const currentUser = authStore.activeUser;
@@ -42,66 +43,27 @@ export default function AdminPanelPage() {
       const debatesData = await getDebates();
       setDebates(debatesData || []);
 
-      // Calculate stats
-      const totalDebates = debatesData?.length || 0;
-      const liveDebates =
-        debatesData?.filter((d) => d.status === "live").length || 0;
-      const finishedDebates =
-        debatesData?.filter((d) => d.status === "finished").length || 0;
-      const scheduledDebates =
-        debatesData?.filter((d) => d.status === "scheduled").length || 0;
+      // Load all users and arguments
+      const [allUsers, argumentsData] = await Promise.all([
+        getAllUsers(),
+        getAllArguments(),
+      ]);
 
-      // Get unique user IDs from debates
-      const userIds = new Set();
-      debatesData?.forEach((debate) => {
-        if (debate.user1_id) userIds.add(debate.user1_id);
-        if (debate.user2_id) userIds.add(debate.user2_id);
-      });
-
-      // Load all users from server
-      const allUsers = await getAllUsers();
       setUsers(allUsers || []);
+      setAllArguments(argumentsData || []);
 
+      // Calculate stats
       setStats({
         totalUsers: allUsers?.length || 0,
-        totalDebates,
-        liveDebates,
-        finishedDebates,
-        scheduledDebates,
+        totalDebates: debatesData?.length || 0,
+        liveDebates:
+          debatesData?.filter((d) => d.status === "live").length || 0,
       });
     } catch (err) {
       setError(err.message || "Failed to load admin data");
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("he-IL", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getStatusBadge = (status) => {
-    const colors = {
-      live: "bg-green-100 text-green-800",
-      scheduled: "bg-blue-100 text-blue-800",
-      finished: "bg-gray-100 text-gray-800",
-    };
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          colors[status] || "bg-gray-100 text-gray-800"
-        }`}
-      >
-        {status}
-      </span>
-    );
   };
 
   const handleDebateAction = (debate, action) => {
@@ -116,6 +78,39 @@ export default function AdminPanelPage() {
     setShowUserModal(true);
     // Here you would implement the actual action (edit, delete, etc.)
     console.log(`Admin action: ${action} on user ${user.id}`);
+  };
+
+  const handleDelete = async (id, type, deleteFn, setStateFn) => {
+    if (!window.confirm(`Are you sure you want to delete this ${type}?`))
+      return;
+
+    try {
+      await deleteFn(id);
+      setStateFn((prev) => prev.filter((item) => item.id !== id));
+
+      // If deleting a debate, also remove its arguments
+      if (type === "debate") {
+        setAllArguments((prev) => prev.filter((arg) => arg.debate?.id !== id));
+      }
+
+      alert(`${type} deleted successfully!`);
+    } catch (error) {
+      alert(`Failed to delete ${type}: ${error.message}`);
+    }
+  };
+
+  const handleFinishDebate = async (debateId) => {
+    if (!window.confirm("Are you sure you want to finish this debate?")) return;
+
+    try {
+      const updatedDebate = await finishDebateForUser(debateId);
+      setDebates((prev) =>
+        prev.map((debate) => (debate.id === debateId ? updatedDebate : debate))
+      );
+      alert("Debate finished successfully!");
+    } catch (error) {
+      alert(`Failed to finish debate: ${error.message}`);
+    }
   };
 
   const canManageDebates = hasAdminPermission(currentUser, "edit_debates");
@@ -160,13 +155,13 @@ export default function AdminPanelPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <ContentCard className="p-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">
               {stats.totalUsers}
             </div>
-            <div className="text-sm text-gray-600">Total Users</div>
+            <div className="text-sm text-gray-600">Users</div>
           </div>
         </ContentCard>
         <ContentCard className="p-6">
@@ -174,7 +169,7 @@ export default function AdminPanelPage() {
             <div className="text-3xl font-bold text-green-600">
               {stats.totalDebates}
             </div>
-            <div className="text-sm text-gray-600">Total Debates</div>
+            <div className="text-sm text-gray-600">Debates</div>
           </div>
         </ContentCard>
         <ContentCard className="p-6">
@@ -182,36 +177,119 @@ export default function AdminPanelPage() {
             <div className="text-3xl font-bold text-red-600">
               {stats.liveDebates}
             </div>
-            <div className="text-sm text-gray-600">Live Debates</div>
-          </div>
-        </ContentCard>
-        <ContentCard className="p-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">
-              {stats.scheduledDebates}
-            </div>
-            <div className="text-sm text-gray-600">Scheduled</div>
-          </div>
-        </ContentCard>
-        <ContentCard className="p-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-gray-600">
-              {stats.finishedDebates}
-            </div>
-            <div className="text-sm text-gray-600">Finished</div>
+            <div className="text-sm text-gray-600">Live Now</div>
           </div>
         </ContentCard>
       </div>
+
+      {/* Platform Analytics */}
+      <ContentCard className="p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Platform Analytics</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h3 className="text-lg font-medium mb-3">Debate Activity</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total Debates:</span>
+                <span className="font-semibold">{stats.totalDebates}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Live Debates:</span>
+                <span className="font-semibold text-green-600">
+                  {stats.liveDebates}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Finished Debates:</span>
+                <span className="font-semibold text-gray-600">
+                  {debates.filter((d) => d.status === "finished").length}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-3">User Activity</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total Users:</span>
+                <span className="font-semibold">{stats.totalUsers}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Active Participants:</span>
+                <span className="font-semibold text-blue-600">
+                  {
+                    new Set(
+                      debates
+                        .flatMap((d) => [d.user1_id, d.user2_id])
+                        .filter(Boolean)
+                    ).size
+                  }
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Avg Debates per User:</span>
+                <span className="font-semibold">
+                  {stats.totalUsers > 0
+                    ? (stats.totalDebates / stats.totalUsers).toFixed(1)
+                    : 0}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-3">Content Stats</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total Arguments:</span>
+                <span className="font-semibold">{allArguments.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Avg Arguments per Debate:</span>
+                <span className="font-semibold">
+                  {stats.totalDebates > 0
+                    ? (allArguments.length / stats.totalDebates).toFixed(1)
+                    : 0}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Most Active User:</span>
+                <span className="font-semibold text-purple-600">
+                  {(() => {
+                    const userCounts = {};
+                    allArguments.forEach((arg) => {
+                      if (arg.author?.id) {
+                        userCounts[arg.author.id] =
+                          (userCounts[arg.author.id] || 0) + 1;
+                      }
+                    });
+                    const mostActive = Object.entries(userCounts).sort(
+                      (a, b) => b[1] - a[1]
+                    )[0];
+                    ("Most Active User: John Doe (4 args)");
+                    if (mostActive) {
+                      const user = users.find((u) => u.id === mostActive[0]);
+                      const userName = user
+                        ? `${user.firstName} ${user.lastName}`
+                        : `User ${mostActive[0].slice(0, 8)}`;
+                      return `${userName} (${mostActive[1]} args)`;
+                    }
+                    return "N/A";
+                  })()}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ContentCard>
 
       {/* Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             {[
-              { id: "overview", label: "Overview" },
               { id: "debates", label: "Debates" },
+              { id: "arguments", label: "Arguments" },
               { id: "users", label: "Users" },
-              { id: "analytics", label: "Analytics" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -230,35 +308,8 @@ export default function AdminPanelPage() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "overview" && (
-        <div className="space-y-6">
-          <ContentCard className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              {debates.slice(0, 5).map((debate) => (
-                <div
-                  key={debate.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <h3 className="font-medium">{debate.topic}</h3>
-                    <p className="text-sm text-gray-600">
-                      {formatDate(debate.start_time)} •{" "}
-                      {getStatusBadge(debate.status)}
-                    </p>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {debate.participants_count || 0} participants
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ContentCard>
-        </div>
-      )}
-
       {activeTab === "debates" && (
-        <ContentCard className="p-6">
+        <ContentCard className="p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">All Debates</h2>
             <div className="flex space-x-3">
@@ -281,13 +332,10 @@ export default function AdminPanelPage() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Start Time
+                    Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Participants
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Messages
+                    Users
                   </th>
                   {canManageDebates && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -305,16 +353,19 @@ export default function AdminPanelPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(debate.status)}
+                      <span className={getStatusBadgeClass(debate.status)}>
+                        {debate.status}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(debate.start_time)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {debate.participants_count || 0}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {debate.messages_count || 0}
+                      {
+                        [debate.user1_id, debate.user2_id].filter(Boolean)
+                          .length
+                      }
+                      /2
                     </td>
                     {canManageDebates && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -325,8 +376,23 @@ export default function AdminPanelPage() {
                           >
                             Edit
                           </button>
+                          {debate.status === "live" && (
+                            <button
+                              onClick={() => handleFinishDebate(debate.id)}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              Finish
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleDebateAction(debate, "delete")}
+                            onClick={() =>
+                              handleDelete(
+                                debate.id,
+                                "debate",
+                                deleteDebate,
+                                setDebates
+                              )
+                            }
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -342,8 +408,95 @@ export default function AdminPanelPage() {
         </ContentCard>
       )}
 
+      {activeTab === "arguments" && (
+        <ContentCard className="p-6 mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">All Arguments</h2>
+            <PrimaryButton onClick={loadAdminData}>Refresh</PrimaryButton>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Author
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Debate
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {allArguments.map((argument) => (
+                  <tr key={argument.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <UserAvatar
+                          user={argument.author}
+                          size="small"
+                          className="mr-3"
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {argument.author?.firstName}{" "}
+                            {argument.author?.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            @{argument.author?.username || argument.author?.id}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 max-w-xs truncate">
+                        {argument.debate?.topic}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        <span
+                          className={getStatusBadgeClass(
+                            argument.debate?.status
+                          )}
+                        >
+                          {argument.debate?.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(argument.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() =>
+                            handleDelete(
+                              argument.id,
+                              "argument",
+                              deleteArgument,
+                              setAllArguments
+                            )
+                          }
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ContentCard>
+      )}
+
       {activeTab === "users" && (
-        <ContentCard className="p-6">
+        <ContentCard className="p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Active Users</h2>
             <div className="flex space-x-3">
@@ -363,13 +516,7 @@ export default function AdminPanelPage() {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Debates
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
                   </th>
                   {canManageUsers && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -395,20 +542,12 @@ export default function AdminPanelPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.email || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {
                         debates.filter(
                           (d) =>
                             d.user1_id === user.id || d.user2_id === user.id
                         ).length
                       }
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Active
-                      </span>
                     </td>
                     {canManageUsers && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -419,12 +558,6 @@ export default function AdminPanelPage() {
                           >
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleUserAction(user, "suspend")}
-                            className="text-yellow-600 hover:text-yellow-900"
-                          >
-                            Suspend
-                          </button>
                         </div>
                       </td>
                     )}
@@ -434,100 +567,6 @@ export default function AdminPanelPage() {
             </table>
           </div>
         </ContentCard>
-      )}
-
-      {activeTab === "analytics" && (
-        <div className="space-y-6">
-          <ContentCard className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Platform Analytics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3">Debate Activity</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Total Debates:</span>
-                    <span className="font-semibold">{stats.totalDebates}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Live Debates:</span>
-                    <span className="font-semibold text-green-600">
-                      {stats.liveDebates}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Scheduled Debates:</span>
-                    <span className="font-semibold text-blue-600">
-                      {stats.scheduledDebates}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Finished Debates:</span>
-                    <span className="font-semibold text-gray-600">
-                      {stats.finishedDebates}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3">User Activity</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Total Users:</span>
-                    <span className="font-semibold">{stats.totalUsers}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Active Users:</span>
-                    <span className="font-semibold text-green-600">
-                      {users.length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Avg Debates per User:</span>
-                    <span className="font-semibold">
-                      {stats.totalUsers > 0
-                        ? (stats.totalDebates / stats.totalUsers).toFixed(1)
-                        : 0}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ContentCard>
-
-          <ContentCard className="p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Recent Activity Timeline
-            </h2>
-            <div className="space-y-4">
-              {debates.slice(0, 10).map((debate, index) => (
-                <div
-                  key={debate.id}
-                  className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 text-sm font-medium">
-                        {index + 1}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {debate.topic}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {formatDate(debate.start_time)} •{" "}
-                      {getStatusBadge(debate.status)}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 text-sm text-gray-500">
-                    {debate.participants_count || 0} participants
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ContentCard>
-        </div>
       )}
 
       {/* Modals */}

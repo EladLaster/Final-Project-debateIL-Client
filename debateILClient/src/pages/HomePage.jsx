@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import DebateSection from "../components/features/homepage/DebateSection";
 import DebateStats from "../components/features/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
 import { authStore } from "../stores/authStore";
+import { usersStore } from "../stores/usersStore";
 import CreateDebateModal from "../components/features/debate/CreateDebateModal";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useErrorHandler } from "../utils/errorHandler";
@@ -20,6 +21,12 @@ function HomePage() {
     try {
       const list = await getDebates();
       setAllDebates(Array.isArray(list) ? list : []);
+
+      // Load user data for all debates
+      if (Array.isArray(list) && list.length > 0) {
+        await usersStore.loadUsersForDebates(list);
+      }
+
       setError("");
     } catch (e) {
       const friendlyError = handleError(e, {
@@ -28,35 +35,23 @@ function HomePage() {
       });
       setError(friendlyError.message);
     }
-  }, []); // Remove handleError from dependencies
+  }, [handleError]);
 
   useEffect(() => {
     let alive = true;
 
     async function load() {
-      try {
-        const list = await getDebates(); // Fetch all debates from server
-        if (!alive) return;
-        setAllDebates(Array.isArray(list) ? list : []);
-        setError("");
-      } catch (e) {
-        if (alive) {
-          const friendlyError = handleError(e, {
-            action: "loadDebates",
-            component: "HomePage",
-          });
-          setError(friendlyError.message);
-        }
-      } finally {
-        if (alive) setLoading(false);
-      }
+      if (!alive) return;
+      setLoading(true);
+      await loadDebates();
+      if (alive) setLoading(false);
     }
 
     load();
     return () => {
       alive = false;
     };
-  }, []);
+  }, [loadDebates]);
 
   // Auto-refresh when user login status changes
   useEffect(() => {
@@ -66,43 +61,17 @@ function HomePage() {
     }
   }, [authStore.activeUser?.id, loadDebates]); // Add loadDebates to dependencies
 
-  // Calculate available spots based on database schema (user1_id, user2_id)
-  const getAvailableSpots = (debate) => {
-    const maxParticipants = 2; // Each debate has max 2 participants
-    let joinedCount = 0;
-
-    if (debate.user1_id) joinedCount++;
-    if (debate.user2_id) joinedCount++;
-
-    return Math.max(0, maxParticipants - joinedCount);
-  };
+  // Calculate available spots inline
+  const getAvailableSpots = (debate) =>
+    2 - (debate.user1_id ? 1 : 0) - (debate.user2_id ? 1 : 0);
 
   // Filter debates by status
-  const liveDebates = useMemo(
-    () => allDebates.filter((debate) => debate.status === "live"),
-    [allDebates]
+  const liveDebates = allDebates.filter((debate) => debate.status === "live");
+  const registerableDebates = allDebates.filter(
+    (debate) => debate.status === "scheduled" && getAvailableSpots(debate) > 0
   );
-
-  const registerableDebates = useMemo(
-    () =>
-      allDebates.filter(
-        (debate) =>
-          debate.status === "scheduled" && getAvailableSpots(debate) > 0
-      ),
-    [allDebates]
-  );
-
-  const finishedDebates = useMemo(
-    () => allDebates.filter((debate) => debate.status === "finished"),
-    [allDebates]
-  );
-
-  const handleCreateDebateSuccess = useCallback(
-    (newDebate) => {
-      // Refresh the debates list
-      loadDebates();
-    },
-    [loadDebates]
+  const finishedDebates = allDebates.filter(
+    (debate) => debate.status === "finished"
   );
 
   if (loading) return <div className="p-6">Loading open debates…</div>;
@@ -122,8 +91,6 @@ function HomePage() {
                 : "Watch live debates and vote for your favorite arguments"}
             </p>
           </div>
-
-          {/* Create Debate Button */}
           {authStore.activeUser && (
             <div className="mt-4 sm:mt-0">
               <PrimaryButton
@@ -189,7 +156,7 @@ function HomePage() {
       <CreateDebateModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={handleCreateDebateSuccess}
+        onSuccess={loadDebates}
       />
     </div>
   );

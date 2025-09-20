@@ -1,6 +1,23 @@
 import { useState, useEffect } from "react";
 import { getAvatarForUser, getInitialsAvatar } from "../../api/randomAvatar";
 
+const getSizeClasses = (size) => {
+  switch (size) {
+    case "small":
+      return "w-6 h-6 text-xs";
+    case "medium":
+      return "w-8 h-8 text-sm";
+    case "large":
+      return "w-12 h-12 text-base";
+    case "xl":
+      return "w-16 h-16 text-lg";
+    case "2xl":
+      return "w-24 h-24 text-xl";
+    default:
+      return "w-8 h-8 text-sm";
+  }
+};
+
 export default function UserAvatar({
   user,
   size = "medium",
@@ -11,10 +28,14 @@ export default function UserAvatar({
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    if (user?.id) {
-      getAvatarForUser(user.id).then(setAvatarUrl);
+    if (user?.avatarUrl) {
+      // Use the avatar URL from the user data (from server)
+      setAvatarUrl(user.avatarUrl);
+    } else if (user?.id) {
+      // Fallback to generating avatar if no avatarUrl
+      getAvatarForUser(user.id, user.gender).then(setAvatarUrl);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.avatarUrl, user?.gender]);
 
   if (!user) {
     return (
@@ -27,23 +48,6 @@ export default function UserAvatar({
       </div>
     );
   }
-
-  const getSizeClasses = (size) => {
-    switch (size) {
-      case "small":
-        return "w-6 h-6 text-xs";
-      case "medium":
-        return "w-8 h-8 text-sm";
-      case "large":
-        return "w-12 h-12 text-base";
-      case "xl":
-        return "w-16 h-16 text-lg";
-      case "2xl":
-        return "w-24 h-24 text-xl";
-      default:
-        return "w-8 h-8 text-sm";
-    }
-  };
 
   const getBorderClasses = () => {
     if (!showBorder) return "";

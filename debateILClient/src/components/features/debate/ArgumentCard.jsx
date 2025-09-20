@@ -2,10 +2,10 @@ import StatusBadge from "../../ui/StatusBadge.jsx";
 
 export default function ArgumentCard({ argument, onReply, onVote }) {
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
   };
 
   return (

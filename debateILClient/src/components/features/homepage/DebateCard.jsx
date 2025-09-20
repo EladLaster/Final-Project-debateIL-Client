@@ -1,6 +1,7 @@
 import ContentCard from "../../ui/ContentCard";
 import UserAvatar from "../../ui/UserAvatar";
 import { useState, useEffect } from "react";
+import { usersStore } from "../../../stores/usersStore";
 
 export default function DebateCard({
   debate,
@@ -14,19 +15,35 @@ export default function DebateCard({
 
   // Load user details for display
   useEffect(() => {
-    if (debate.user1_id) {
-      // For now, create a mock user object with the ID
-      setUser1({
-        id: debate.user1_id,
-        firstName: `User ${debate.user1_id.slice(0, 8)}`,
-      });
-    }
-    if (debate.user2_id) {
-      setUser2({
-        id: debate.user2_id,
-        firstName: `User ${debate.user2_id.slice(0, 8)}`,
-      });
-    }
+    const loadUsers = () => {
+      if (debate.user1_id) {
+        const userData = usersStore.getUserForComponent(debate.user1_id);
+        if (userData) {
+          setUser1(userData);
+        } else {
+          // Fallback to mock user if not found
+          setUser1({
+            id: debate.user1_id,
+            firstName: `User ${debate.user1_id.slice(0, 8)}`,
+          });
+        }
+      }
+
+      if (debate.user2_id) {
+        const userData = usersStore.getUserForComponent(debate.user2_id);
+        if (userData) {
+          setUser2(userData);
+        } else {
+          // Fallback to mock user if not found
+          setUser2({
+            id: debate.user2_id,
+            firstName: `User ${debate.user2_id.slice(0, 8)}`,
+          });
+        }
+      }
+    };
+
+    loadUsers();
   }, [debate.user1_id, debate.user2_id]);
 
   return (

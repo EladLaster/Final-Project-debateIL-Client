@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect, useCallback, memo } from "react";
 import { useParams } from "react-router-dom";
 import { validateArgument, sanitizeInput } from "../utils/validators";
-import { getDebate, getArgumentsForDebate } from "../stores/usersStore";
+import { getDebate } from "../stores/usersStore";
+import {
+  getArgumentsForDebate,
+  createArgument,
+} from "../services/argumentsApi";
+import {
+  voteForUser,
+  getVoteResults,
+  hasUserVoted,
+} from "../services/votingApi";
 import { authStore } from "../stores/authStore";
 import { usersStore } from "../stores/usersStore";
 
@@ -14,6 +23,8 @@ export default function DebatePage() {
   const [error, setError] = useState(null);
   const [votes, setVotes] = useState({ user1: 0, user2: 0 });
   const [hasVoted, setHasVoted] = useState(false);
+  const [isSubmittingArgument, setIsSubmittingArgument] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
 
   // Load debate data
   useEffect(() => {
@@ -36,6 +47,17 @@ export default function DebatePage() {
       // Load arguments for the debate
       const argumentsData = await getArgumentsForDebate(id);
       setDebateArguments(argumentsData || []);
+
+      // Load vote results
+      const voteResults = await getVoteResults(id);
+      setVotes({
+        user1: voteResults.user1Votes || 0,
+        user2: voteResults.user2Votes || 0,
+      });
+
+      // Check if user has already voted
+      const userVoted = await hasUserVoted(id);
+      setHasVoted(userVoted);
 
       // Load user data for participants
       if (debateData.user1_id || debateData.user2_id) {
@@ -83,11 +105,17 @@ export default function DebatePage() {
 
   // Add argument with validation
   const handleAddArgument = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
 
       if (!currentUser) {
         alert("Please log in to add arguments");
+        return;
+      }
+
+      // Only debate participants can add arguments
+      if (currentUser.id !== user1?.id && currentUser.id !== user2?.id) {
+        alert("Only debate participants can add arguments");
         return;
       }
 
@@ -101,33 +129,48 @@ export default function DebatePage() {
         return;
       }
 
-      // TODO: Add API call to save argument to server
-      // For now, add to local state
-      setDebateArguments((prev) => [
-        ...prev,
-        {
-          id: Date.now(), // Temporary ID
-          user: currentUser,
-          text: sanitizedArgument,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-      setNewArgument("");
+      setIsSubmittingArgument(true);
+      try {
+        // Save argument to server
+        const newArgumentData = await createArgument(id, sanitizedArgument);
+
+        // Add to local state with server data (includes author info)
+        setDebateArguments((prev) => [...prev, newArgumentData]);
+        setNewArgument("");
+      } catch (error) {
+        console.error("Error creating argument:", error);
+        alert(error.message || "Failed to add argument");
+      } finally {
+        setIsSubmittingArgument(false);
+      }
     },
-    [newArgument, currentUser]
+    [newArgument, currentUser, id]
   );
 
   // Vote
   const handleVote = useCallback(
-    (side) => {
-      if (hasVoted || !currentUser) return;
-      setVotes((prev) => ({
-        ...prev,
-        [side]: prev[side] + 1,
-      }));
-      setHasVoted(true);
+    async (side) => {
+      if (hasVoted || !currentUser || isVoting) return;
+
+      setIsVoting(true);
+      try {
+        // Send vote to server
+        const updatedDebate = await voteForUser(id, side);
+
+        // Update local state with server response
+        setVotes({
+          user1: updatedDebate.score_user1 || 0,
+          user2: updatedDebate.score_user2 || 0,
+        });
+        setHasVoted(true);
+      } catch (error) {
+        console.error("Error voting:", error);
+        alert(error.message || "Failed to vote");
+      } finally {
+        setIsVoting(false);
+      }
     },
-    [hasVoted, currentUser]
+    [hasVoted, currentUser, isVoting, id]
   );
 
   // Loading state
@@ -275,29 +318,29 @@ export default function DebatePage() {
                     <div
                       key={argument.id}
                       className={`flex items-end mb-4 ${
-                        argument.user?.id === user1?.id
+                        argument.author?.id === user1?.id
                           ? "justify-start"
                           : "justify-end"
                       }`}
                     >
                       {/* Bubble + Avatar */}
-                      {argument.user?.id === user1?.id && (
+                      {argument.author?.id === user1?.id && (
                         <>
                           <div className="flex items-end">
                             <div className="rounded-3xl bg-blue-100 px-6 py-3 shadow text-left max-w-xs mr-2 text-base border-2 border-blue-300 text-blue-900 font-semibold">
                               <div className="mb-1 text-blue-700 font-bold">
-                                {argument.user?.firstName || "User"}
+                                {argument.author?.firstName || "User"}
                               </div>
                               <div>{argument.text}</div>
                             </div>
                           </div>
                         </>
                       )}
-                      {argument.user.id === user2.id && (
+                      {argument.author?.id === user2?.id && (
                         <>
                           <div className="rounded-3xl bg-red-100 px-6 py-3 shadow text-right max-w-xs ml-2 text-base border-2 border-red-300 text-red-900 font-semibold">
                             <div className="mb-1 text-red-700 font-bold">
-                              {argument.user.firstName}
+                              {argument.author?.firstName || "User"}
                             </div>
                             <div>{argument.text}</div>
                           </div>
@@ -315,35 +358,38 @@ export default function DebatePage() {
         </div>
       </div>
 
-      {/* Input box BELOW the ring */}
-      <form
-        onSubmit={handleAddArgument}
-        className="w-full max-w-4xl mx-auto flex items-center justify-center px-2 pb-2 mt-2"
-        style={{ pointerEvents: "auto" }}
-      >
-        <input
-          type="text"
-          value={newArgument}
-          onChange={(e) => setNewArgument(e.target.value)}
-          placeholder="Type your argument..."
-          className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
-            currentUser?.id === user1?.id
-              ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
-              : "border-red-700 focus:ring-2 focus:ring-red-400"
-          }`}
-          style={{ maxWidth: 600 }}
-        />
-        <button
-          type="submit"
-          className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
-            currentUser?.id === user1?.id
-              ? "bg-blue-700 text-white hover:bg-blue-900"
-              : "bg-red-700 text-white hover:bg-red-900"
-          } transition`}
+      {/* Input box BELOW the ring - Only for debate participants */}
+      {(currentUser?.id === user1?.id || currentUser?.id === user2?.id) && (
+        <form
+          onSubmit={handleAddArgument}
+          className="w-full max-w-4xl mx-auto flex items-center justify-center px-2 pb-2 mt-2"
+          style={{ pointerEvents: "auto" }}
         >
-          Send
-        </button>
-      </form>
+          <input
+            type="text"
+            value={newArgument}
+            onChange={(e) => setNewArgument(e.target.value)}
+            placeholder="Type your argument..."
+            className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
+              currentUser?.id === user1?.id
+                ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
+                : "border-red-700 focus:ring-2 focus:ring-red-400"
+            }`}
+            style={{ maxWidth: 600 }}
+          />
+          <button
+            type="submit"
+            disabled={isSubmittingArgument}
+            className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
+              currentUser?.id === user1?.id
+                ? "bg-blue-700 text-white hover:bg-blue-900"
+                : "bg-red-700 text-white hover:bg-red-900"
+            } transition disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isSubmittingArgument ? "Sending..." : "Send"}
+          </button>
+        </form>
+      )}
 
       {/* Audience & Voting */}
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-4 pb-4">

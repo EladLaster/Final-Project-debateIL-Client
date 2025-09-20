@@ -14,6 +14,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    gender: "male", // Default to male
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -267,6 +268,30 @@ export default function RegisterPage() {
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email}</p>
             )}
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium mb-1"
+              style={{ color: brandColors.text }}
+            >
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 border-gray-300"
+              style={{
+                borderColor: brandColors.primary,
+              }}
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
           </div>
 
           {/* Password */}
