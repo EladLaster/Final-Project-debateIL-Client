@@ -1,64 +1,121 @@
-## DebateIL - Client
+# DebateIL - Client
 
-### Project Structure
+## 📁 Project Structure
 
 ```
 src/
-├── api/                           # API utilities and external services
-│   └── randomAvatar.js           # Avatar generation from randomuser.me API
+├── api/                           # External API services
+│   └── randomAvatar.js           # Avatar generation from randomuser.me
 ├── components/                    # React components
-│   ├── ui/                       # Basic UI components
-│   │   ├── ContentCard.jsx       # Container component for content sections
-│   │   ├── PrimaryButton.jsx     # Button component with variants
-│   │   ├── StatusBadge.jsx       # Status badges for debates
+│   ├── ui/                       # Reusable UI components
+│   │   ├── ContentCard.jsx       # Content container
+│   │   ├── PrimaryButton.jsx     # Button with variants
+│   │   ├── StatusBadge.jsx       # Status indicators
 │   │   └── UserAvatar.jsx        # User avatar display
 │   ├── layout/                   # Layout components
-│   │   ├── Footer.jsx            # Footer component
+│   │   ├── Footer.jsx            # Site footer
 │   │   └── Navbar.jsx            # Navigation bar
-│   ├── features/                 # Feature-specific components
-│   │   ├── admin/                # Admin functionality
-│   │   │   └── AdminRoute.jsx    # Admin route protection
-│   │   ├── debate/               # Debate functionality
-│   │   │   ├── ArgumentCard.jsx  # Display individual arguments
-│   │   │   └── CreateDebateModal.jsx # Create debate modal
-│   │   ├── homepage/             # Homepage components
-│   │   │   ├── DebateCard.jsx    # Debate card display
-│   │   │   ├── DebateGrid.jsx    # Grid layout for debates
-│   │   │   ├── DebateSection.jsx # Debate section wrapper
-│   │   │   ├── DebateStats.jsx   # Platform statistics
-│   │   │   ├── EmptyState.jsx    # Empty state component
-│   │   │   └── NavigationButtons.jsx # Navigation buttons
-│   │   └── profile/              # Profile functionality
-│   │       ├── EditProfile.jsx   # Edit profile form
-│   │       ├── ProfileCard.jsx   # Profile display
-│   │       ├── UserDebateHistory.jsx # User debate history
-│   │       └── UserStats.jsx     # User statistics
-│   └── README.md                 # Components documentation
-├── hooks/                        # Custom React hooks (empty - ready for future hooks)
-│   ├── useAuth.js                # Authentication state and actions
-│   ├── useDebates.js             # Debates data management with loading states
-│   ├── useLocalStorage.js        # LocalStorage synchronization hook
-│   ├── useTheme.js               # Theme management hook
-│   └── index.js                  # Barrel exports for all hooks
-├── pages/                        # Route-level page components
-│   ├── AdminPanelPage.jsx        # Admin dashboard page
-│   ├── DebatePage.jsx            # Individual debate view page
-│   ├── HomePage.jsx              # Homepage with hero section and debate lists
-│   ├── LoginPage.jsx             # User login page
-│   ├── NotFoundPage.jsx          # 404 error page
-│   ├── ProfilePage.jsx           # User profile page
-│   └── ReplayPage.jsx            # Debate replay viewer page
-├── services/                     # API service layer
-│   └── serverApi.js              # Main API service functions and configuration
-├── stores/                       # MobX stores for state management
-│   └── authStore.js              # Authentication store with login/logout
-├── styles/                       # Global styles
-│   └── global.css                # Global CSS styles and variables
-├── utils/                        # Utility functions and constants
-│   ├── constants.js              # Application constants and configuration
-│   ├── formatters.js             # Data formatting utilities (dates, text, scores)
-│   ├── validators.js             # Input validation utilities
-│   └── index.js                  # Barrel exports for all utilities
-├── App.jsx                       # Main app component with routing setup
-└── main.jsx                      # Application entry point
+│   └── features/                 # Feature components
+│       ├── admin/                # Admin functionality
+│       │   └── AdminRoute.jsx    # Admin route protection
+│       ├── debate/               # Debate features
+│       │   ├── ArgumentCard.jsx  # Argument display
+│       │   └── CreateDebateModal.jsx # Create debate
+│       ├── homepage/             # Homepage components
+│       │   ├── DebateCard.jsx    # Debate card
+│       │   ├── DebateGrid.jsx    # Debate grid layout
+│       │   ├── DebateSection.jsx # Debate sections
+│       │   └── DebateStats.jsx   # Platform stats
+│       └── profile/              # Profile features
+│           ├── EditProfile.jsx   # Profile editing
+│           ├── ProfileCard.jsx   # Profile display
+│           ├── UserDebateHistory.jsx # User history
+│           └── UserStats.jsx     # User statistics
+├── pages/                        # Route pages
+│   ├── AdminPanelPage.jsx        # Admin dashboard
+│   ├── DebatePage.jsx            # Debate view
+│   ├── HomePage.jsx              # Homepage
+│   ├── LoginPage.jsx             # Login
+│   ├── ProfilePage.jsx           # User profile
+│   ├── RegisterPage.jsx          # Registration
+│   └── ReplayPage.jsx            # Debate replay
+├── services/                     # API services
+│   ├── argumentsApi.js           # Arguments API
+│   ├── serverApi.js              # Main API service
+│   └── votingApi.js              # Voting API
+├── stores/                       # MobX stores
+│   ├── authStore.js              # Authentication state
+│   └── usersStore.js             # Users data management
+├── utils/                        # Utilities
+│   ├── adminAuth.js              # Admin authentication
+│   ├── brandColors.js            # Brand colors
+│   ├── constants.js              # App constants
+│   ├── errorHandler.js           # Error handling
+│   ├── formatters.js             # Data formatters
+│   ├── statistics.js             # Statistics helpers
+│   └── validators.js             # Input validation
+├── App.jsx                       # Main app component
+└── main.jsx                      # Entry point
 ```
+
+## 🔧 Key Features
+
+### Authentication
+- **Login/Register**: User authentication with JWT
+- **Admin Panel**: Protected admin routes and functionality
+- **Profile Management**: Edit user profiles and view statistics
+
+### Debates
+- **Live Debates**: Real-time debate participation
+- **Debate Creation**: Create new debates with topics
+- **Argument System**: Post and vote on arguments
+- **Replay System**: Watch finished debates
+
+### Admin Features
+- **User Management**: View and manage users
+- **Debate Management**: Create, edit, delete debates
+- **Analytics**: Platform statistics and insights
+
+## 📊 API Endpoints
+
+### Users
+- `GET /api/users` - Get all users
+- `GET /api/users/profile` - Get current user profile
+- `PUT /api/users/profile` - Update user profile
+- `POST /api/users/login` - User login
+- `POST /api/users/register` - User registration
+
+### Debates
+- `GET /api/debates` - Get all debates
+- `GET /api/debates/:id` - Get specific debate
+- `POST /api/debates` - Create new debate
+- `PUT /api/debates/:id` - Update debate
+- `DELETE /api/debates/:id` - Delete debate
+- `POST /api/debates/:id/register` - Register for debate
+- `POST /api/debates/:id/finish` - Finish debate
+
+### Arguments
+- `GET /api/debates/arguments` - Get all arguments
+- `POST /api/debates/:id/arguments` - Create argument
+- `PUT /api/debates/:id/arguments/:argumentId` - Update argument
+- `DELETE /api/debates/:id/arguments/:argumentId` - Delete argument
+
+### Voting
+- `PATCH /api/debates/:id/vote/user1` - Vote for user 1
+- `PATCH /api/debates/:id/vote/user2` - Vote for user 2
+- `GET /api/debates/:id/votes` - Get debate votes
+
+## 🚀 Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+## 🛠️ Tech Stack
+
+- **React 18** - Frontend framework
+- **Vite** - Build tool
+- **MobX** - State management
+- **Tailwind CSS** - Styling
+- **Axios** - HTTP client
