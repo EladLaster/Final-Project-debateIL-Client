@@ -155,11 +155,15 @@ export default function ReplayPage() {
         {/* Winner Banner */}
         {winner && (
           <div className="mb-8">
-            {winner.side === 'tie' ? (
+            {winner.side === "tie" ? (
               <div className="bg-yellow-100 border-2 border-yellow-300 rounded-xl p-6 text-center">
                 <div className="text-4xl mb-2">🤝</div>
-                <h3 className="text-2xl font-bold text-yellow-800">It's a Tie!</h3>
-                <p className="text-yellow-700">Both participants scored {winner.score} points</p>
+                <h3 className="text-2xl font-bold text-yellow-800">
+                  It's a Tie!
+                </h3>
+                <p className="text-yellow-700">
+                  Both participants scored {winner.score} points
+                </p>
               </div>
             ) : (
               <div className="bg-green-100 border-2 border-green-300 rounded-xl p-6 text-center">
@@ -183,7 +187,9 @@ export default function ReplayPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Participants */}
           <div className="bg-white rounded-xl p-6 shadow">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Participants</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Participants
+            </h3>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <UserAvatar user={user1} size="large" />
@@ -208,20 +214,26 @@ export default function ReplayPage() {
 
           {/* Vote Results */}
           <div className="bg-white rounded-xl p-6 shadow">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Vote Results</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Vote Results
+            </h3>
             {voteResults && (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Total Votes:</span>
-                  <span className="font-semibold">{voteResults.totalVotes}</span>
+                  <span className="font-semibold">
+                    {voteResults.totalVotes}
+                  </span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-blue-600">User 1:</span>
-                    <span className="font-semibold">{voteResults.user1Votes} ({voteResults.user1Percent}%)</span>
+                    <span className="font-semibold">
+                      {voteResults.user1Votes} ({voteResults.user1Percent}%)
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${voteResults.user1Percent}%` }}
                     ></div>
@@ -230,10 +242,12 @@ export default function ReplayPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-red-600">User 2:</span>
-                    <span className="font-semibold">{voteResults.user2Votes} ({voteResults.user2Percent}%)</span>
+                    <span className="font-semibold">
+                      {voteResults.user2Votes} ({voteResults.user2Percent}%)
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-red-500 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${voteResults.user2Percent}%` }}
                     ></div>
@@ -245,26 +259,36 @@ export default function ReplayPage() {
 
           {/* Debate Info */}
           <div className="bg-white rounded-xl p-6 shadow">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Debate Info</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Debate Info
+            </h3>
             <div className="space-y-3 text-sm">
               <div>
                 <span className="font-medium text-gray-600">Status:</span>
-                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
-                  debate.status === 'finished' ? 'bg-red-100 text-red-800' :
-                  debate.status === 'live' ? 'bg-green-100 text-green-800' :
-                  'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
+                    debate.status === "finished"
+                      ? "bg-red-100 text-red-800"
+                      : debate.status === "live"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
                   {debate.status.toUpperCase()}
                 </span>
               </div>
               <div>
                 <span className="font-medium text-gray-600">Started:</span>
-                <div className="text-gray-500">{formatDateTime(debate.start_time)}</div>
+                <div className="text-gray-500">
+                  {formatDateTime(debate.start_time)}
+                </div>
               </div>
               {debate.end_time && (
                 <div>
                   <span className="font-medium text-gray-600">Ended:</span>
-                  <div className="text-gray-500">{formatDateTime(debate.end_time)}</div>
+                  <div className="text-gray-500">
+                    {formatDateTime(debate.end_time)}
+                  </div>
                 </div>
               )}
               {duration && (
@@ -280,18 +304,25 @@ export default function ReplayPage() {
         {/* Arguments Section */}
         <div className="bg-white rounded-xl shadow">
           <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">Debate Arguments</h3>
+            <h3 className="text-xl font-semibold text-gray-900">
+              Debate Arguments
+            </h3>
             <p className="text-gray-600 mt-1">
-              {argumentsList.length} argument{argumentsList.length !== 1 ? 's' : ''} total
+              {argumentsList.length} argument
+              {argumentsList.length !== 1 ? "s" : ""} total
             </p>
           </div>
-          
+
           <div className="p-6">
             {argumentsList.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">💬</div>
-                <h4 className="text-lg font-semibold text-gray-700 mb-2">No Arguments</h4>
-                <p className="text-gray-500">This debate had no arguments recorded.</p>
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">
+                  No Arguments
+                </h4>
+                <p className="text-gray-500">
+                  This debate had no arguments recorded.
+                </p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -302,9 +333,15 @@ export default function ReplayPage() {
                   return (
                     <div
                       key={arg.id || idx}
-                      className={`flex ${isUser1 ? "justify-start" : "justify-end"} mb-6`}
+                      className={`flex ${
+                        isUser1 ? "justify-start" : "justify-end"
+                      } mb-6`}
                     >
-                      <div className={`max-w-2xl ${isUser1 ? "order-1" : "order-2"}`}>
+                      <div
+                        className={`max-w-2xl ${
+                          isUser1 ? "order-1" : "order-2"
+                        }`}
+                      >
                         <div
                           className={`rounded-2xl p-4 ${
                             isUser1
@@ -322,7 +359,11 @@ export default function ReplayPage() {
                           }`}
                         >
                           <UserAvatar user={author} size="small" />
-                          <div className={`text-xs text-gray-500 ${isUser1 ? "text-left" : "text-right"}`}>
+                          <div
+                            className={`text-xs text-gray-500 ${
+                              isUser1 ? "text-left" : "text-right"
+                            }`}
+                          >
                             <div className="font-medium">
                               {author?.firstName} {author?.lastName}
                             </div>
@@ -330,9 +371,9 @@ export default function ReplayPage() {
                               <div>
                                 {(() => {
                                   const date = new Date(arg.createdAt);
-                                  return date.toLocaleTimeString('he-IL', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
+                                  return date.toLocaleTimeString("he-IL", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
                                   });
                                 })()}
                               </div>
