@@ -1,30 +1,42 @@
 import { useState, useRef, useEffect, useCallback, memo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { validateArgument, sanitizeInput } from "../utils/validators";
 import { getDebate } from "../stores/usersStore";
 import {
   getArgumentsForDebate,
   createArgument,
 } from "../services/argumentsApi";
-import {
-  voteForUser,
-  getVoteResults,
-  hasUserVoted,
-} from "../services/votingApi";
 import { authStore } from "../stores/authStore";
 import { usersStore } from "../stores/usersStore";
+import UserAvatar from "../components/ui/UserAvatar";
+import { useVoting } from "../hooks/useVoting";
+import VoteBar from "../components/features/voting/VoteBar";
+import VoteButtons from "../components/features/voting/VoteButtons";
+import AudienceDisplay from "../components/features/voting/AudienceDisplay";
 
 export default function DebatePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [debate, setDebate] = useState(null);
   const [debateArguments, setDebateArguments] = useState([]);
   const [newArgument, setNewArgument] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [votes, setVotes] = useState({ user1: 0, user2: 0 });
-  const [hasVoted, setHasVoted] = useState(false);
   const [isSubmittingArgument, setIsSubmittingArgument] = useState(false);
-  const [isVoting, setIsVoting] = useState(false);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+
+  // Voting hook
+  const {
+    votes,
+    voteStatus,
+    isLoading: isVoting,
+    error: votingError,
+    refreshVotes,
+  } = useVoting(id, {
+    autoLoad: true,
+    autoRefresh: true,
+    refreshInterval: 3000,
+  });
 
   // Load debate data
   useEffect(() => {
@@ -48,16 +60,7 @@ export default function DebatePage() {
       const argumentsData = await getArgumentsForDebate(id);
       setDebateArguments(argumentsData || []);
 
-      // Load vote results
-      const voteResults = await getVoteResults(id);
-      setVotes({
-        user1: voteResults.user1Votes || 0,
-        user2: voteResults.user2Votes || 0,
-      });
-
-      // Check if user has already voted
-      const userVoted = await hasUserVoted(id);
-      setHasVoted(userVoted);
+      // Voting data is now handled by the voting hook
 
       // Load user data for participants
       if (debateData.user1_id || debateData.user2_id) {
@@ -75,6 +78,33 @@ export default function DebatePage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [debateArguments]);
+
+  // Auto refresh every 3 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        // Only refresh if debate is live
+        if (debate?.status === "live") {
+          setIsAutoRefreshing(true);
+
+          // Refresh arguments
+          const argumentsData = await getArgumentsForDebate(id);
+          setDebateArguments(argumentsData || []);
+
+          // Refresh votes (handled by voting hook)
+          await refreshVotes();
+
+          setIsAutoRefreshing(false);
+        }
+      } catch (error) {
+        // Silent fail for auto-refresh
+        console.log("Auto-refresh failed:", error.message);
+        setIsAutoRefreshing(false);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [id, debate?.status, refreshVotes]);
 
   // Get user data for participants
   const user1 = debate?.user1_id
@@ -94,14 +124,10 @@ export default function DebatePage() {
     { id: 105, avatar: "" },
   ];
 
-  // Vote bar calculation
-  const totalVotes = votes.user1 + votes.user2;
-  const user1Percent = totalVotes
-    ? Math.round((votes.user1 / totalVotes) * 100)
-    : 50;
-  const user2Percent = totalVotes
-    ? Math.round((votes.user2 / totalVotes) * 100)
-    : 50;
+  // Vote bar calculation (now handled by voting store)
+  const totalVotes = votes?.total || 0;
+  const user1Percent = votes?.user1Percent || 50;
+  const user2Percent = votes?.user2Percent || 50;
 
   // Add argument with validation
   const handleAddArgument = useCallback(
@@ -146,30 +172,7 @@ export default function DebatePage() {
     [newArgument, currentUser, id]
   );
 
-  // Vote
-  const handleVote = useCallback(
-    async (side) => {
-      if (hasVoted || !currentUser || isVoting) return;
-
-      setIsVoting(true);
-      try {
-        // Send vote to server
-        const updatedDebate = await voteForUser(id, side);
-
-        // Update local state with server response
-        setVotes({
-          user1: updatedDebate.score_user1 || 0,
-          user2: updatedDebate.score_user2 || 0,
-        });
-        setHasVoted(true);
-      } catch (error) {
-        alert(error.message || "Failed to vote");
-      } finally {
-        setIsVoting(false);
-      }
-    },
-    [hasVoted, currentUser, isVoting, id]
-  );
+  // Vote handling is now done by the voting components
 
   // Loading state
   if (loading) {
@@ -214,86 +217,133 @@ export default function DebatePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-100 to-gray-100">
-      {/* Vote Bar */}
-      <div className="w-full max-w-4xl mx-auto mt-8 mb-4">
-        <div className="flex h-10 rounded-full overflow-hidden shadow-2xl border-4 border-gray-300 relative">
-          <div
-            className="flex items-center justify-end pr-4 text-white font-extrabold text-lg bg-blue-700 transition-all"
-            style={{ width: `${user1Percent}%` }}
+    <div className="h-screen bg-gradient-to-b from-blue-100 to-gray-100 overflow-hidden flex flex-col">
+      {/* Back Button */}
+      <div className="w-full max-w-4xl mx-auto px-4 pt-2 pb-1">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            {user1?.firstName || "User 1"} {user1Percent}%
-          </div>
-          <div
-            className="flex items-center justify-start pl-4 text-white font-extrabold text-lg bg-red-700 transition-all"
-            style={{ width: `${user2Percent}%` }}
-          >
-            {user2Percent}% {user2?.firstName || "User 2"}
-          </div>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          <span className="text-sm font-medium">Back to Home</span>
+        </button>
       </div>
 
+      {/* Vote Bar */}
+      <VoteBar
+        debateId={id}
+        user1Name={user1?.firstName || "User 1"}
+        user2Name={user2?.firstName || "User 2"}
+      />
+
       {/* Debaters Avatars - OUTSIDE the ring */}
-      <div
-        className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-8 mb-2"
-        style={{ marginTop: 0 }}
-      >
+      <div className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-4 mb-2">
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-white border-8 border-blue-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-blue-200">
-            {user1?.avatar ? (
-              <img
-                src={user1.avatar}
-                alt="user1"
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-blue-300">+</span>
+          <div className="relative">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-white border-4 sm:border-6 md:border-8 border-blue-700 flex items-center justify-center text-2xl sm:text-3xl md:text-5xl shadow-2xl ring-2 sm:ring-3 md:ring-4 ring-blue-200 overflow-hidden">
+              {user1?.avatarUrl ? (
+                <img
+                  src={user1.avatarUrl}
+                  alt="user1"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : user1 ? (
+                <UserAvatar user={user1} size="2xl" className="w-full h-full" />
+              ) : (
+                <span className="text-blue-300">+</span>
+              )}
+            </div>
+            {/* Participant indicator for user1 */}
+            {currentUser?.id === user1?.id && (
+              <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                YOU
+              </div>
             )}
           </div>
-          <div className="text-center font-extrabold text-blue-700 text-lg tracking-wide drop-shadow-lg mt-2">
+          <div className="text-center font-extrabold text-blue-700 text-sm sm:text-base md:text-lg tracking-wide drop-shadow-lg mt-1">
             {user1?.firstName || "User 1"}
+            {currentUser?.id === user1?.id && (
+              <span className="block text-xs text-green-600 font-normal">
+                (You)
+              </span>
+            )}
           </div>
         </div>
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-white border-8 border-red-700 flex items-center justify-center text-5xl shadow-2xl ring-4 ring-red-200">
-            {user2?.avatar ? (
-              <img
-                src={user2.avatar}
-                alt="user2"
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-red-300">+</span>
+          <div className="relative">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-white border-4 sm:border-6 md:border-8 border-red-700 flex items-center justify-center text-2xl sm:text-3xl md:text-5xl shadow-2xl ring-2 sm:ring-3 md:ring-4 ring-red-200 overflow-hidden">
+              {user2?.avatarUrl ? (
+                <img
+                  src={user2.avatarUrl}
+                  alt="user2"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : user2 ? (
+                <UserAvatar user={user2} size="2xl" className="w-full h-full" />
+              ) : (
+                <span className="text-red-300">+</span>
+              )}
+            </div>
+            {/* Participant indicator for user2 */}
+            {currentUser?.id === user2?.id && (
+              <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                YOU
+              </div>
             )}
           </div>
-          <div className="text-center font-extrabold text-red-700 text-lg tracking-wide drop-shadow-lg mt-2">
+          <div className="text-center font-extrabold text-red-700 text-sm sm:text-base md:text-lg tracking-wide drop-shadow-lg mt-1">
             {user2?.firstName || "User 2"}
+            {currentUser?.id === user2?.id && (
+              <span className="block text-xs text-green-600 font-normal">
+                (You)
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       {/* Debate Title */}
-      <div className="w-full max-w-4xl mx-auto text-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800 px-4">
-          {debate.topic || "Debate Topic"}
-        </h1>
+      <div className="w-full max-w-4xl mx-auto text-center mb-2 px-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+            {debate.topic || "Debate Topic"}
+          </h1>
+          {debate?.status === "live" && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-xs sm:text-sm text-gray-600">
+                {isAutoRefreshing ? "Updating..." : "Live"}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Debate Arena */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col min-h-0">
         {/* Boxing ring frame */}
         <div
-          className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-6 px-2"
+          className="w-full flex flex-col items-center justify-center py-3 px-2 flex-1"
           style={{
-            border: "6px solid #222",
-            borderRadius: "2.5rem",
-            boxShadow: "0 0 0 8px #e0e7ef, 0 8px 32px 0 rgba(0,0,0,0.10)",
+            border: "4px solid #222",
+            borderRadius: "1.5rem",
+            boxShadow: "0 0 0 4px #e0e7ef, 0 4px 16px 0 rgba(0,0,0,0.10)",
             background: "linear-gradient(135deg, #f8fafc 80%, #e0e7ef 100%)",
             position: "relative",
-            minHeight: "38vh",
-            maxHeight: "38vh",
             overflow: "hidden",
-            marginBottom: "0.5rem",
+            minHeight: "200px",
           }}
         >
           {/* Chat Area */}
@@ -303,8 +353,8 @@ export default function DebatePage() {
               style={{
                 scrollbarWidth: "none",
                 background: "transparent",
-                minWidth: "260px",
-                maxHeight: "32vh",
+                minWidth: "200px",
+                maxHeight: "250px",
               }}
             >
               <div ref={chatEndRef}></div>
@@ -325,22 +375,22 @@ export default function DebatePage() {
                       {argument.author?.id === user1?.id && (
                         <>
                           <div className="flex items-end">
-                            <div className="rounded-3xl bg-blue-100 px-6 py-3 shadow text-left max-w-xs mr-2 text-base border-2 border-blue-300 text-blue-900 font-semibold">
-                              <div className="mb-1 text-blue-700 font-bold">
+                            <div className="rounded-2xl bg-blue-100 px-3 py-2 sm:px-4 sm:py-3 shadow text-left max-w-xs mr-2 text-sm sm:text-base border-2 border-blue-300 text-blue-900 font-semibold">
+                              <div className="mb-1 text-blue-700 font-bold text-xs sm:text-sm">
                                 {argument.author?.firstName || "User"}
                               </div>
-                              <div>{argument.text}</div>
+                              <div className="break-words">{argument.text}</div>
                             </div>
                           </div>
                         </>
                       )}
                       {argument.author?.id === user2?.id && (
                         <>
-                          <div className="rounded-3xl bg-red-100 px-6 py-3 shadow text-right max-w-xs ml-2 text-base border-2 border-red-300 text-red-900 font-semibold">
-                            <div className="mb-1 text-red-700 font-bold">
+                          <div className="rounded-2xl bg-red-100 px-3 py-2 sm:px-4 sm:py-3 shadow text-right max-w-xs ml-2 text-sm sm:text-base border-2 border-red-300 text-red-900 font-semibold">
+                            <div className="mb-1 text-red-700 font-bold text-xs sm:text-sm">
                               {argument.author?.firstName || "User"}
                             </div>
-                            <div>{argument.text}</div>
+                            <div className="break-words">{argument.text}</div>
                           </div>
                         </>
                       )}
@@ -358,75 +408,45 @@ export default function DebatePage() {
 
       {/* Input box BELOW the ring - Only for debate participants */}
       {(currentUser?.id === user1?.id || currentUser?.id === user2?.id) && (
-        <form
-          onSubmit={handleAddArgument}
-          className="w-full max-w-4xl mx-auto flex items-center justify-center px-2 pb-2 mt-2"
-          style={{ pointerEvents: "auto" }}
-        >
-          <input
-            type="text"
-            value={newArgument}
-            onChange={(e) => setNewArgument(e.target.value)}
-            placeholder="Type your argument..."
-            className={`flex-1 px-5 py-3 border-2 rounded-full text-base shadow-lg bg-white focus:outline-none ${
-              currentUser?.id === user1?.id
-                ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
-                : "border-red-700 focus:ring-2 focus:ring-red-400"
-            }`}
-            style={{ maxWidth: 600 }}
-          />
-          <button
-            type="submit"
-            disabled={isSubmittingArgument}
-            className={`ml-2 px-6 py-3 rounded-full font-extrabold text-base shadow ${
-              currentUser?.id === user1?.id
-                ? "bg-blue-700 text-white hover:bg-blue-900"
-                : "bg-red-700 text-white hover:bg-red-900"
-            } transition disabled:opacity-50 disabled:cursor-not-allowed`}
+        <div className="w-full max-w-4xl mx-auto px-4 py-2">
+          <form
+            onSubmit={handleAddArgument}
+            className="flex flex-col sm:flex-row items-center justify-center gap-2"
           >
-            {isSubmittingArgument ? "Sending..." : "Send"}
-          </button>
-        </form>
+            <input
+              type="text"
+              value={newArgument}
+              onChange={(e) => setNewArgument(e.target.value)}
+              placeholder="Type your argument..."
+              className={`flex-1 px-4 py-2 sm:px-5 sm:py-3 border-2 rounded-full text-sm sm:text-base shadow-lg bg-white focus:outline-none ${
+                currentUser?.id === user1?.id
+                  ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
+                  : "border-red-700 focus:ring-2 focus:ring-red-400"
+              }`}
+              style={{ maxWidth: 500 }}
+            />
+            <button
+              type="submit"
+              disabled={isSubmittingArgument}
+              className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full font-extrabold text-sm sm:text-base shadow ${
+                currentUser?.id === user1?.id
+                  ? "bg-blue-700 text-white hover:bg-blue-900"
+                  : "bg-red-700 text-white hover:bg-red-900"
+              } transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto`}
+            >
+              {isSubmittingArgument ? "Sending..." : "Send"}
+            </button>
+          </form>
+        </div>
       )}
 
       {/* Audience & Voting */}
-      <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-4 pb-4">
-        <div className="flex items-center gap-6 mb-6">
-          {audience.map((a) => (
-            <span
-              key={a.id}
-              className="w-20 h-20 rounded-full bg-white border-8 border-gray-400 flex items-center justify-center text-4xl shadow-lg"
-              title={`Audience #${a.id}`}
-            >
-              {a.avatar ? (
-                <img
-                  src={a.avatar}
-                  alt={`Audience #${a.id}`}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-gray-300">+</span>
-              )}
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-10">
-          <button
-            className="bg-blue-700 text-white px-10 py-3 rounded-full text-xl font-extrabold shadow-xl hover:bg-blue-900 transition"
-            disabled={hasVoted}
-            onClick={() => handleVote("user1")}
-          >
-            Vote {user1.firstName}
-          </button>
-          <button
-            className="bg-red-700 text-white px-10 py-3 rounded-full text-xl font-extrabold shadow-xl hover:bg-red-900 transition"
-            disabled={hasVoted}
-            onClick={() => handleVote("user2")}
-          >
-            Vote {user2.firstName}
-          </button>
-        </div>
-      </div>
+      <AudienceDisplay audience={audience} />
+      <VoteButtons
+        debateId={id}
+        user1Name={user1?.firstName || "User 1"}
+        user2Name={user2?.firstName || "User 2"}
+      />
     </div>
   );
 }

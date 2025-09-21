@@ -119,11 +119,11 @@ export async function createDebate(debateData) {
   }
 }
 
-export async function registerToDebate(debateId) {
+export async function registerToDebate(debateId, userId) {
   try {
     const response = await api.post(
       `${API_ENDPOINTS.DEBATES}/${debateId}/register`,
-      {},
+      { userId }, // Send userId in request body
       {
         withCredentials: true,
       }
@@ -138,7 +138,7 @@ export async function registerToDebate(debateId) {
     throw normalizeError(error, {
       action: "registerToDebate",
       component: "DebatesAPI",
-      data: { debateId },
+      data: { debateId, userId },
     });
   }
 }
@@ -202,7 +202,7 @@ export async function updateUserProfile(profileData) {
     const { data } = await api.put(`/api/users/profile`, profileData, {
       withCredentials: true,
     });
-    
+
     if (data?.success) {
       return data.user;
     } else {
