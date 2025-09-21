@@ -26,24 +26,14 @@ export function useDebateEnding(
           return;
         }
 
-        // Call API to end the debate
-        const response = await fetch(`/api/debates/${debateId}/finish`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Enable cookies for authentication
-          body: JSON.stringify({
-            // The server expects current scores, not endReason
-            // We'll let the server use the current scores from the database
-          }),
+        // Call API to end the debate using serverApi
+        const { finishDebate } = await import("../services/serverApi");
+        const updatedDebate = await finishDebate(debateId, {
+          // The server expects current scores, not endReason
+          // We'll let the server use the current scores from the database
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to end debate");
-        }
-
-        const updatedDebate = await response.json();
+        // No need to check response.ok since serverApi handles errors
 
         // Clear auto-end timer
         if (autoEndTimer) {
