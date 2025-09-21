@@ -60,7 +60,7 @@ function HomePage() {
       // User just logged in, refresh debates
       loadDebates();
     }
-  }, [authStore.activeUser?.id, loadDebates]); // Add loadDebates to dependencies
+  }, [authStore.activeUser?.id]); // Remove loadDebates to prevent infinite loop
 
   // Auto refresh every 3 seconds for real-time updates
   useEffect(() => {

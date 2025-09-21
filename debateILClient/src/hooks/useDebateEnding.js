@@ -62,7 +62,7 @@ export function useDebateEnding(
         throw error;
       }
     },
-    [debateId, autoEndTimer]
+    [debateId]
   );
 
   // Handle manual ending by user
@@ -146,7 +146,7 @@ export function useDebateEnding(
 
       setAutoEndTimer(timer);
     }
-  }, [debateStatus, autoEndTimer, handleAutoEndDebate]);
+  }, [debateStatus, handleAutoEndDebate]); // Remove autoEndTimer to prevent infinite loop
 
   // Countdown timer display
   useEffect(() => {
