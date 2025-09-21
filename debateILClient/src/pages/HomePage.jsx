@@ -44,6 +44,7 @@ function HomePage() {
     async function load() {
       if (!alive) return;
       setLoading(true);
+      setError(""); // Clear any previous errors
       await loadDebates();
       if (alive) setLoading(false);
     }
