@@ -88,9 +88,7 @@ export async function register(userData) {
 // Debates API
 export async function getDebates() {
   try {
-    const { data } = await api.get(API_ENDPOINTS.DEBATES, {
-      withCredentials: true,
-    });
+    const { data } = await api.get(API_ENDPOINTS.DEBATES);
     return data?.debates ?? [];
   } catch (err) {
     if (err?.response?.status === 404) return [];
@@ -153,10 +151,7 @@ export async function registerToDebate(debateId, userId) {
   try {
     const response = await api.post(
       `${API_ENDPOINTS.DEBATES}/${debateId}/register`,
-      { userId }, // Send userId in request body
-      {
-        withCredentials: true,
-      }
+      { userId } // Send userId in request body
     );
 
     if (response.data.success) {
@@ -177,10 +172,7 @@ export async function finishDebate(debateId, scores = {}) {
   try {
     const response = await api.post(
       `${API_ENDPOINTS.DEBATES}/${debateId}/finish`,
-      scores,
-      {
-        withCredentials: true,
-      }
+      scores
     );
 
     if (response.data.success) {
@@ -200,9 +192,7 @@ export async function finishDebate(debateId, scores = {}) {
 // Users API
 export async function getAllUsers() {
   try {
-    const { data } = await api.get("/api/users/users", {
-      withCredentials: true,
-    });
+    const { data } = await api.get("/api/users/users");
     return data?.users ?? [];
   } catch (err) {
     throw normalizeError(err, {
@@ -214,9 +204,7 @@ export async function getAllUsers() {
 
 export async function getUserById(userId) {
   try {
-    const { data } = await api.get(`/api/users/users/${userId}`, {
-      withCredentials: true,
-    });
+    const { data } = await api.get(`/api/users/users/${userId}`);
     return data?.user ?? null;
   } catch (err) {
     throw normalizeError(err, {
@@ -229,9 +217,7 @@ export async function getUserById(userId) {
 
 export async function updateUserProfile(profileData) {
   try {
-    const { data } = await api.put(`/api/users/profile`, profileData, {
-      withCredentials: true,
-    });
+    const { data } = await api.put(`/api/users/profile`, profileData);
 
     if (data?.success) {
       return data.user;
@@ -249,9 +235,7 @@ export async function updateUserProfile(profileData) {
 
 export async function deleteDebate(debateId) {
   try {
-    const { data } = await api.delete(`/api/debates/${debateId}`, {
-      withCredentials: true,
-    });
+    const { data } = await api.delete(`/api/debates/${debateId}`);
     return data?.success ?? false;
   } catch (err) {
     throw normalizeError(err, {
