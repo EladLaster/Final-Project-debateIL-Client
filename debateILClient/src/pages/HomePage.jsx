@@ -20,7 +20,13 @@ function HomePage() {
 
   const loadDebates = useCallback(async () => {
     try {
+      console.log("🔍 Mobile Debug - Loading debates...");
+      console.log("🔍 Mobile Debug - Auth state:", authStore.activeUser);
+      console.log("🔍 Mobile Debug - LocalStorage:", localStorage.getItem("activeUser"));
+      
       const list = await getDebates();
+      console.log("🔍 Mobile Debug - Debates loaded:", list);
+      
       setAllDebates(Array.isArray(list) ? list : []);
 
       // Load user data for all debates
@@ -30,6 +36,10 @@ function HomePage() {
 
       setError("");
     } catch (e) {
+      console.log("🔍 Mobile Debug - ERROR:", e);
+      console.log("🔍 Mobile Debug - Error status:", e?.response?.status);
+      console.log("🔍 Mobile Debug - Error message:", e?.message);
+      
       const friendlyError = handleError(e, {
         action: "loadDebates",
         component: "HomePage",

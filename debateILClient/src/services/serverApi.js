@@ -54,9 +54,19 @@ export async function register(userData) {
 // Debates API
 export async function getDebates() {
   try {
+    console.log("🔍 Mobile Debug - Getting debates from:", API_ENDPOINTS.DEBATES);
+    console.log("🔍 Mobile Debug - Request headers:", api.defaults.headers);
+    console.log("🔍 Mobile Debug - With credentials:", api.defaults.withCredentials);
+    
     const { data } = await api.get(API_ENDPOINTS.DEBATES);
+    console.log("🔍 Mobile Debug - Response data:", data);
+    
     return data?.debates ?? [];
   } catch (err) {
+    console.log("🔍 Mobile Debug - API Error:", err);
+    console.log("🔍 Mobile Debug - Error response:", err?.response);
+    console.log("🔍 Mobile Debug - Error status:", err?.response?.status);
+    
     if (err?.response?.status === 404) return [];
     throw normalizeError(err, {
       action: "getDebates",
