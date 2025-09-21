@@ -44,7 +44,7 @@ const DEBATE_CONFIGS = {
             <div>
               <span className="font-medium text-red-700 block">💬</span>
               <div className="text-lg font-bold text-red-800">
-                {debate.messages_count || 4}
+                {debate.arguments_count || 0}
               </div>
             </div>
             <div>
