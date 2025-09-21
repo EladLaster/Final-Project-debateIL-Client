@@ -16,7 +16,7 @@ function HomePage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const navigate = useNavigate();
-  const { handleError } = useErrorHandler();
+  const handleError = useErrorHandler();
 
   const loadDebates = useCallback(async () => {
     try {
@@ -36,7 +36,7 @@ function HomePage() {
       });
       setError(friendlyError.message);
     }
-  }, [handleError]);
+  }, []); // Remove handleError to prevent infinite loop
 
   useEffect(() => {
     let alive = true;
@@ -52,7 +52,7 @@ function HomePage() {
     return () => {
       alive = false;
     };
-  }, [loadDebates]);
+  }, []); // Remove loadDebates to prevent infinite loop
 
   // Auto-refresh when user login status changes
   useEffect(() => {

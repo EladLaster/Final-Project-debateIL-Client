@@ -25,8 +25,8 @@ export function useDebateEnding(
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
+          credentials: "include", // Enable cookies for authentication
           body: JSON.stringify({
             endReason,
           }),
