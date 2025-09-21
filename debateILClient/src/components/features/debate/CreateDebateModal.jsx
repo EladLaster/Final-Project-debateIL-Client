@@ -33,8 +33,8 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
 
     if (!formData.topic.trim()) {
       newErrors.topic = "Debate topic is required";
-    } else if (formData.topic.length < 5) {
-      newErrors.topic = "Topic must be at least 5 characters";
+    } else if (formData.topic.length < 10) {
+      newErrors.topic = "Topic must be at least 10 characters";
     }
 
     if (!formData.start_time) {
