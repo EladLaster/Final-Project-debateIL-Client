@@ -20,15 +20,22 @@ export function useDebateEnding(
   const endDebate = useCallback(
     async (endReason) => {
       try {
+        // Check if debate is already finished
+        if (debateStatus === "finished") {
+          console.log("Debate is already finished");
+          return;
+        }
+
         // Call API to end the debate
-        const response = await fetch(`/api/debates/${debateId}/end`, {
+        const response = await fetch(`/api/debates/${debateId}/finish`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include", // Enable cookies for authentication
           body: JSON.stringify({
-            endReason,
+            // The server expects current scores, not endReason
+            // We'll let the server use the current scores from the database
           }),
         });
 

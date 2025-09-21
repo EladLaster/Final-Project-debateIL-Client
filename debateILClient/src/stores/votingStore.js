@@ -58,20 +58,20 @@ class VotingStore {
     try {
       const results = await getVoteResults(debateId);
 
-      this.votes[debateId] = {
+      this.setVotes(debateId, {
         user1: results.user1Votes || 0,
         user2: results.user2Votes || 0,
         total: results.totalVotes || 0,
         user1Percent: results.user1Percentage || 50,
         user2Percent: results.user2Percentage || 50,
-      };
+      });
 
       // Check if user has voted
       const hasVoted = await checkUserVoted(debateId);
-      this.userVotes[debateId] = {
+      this.setUserVotes(debateId, {
         hasVoted,
         votedFor: hasVoted ? this.userVotes[debateId]?.votedFor : null,
-      };
+      });
     } catch (error) {
       this.setError(debateId, error.message);
       console.error("Failed to load vote results:", error);
@@ -92,7 +92,7 @@ class VotingStore {
       const updatedDebate = await voteForUser(debateId, userSide);
 
       // Update votes
-      this.votes[debateId] = {
+      this.setVotes(debateId, {
         user1: updatedDebate.score_user1 || 0,
         user2: updatedDebate.score_user2 || 0,
         total:
@@ -107,13 +107,13 @@ class VotingStore {
           updatedDebate.score_user1 || 0,
           1
         ),
-      };
+      });
 
       // Update user vote status
-      this.userVotes[debateId] = {
+      this.setUserVotes(debateId, {
         hasVoted: true,
         votedFor: userSide,
-      };
+      });
 
       return updatedDebate;
     } catch (error) {
@@ -144,6 +144,14 @@ class VotingStore {
 
   setError(debateId, error) {
     this.errors[debateId] = error;
+  }
+
+  setVotes(debateId, votes) {
+    this.votes[debateId] = votes;
+  }
+
+  setUserVotes(debateId, userVotes) {
+    this.userVotes[debateId] = userVotes;
   }
 
   // Clear data for a specific debate

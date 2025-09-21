@@ -160,6 +160,18 @@ export default function DebatePage() {
         if (debate?.status === "live") {
           setIsAutoRefreshing(true);
 
+          // Refresh debate data
+          const debateData = await getDebate(id);
+          if (debateData) {
+            setDebate(debateData);
+
+            // If debate status changed to finished, navigate to replay
+            if (debateData.status === "finished") {
+              navigate(`/replay/${id}`);
+              return;
+            }
+          }
+
           // Refresh arguments
           const argumentsData = await getArgumentsForDebate(id);
           setDebateArguments(argumentsData || []);
