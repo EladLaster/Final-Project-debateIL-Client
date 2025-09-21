@@ -27,6 +27,12 @@ function HomePage() {
         localStorage.getItem("activeUser")
       );
 
+      // Show debug info on screen for mobile
+      const debugInfo = `Debug: Auth=${!!authStore.activeUser}, Storage=${!!localStorage.getItem(
+        "activeUser"
+      )}`;
+      document.title = debugInfo; // Show in browser tab
+
       const list = await getDebates();
       console.log("🔍 Mobile Debug - Debates loaded:", list);
 
@@ -42,6 +48,12 @@ function HomePage() {
       console.log("🔍 Mobile Debug - ERROR:", e);
       console.log("🔍 Mobile Debug - Error status:", e?.response?.status);
       console.log("🔍 Mobile Debug - Error message:", e?.message);
+
+      // Show error on screen for mobile
+      const errorInfo = `Error: ${e?.response?.status || "Unknown"} - ${
+        e?.message || "Unknown error"
+      }`;
+      document.title = errorInfo; // Show in browser tab
 
       const friendlyError = handleError(e, {
         action: "loadDebates",
