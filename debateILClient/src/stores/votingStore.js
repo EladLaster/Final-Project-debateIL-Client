@@ -131,11 +131,20 @@ class VotingStore {
   // Helper methods
   calculatePercentage(votes, otherVotes, fallback) {
     const total = votes + otherVotes;
-    return total > 0
-      ? Math.round((votes / total) * 100)
-      : fallback === 0
-      ? 50
-      : 50;
+    if (total === 0) {
+      return 50; // Default to 50% when no votes
+    }
+
+    // Handle edge cases for 100% and 0%
+    if (votes > 0 && otherVotes === 0) {
+      return 100;
+    } else if (votes === 0 && otherVotes > 0) {
+      return 0;
+    }
+
+    // Calculate normal percentage
+    const percentage = Math.round((votes / total) * 100);
+    return Math.max(0, Math.min(100, percentage)); // Ensure between 0-100
   }
 
   setLoading(debateId, loading) {

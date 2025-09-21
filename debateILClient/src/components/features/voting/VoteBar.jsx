@@ -17,25 +17,31 @@ const VoteBar = observer(
           {/* User 1 votes */}
           <div
             className="flex items-center justify-end pr-2 text-white font-extrabold text-sm bg-blue-700 transition-all duration-500"
-            style={{ width: `${votes.user1Percent}%` }}
+            style={{ 
+              width: `${Math.max(votes.user1Percent, 0)}%`,
+              minWidth: votes.user1Percent > 0 ? '20px' : '0px'
+            }}
           >
             {isLoading ? (
               <div className="animate-pulse text-xs">Loading...</div>
-            ) : (
+            ) : votes.user1Percent > 0 ? (
               `${votes.user1Percent}% ${user1Name}`
-            )}
+            ) : null}
           </div>
 
           {/* User 2 votes */}
           <div
             className="flex items-center justify-start pl-2 text-white font-extrabold text-sm bg-red-700 transition-all duration-500"
-            style={{ width: `${votes.user2Percent}%` }}
+            style={{ 
+              width: `${Math.max(votes.user2Percent, 0)}%`,
+              minWidth: votes.user2Percent > 0 ? '20px' : '0px'
+            }}
           >
             {isLoading ? (
               <div className="animate-pulse text-xs">Loading...</div>
-            ) : (
+            ) : votes.user2Percent > 0 ? (
               `${votes.user2Percent}% ${user2Name}`
-            )}
+            ) : null}
           </div>
         </div>
 
