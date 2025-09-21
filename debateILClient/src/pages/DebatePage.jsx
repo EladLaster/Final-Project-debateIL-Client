@@ -10,6 +10,7 @@ import { authStore } from "../stores/authStore";
 import { usersStore } from "../stores/usersStore";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useVoting } from "../hooks/useVoting";
+import { useDebateEnding } from "../hooks/useDebateEnding";
 import VoteBar from "../components/features/voting/VoteBar";
 import VoteButtons from "../components/features/voting/VoteButtons";
 import AudienceDisplay from "../components/features/voting/AudienceDisplay";
@@ -37,6 +38,19 @@ export default function DebatePage() {
     autoRefresh: true,
     refreshInterval: 3000,
   });
+
+  // Get user data for participants
+  const user1 = debate?.user1_id
+    ? usersStore.getUserForComponent(debate.user1_id)
+    : null;
+  const user2 = debate?.user2_id
+    ? usersStore.getUserForComponent(debate.user2_id)
+    : null;
+  const currentUser = authStore.activeUser;
+
+  // Debate ending hook
+  const { handleEndDebate, timeUntilAutoEnd, isAutoEndActive } =
+    useDebateEnding(id, debate?.status, currentUser, user1, user2);
 
   // Load debate data
   useEffect(() => {
@@ -78,42 +92,6 @@ export default function DebatePage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [debateArguments]);
-
-  // Auto refresh every 3 seconds for real-time updates
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        // Only refresh if debate is live
-        if (debate?.status === "live") {
-          setIsAutoRefreshing(true);
-
-          // Refresh arguments
-          const argumentsData = await getArgumentsForDebate(id);
-          setDebateArguments(argumentsData || []);
-
-          // Refresh votes (handled by voting hook)
-          await refreshVotes();
-
-          setIsAutoRefreshing(false);
-        }
-      } catch (error) {
-        // Silent fail for auto-refresh
-        console.log("Auto-refresh failed:", error.message);
-        setIsAutoRefreshing(false);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [id, debate?.status, refreshVotes]);
-
-  // Get user data for participants
-  const user1 = debate?.user1_id
-    ? usersStore.getUserForComponent(debate.user1_id)
-    : null;
-  const user2 = debate?.user2_id
-    ? usersStore.getUserForComponent(debate.user2_id)
-    : null;
-  const currentUser = authStore.activeUser;
 
   // Mock audience for now (could be loaded from server in the future)
   const audience = [
@@ -173,6 +151,33 @@ export default function DebatePage() {
   );
 
   // Vote handling is now done by the voting components
+
+  // Auto refresh every 3 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        // Only refresh if debate is live
+        if (debate?.status === "live") {
+          setIsAutoRefreshing(true);
+
+          // Refresh arguments
+          const argumentsData = await getArgumentsForDebate(id);
+          setDebateArguments(argumentsData || []);
+
+          // Refresh votes (handled by voting hook)
+          await refreshVotes();
+
+          setIsAutoRefreshing(false);
+        }
+      } catch (error) {
+        // Silent fail for auto-refresh
+        console.log("Auto-refresh failed:", error.message);
+        setIsAutoRefreshing(false);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [id, debate?.status, refreshVotes]);
 
   // Loading state
   if (loading) {
@@ -326,6 +331,20 @@ export default function DebatePage() {
               <span className="text-xs sm:text-sm text-gray-600">
                 {isAutoRefreshing ? "Updating..." : "Live"}
               </span>
+              {timeUntilAutoEnd && (
+                <div className="flex items-center gap-1 ml-2">
+                  <span className="text-xs text-orange-600">⏰</span>
+                  <span className="text-xs text-orange-600 font-mono">
+                    Auto-end: {timeUntilAutoEnd}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+          {debate?.status === "finished" && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+              <span className="text-xs sm:text-sm text-gray-600">Finished</span>
             </div>
           )}
         </div>
@@ -437,6 +456,27 @@ export default function DebatePage() {
               {isSubmittingArgument ? "Sending..." : "Send"}
             </button>
           </form>
+
+          {/* End Debate Button - Only for live debates */}
+          {debate?.status === "live" && (
+            <div className="flex justify-center mt-3">
+              <button
+                onClick={handleEndDebate}
+                className="px-6 py-2 bg-red-600 text-white rounded-full font-bold text-sm sm:text-base shadow-lg hover:bg-red-700 transition-colors border-2 border-red-500"
+              >
+                🏁 End Debate
+              </button>
+            </div>
+          )}
+
+          {/* Debate Ended Message */}
+          {debate?.status === "finished" && (
+            <div className="flex justify-center mt-3">
+              <div className="px-6 py-2 bg-gray-600 text-white rounded-full font-bold text-sm sm:text-base shadow-lg border-2 border-gray-500">
+                🏁 Debate Ended
+              </div>
+            </div>
+          )}
         </div>
       )}
 
