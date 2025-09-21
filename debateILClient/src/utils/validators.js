@@ -161,3 +161,45 @@ export const validateRegisterForm = (formData) => {
     errors,
   };
 };
+
+// Additional validation functions to match server schemas
+export const validateVote = (votedFor) => {
+  if (!votedFor || !["user1", "user2"].includes(votedFor)) {
+    return {
+      isValid: false,
+      message: "Vote must be for either 'user1' or 'user2'",
+    };
+  }
+  return { isValid: true };
+};
+
+export const validateGender = (gender) => {
+  const validGenders = ["male", "female", "other", "prefer_not_to_say"];
+  if (gender && !validGenders.includes(gender)) {
+    return {
+      isValid: false,
+      message: "Gender must be one of: male, female, other, prefer_not_to_say",
+    };
+  }
+  return { isValid: true };
+};
+
+export const validateAvatarUrl = (url) => {
+  if (!url) return { isValid: true }; // Optional field
+
+  try {
+    new URL(url);
+    if (url.length > 500) {
+      return {
+        isValid: false,
+        message: "Avatar URL must be less than 500 characters",
+      };
+    }
+    return { isValid: true };
+  } catch {
+    return {
+      isValid: false,
+      message: "Avatar URL must be a valid URL",
+    };
+  }
+};
