@@ -5,32 +5,8 @@ import { handleApiError } from "../utils/errorHandler";
 // API configuration
 const api = axios.create({
   baseURL: APP_CONFIG.API_BASE_URL,
-  withCredentials: false, // We'll use Authorization header instead
+  withCredentials: true, // Enable cookies for authentication
 });
-
-// Add request interceptor to add token to headers
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  console.log("🔍 Making API request to:", config.url);
-  console.log("🔑 Token in header:", token ? "✅ Yes" : "❌ No");
-  return config;
-});
-
-// Add response interceptor to log what we get back
-api.interceptors.response.use(
-  (response) => {
-    console.log("✅ API response:", response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    console.error("❌ API error:", error.response?.status, error.config?.url);
-    console.error("❌ Error details:", error.response?.data);
-    return Promise.reject(error);
-  }
-);
 
 // Error handling utility - now uses centralized error handler
 const normalizeError = (error, context = {}) => {
@@ -41,24 +17,14 @@ const normalizeError = (error, context = {}) => {
 // Authentication API
 export async function login(email, password) {
   try {
-    console.log("🔐 Attempting login for:", email);
     const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
 
     if (response.data.success) {
-      console.log("✅ Login successful! Saving token...");
-      console.log("🔑 Token from server:", response.data.token);
-
-      // Save token to localStorage
-      localStorage.setItem("token", response.data.token);
-      console.log("🔑 Token saved to localStorage");
-      console.log("🔑 Token in localStorage:", localStorage.getItem("token"));
-
       return response.data.user; // Return user data from server
     } else {
       throw new Error(response.data.message || "Login failed");
     }
   } catch (error) {
-    console.error("❌ Login failed:", error);
     throw normalizeError(error, {
       action: "login",
       component: "AuthAPI",

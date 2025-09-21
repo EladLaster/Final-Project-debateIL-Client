@@ -77,6 +77,13 @@ class AuthStore {
   handleLogout = () => {
     localStorage.removeItem("activeUser");
     this.activeUser = null;
+
+    // Dispatch custom event for UI updates
+    window.dispatchEvent(
+      new CustomEvent("authStateChanged", {
+        detail: { user: null },
+      })
+    );
   };
 }
 
