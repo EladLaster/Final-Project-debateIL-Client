@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { finishDebate } from "../services/serverApi"; // ← ייבוא סטטי במקום await import
 
 /**
  * Custom hook for managing debate ending functionality
@@ -26,7 +27,6 @@ export function useDebateEnding(
         }
 
         // Call API to end the debate using serverApi
-        const { finishDebate } = await import("../services/serverApi");
         const updatedDebate = await finishDebate(debateId, {
           // The server expects current scores, not endReason
           // We'll let the server use the current scores from the database
