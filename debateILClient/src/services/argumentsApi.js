@@ -27,7 +27,7 @@ const normalizeError = (error, context = {}) => {
 export async function getArgumentsForDebate(debateId) {
   try {
     const { data } = await api.get(`/api/debates/${debateId}/arguments`, {
-      withCredentials: true,
+      // withCredentials: true,
     });
 
     if (data?.success === false) {
@@ -56,7 +56,7 @@ export async function createArgument(debateId, text) {
     const { data } = await api.post(
       `/api/debates/${debateId}/arguments`,
       { text },
-      { withCredentials: true }
+      // { withCredentials: true }
     );
 
     if (data?.success === false) {
@@ -84,7 +84,7 @@ export async function updateArgument(argumentId, text) {
     const { data } = await api.put(
       `/api/arguments/${argumentId}`,
       { text },
-      { withCredentials: true }
+      // { withCredentials: true }
     );
 
     if (data?.success === false) {
@@ -109,7 +109,7 @@ export async function updateArgument(argumentId, text) {
 export async function deleteArgument(argumentId) {
   try {
     const { data } = await api.delete(`/api/debates/arguments/${argumentId}`, {
-      withCredentials: true,
+      // withCredentials: true,
     });
 
     if (data?.success === false) {
@@ -133,7 +133,7 @@ export async function deleteArgument(argumentId) {
 export async function getAllArguments() {
   try {
     const { data } = await api.get(`/api/debates/arguments`, {
-      withCredentials: true,
+      // withCredentials: true,
     });
 
     if (data?.success === false) {
@@ -157,7 +157,7 @@ export async function getAllArguments() {
 export async function getArgumentStats(debateId) {
   try {
     const { data } = await api.get(`/api/debates/${debateId}/arguments/stats`, {
-      withCredentials: true,
+      // withCredentials: true,
     });
 
     if (data?.success === false) {

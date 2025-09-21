@@ -29,7 +29,7 @@ export async function voteForUser1(debateId) {
     const { data } = await api.patch(
       `/api/debates/${debateId}/vote/user1`,
       {},
-      { withCredentials: true }
+      // { withCredentials: true }
     );
 
     if (data?.success === false) {
@@ -60,7 +60,7 @@ export async function voteForUser2(debateId) {
     const { data } = await api.patch(
       `/api/debates/${debateId}/vote/user2`,
       {},
-      { withCredentials: true }
+      // { withCredentials: true }
     );
 
     if (data?.success === false) {
@@ -89,7 +89,7 @@ export async function voteForUser2(debateId) {
 export async function getVoteResults(debateId) {
   try {
     const { data } = await api.get(`/api/debates/${debateId}/votes`, {
-      withCredentials: true,
+      // withCredentials: true,
     });
 
     if (data?.success === false) {
