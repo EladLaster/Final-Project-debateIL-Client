@@ -153,7 +153,7 @@ export default function AdminPanelPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <ContentCard className="p-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">
@@ -176,6 +176,14 @@ export default function AdminPanelPage() {
               {stats.liveDebates}
             </div>
             <div className="text-sm text-gray-600">Live Now</div>
+          </div>
+        </ContentCard>
+        <ContentCard className="p-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-purple-600">
+              {allArguments.length}
+            </div>
+            <div className="text-sm text-gray-600">Arguments</div>
           </div>
         </ContentCard>
       </div>
@@ -247,6 +255,28 @@ export default function AdminPanelPage() {
                   {stats.totalDebates > 0
                     ? (allArguments.length / stats.totalDebates).toFixed(1)
                     : 0}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Most Active Debate:</span>
+                <span className="font-semibold text-purple-600">
+                  {(() => {
+                    const debateWithMostArgs = debates.reduce((max, debate) => {
+                      const currentCount = debate.arguments_count || 0;
+                      const maxCount = max.arguments_count || 0;
+                      return currentCount > maxCount ? debate : max;
+                    }, debates[0] || {});
+
+                    if (
+                      debateWithMostArgs &&
+                      debateWithMostArgs.arguments_count > 0
+                    ) {
+                      return `${debateWithMostArgs.topic?.slice(0, 20)}... (${
+                        debateWithMostArgs.arguments_count
+                      } args)`;
+                    }
+                    return "N/A";
+                  })()}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -335,6 +365,9 @@ export default function AdminPanelPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Users
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Arguments
+                  </th>
                   {canManageDebates && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -364,6 +397,14 @@ export default function AdminPanelPage() {
                           .length
                       }
                       /2
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <span className="text-lg mr-1">💬</span>
+                        <span className="font-semibold text-blue-600">
+                          {debate.arguments_count || 0}
+                        </span>
+                      </div>
                     </td>
                     {canManageDebates && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

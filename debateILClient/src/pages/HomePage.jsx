@@ -14,6 +14,7 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const navigate = useNavigate();
   const { handleError } = useErrorHandler();
 
@@ -61,6 +62,23 @@ function HomePage() {
     }
   }, [authStore.activeUser?.id, loadDebates]); // Add loadDebates to dependencies
 
+  // Auto refresh every 3 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        setIsAutoRefreshing(true);
+        await loadDebates();
+        setIsAutoRefreshing(false);
+      } catch (error) {
+        // Silent fail for auto-refresh
+        console.log("Auto-refresh failed:", error.message);
+        setIsAutoRefreshing(false);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [loadDebates]);
+
   // Calculate available spots inline
   const getAvailableSpots = (debate) =>
     2 - (debate.user1_id ? 1 : 0) - (debate.user2_id ? 1 : 0);
@@ -82,9 +100,17 @@ function HomePage() {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              DebateIL - Live Debates
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900">
+                DebateIL - Live Debates
+              </h1>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600">
+                  {isAutoRefreshing ? "Updating..." : "Live"}
+                </span>
+              </div>
+            </div>
             <p className="text-gray-600">
               {authStore.activeUser
                 ? "Join active debates or register for upcoming discussions"

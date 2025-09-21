@@ -90,7 +90,7 @@ async function createDebate(debateData) {
 
 async function registerForDebate(debateId, userId) {
   try {
-    const response = await registerToDebate(debateId);
+    const response = await registerToDebate(debateId, userId);
     return response.debate;
   } catch (error) {
     throw normalizeError(error);
