@@ -20,22 +20,7 @@ function HomePage() {
 
   const loadDebates = useCallback(async () => {
     try {
-      console.log("🔍 Mobile Debug - Loading debates...");
-      console.log("🔍 Mobile Debug - Auth state:", authStore.activeUser);
-      console.log(
-        "🔍 Mobile Debug - LocalStorage:",
-        localStorage.getItem("activeUser")
-      );
-
-      // Show debug info on screen for mobile
-      const debugInfo = `Debug: Auth=${!!authStore.activeUser}, Storage=${!!localStorage.getItem(
-        "activeUser"
-      )}`;
-      document.title = debugInfo; // Show in browser tab
-
       const list = await getDebates();
-      console.log("🔍 Mobile Debug - Debates loaded:", list);
-
       setAllDebates(Array.isArray(list) ? list : []);
 
       // Load user data for all debates
@@ -45,23 +30,13 @@ function HomePage() {
 
       setError("");
     } catch (e) {
-      console.log("🔍 Mobile Debug - ERROR:", e);
-      console.log("🔍 Mobile Debug - Error status:", e?.response?.status);
-      console.log("🔍 Mobile Debug - Error message:", e?.message);
-
-      // Show error on screen for mobile
-      const errorInfo = `Error: ${e?.response?.status || "Unknown"} - ${
-        e?.message || "Unknown error"
-      }`;
-      document.title = errorInfo; // Show in browser tab
-
       const friendlyError = handleError(e, {
         action: "loadDebates",
         component: "HomePage",
       });
       setError(friendlyError.message);
     }
-  }, []); // Remove handleError to prevent infinite loop
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -97,7 +72,6 @@ function HomePage() {
         setIsAutoRefreshing(false);
       } catch (error) {
         // Silent fail for auto-refresh
-        console.log("Auto-refresh failed:", error.message);
         setIsAutoRefreshing(false);
       }
     }, 3000);

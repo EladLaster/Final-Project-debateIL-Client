@@ -183,7 +183,6 @@ export default function DebatePage() {
         }
       } catch (error) {
         // Silent fail for auto-refresh
-        console.log("Auto-refresh failed:", error.message);
         setIsAutoRefreshing(false);
       }
     }, 3000);

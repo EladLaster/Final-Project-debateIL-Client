@@ -22,7 +22,6 @@ export function useDebateEnding(
       try {
         // Check if debate is already finished
         if (debateStatus === "finished") {
-          console.log("Debate is already finished");
           return;
         }
 
@@ -87,7 +86,6 @@ export function useDebateEnding(
 
   // Handle auto-ending debate due to inactivity
   const handleAutoEndDebate = useCallback(async () => {
-    console.log("Auto-ending debate due to inactivity");
     await endDebate("inactivity_timeout");
   }, [endDebate]);
 
@@ -100,8 +98,6 @@ export function useDebateEnding(
   // Auto-end timer for inactive debates
   useEffect(() => {
     if (debateStatus === "live") {
-      console.log("Setting auto-end timer for 15 minutes");
-
       // Clear existing timer
       if (autoEndTimer) {
         clearTimeout(autoEndTimer);
@@ -129,8 +125,6 @@ export function useDebateEnding(
   // Reset auto-end timer on activity
   useEffect(() => {
     if (debateStatus === "live" && autoEndTimer) {
-      console.log("Activity detected, resetting auto-end timer");
-
       // Clear existing timer
       if (autoEndTimer) {
         clearTimeout(autoEndTimer);
