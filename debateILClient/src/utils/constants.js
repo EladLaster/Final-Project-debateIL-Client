@@ -1,8 +1,6 @@
 // Application constants - Updated for Render deployment
 export const APP_CONFIG = {
-  API_BASE_URL:
-    import.meta.env.VITE_API_BASE ||
-    "https://final-project-debateil-server.onrender.com",
+  API_BASE_URL: import.meta.env.VITE_API_BASE || "http://localhost:3030", // Temporary local server for testing
   DEBATES_PREFIX: "/api/debates",
   AUTH_PREFIX: "/auth",
 };
