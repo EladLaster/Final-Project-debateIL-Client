@@ -70,8 +70,10 @@ function HomePage() {
     }
   }, [authStore.activeUser?.id]); // Remove loadDebates to prevent infinite loop
 
-  // Auto refresh every 3 seconds for real-time updates
+  // Auto refresh every 3 seconds for real-time updates (only when logged in)
   useEffect(() => {
+    if (!authStore.activeUser) return; // Don't auto-refresh if not logged in
+    
     const interval = setInterval(async () => {
       try {
         setIsAutoRefreshing(true);
@@ -84,7 +86,7 @@ function HomePage() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [loadDebates]);
+  }, [loadDebates, authStore.activeUser]);
 
   // Calculate available spots inline
   const getAvailableSpots = (debate) =>
