@@ -1,4 +1,4 @@
-// Application constants
+// Application constants - Updated for Render deployment
 export const APP_CONFIG = {
   API_BASE_URL:
     import.meta.env.VITE_API_BASE ||
@@ -6,6 +6,9 @@ export const APP_CONFIG = {
   DEBATES_PREFIX: "/api/debates",
   AUTH_PREFIX: "/auth",
 };
+
+// Debug log to see which URL is being used
+console.log("🔗 API Base URL:", APP_CONFIG.API_BASE_URL);
 
 // Debate status constants
 export const DEBATE_STATUS = {
