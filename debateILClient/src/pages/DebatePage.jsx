@@ -112,11 +112,8 @@ export default function DebatePage() {
         return;
       }
 
-      // Only debate participants can add arguments
-      if (currentUser.id !== user1?.id && currentUser.id !== user2?.id) {
-        alert("Only debate participants can add arguments");
-        return;
-      }
+      // All authenticated users can add arguments
+      // (Removed restriction to only debate participants)
 
       // Sanitize and validate input
       const sanitizedArgument = sanitizeInput(newArgument);
@@ -450,8 +447,8 @@ export default function DebatePage() {
         </div>
       </div>
 
-      {/* Input box BELOW the ring - Only for debate participants */}
-      {(currentUser?.id === user1?.id || currentUser?.id === user2?.id) && (
+      {/* Input box BELOW the ring - For all authenticated users */}
+      {currentUser && (
         <div className="w-full max-w-4xl mx-auto px-4 py-2">
           <form
             onSubmit={handleAddArgument}
@@ -462,21 +459,13 @@ export default function DebatePage() {
               value={newArgument}
               onChange={(e) => setNewArgument(e.target.value)}
               placeholder="Type your argument..."
-              className={`flex-1 px-4 py-2 sm:px-5 sm:py-3 border-2 rounded-full text-sm sm:text-base shadow-lg bg-white focus:outline-none ${
-                currentUser?.id === user1?.id
-                  ? "border-blue-700 focus:ring-2 focus:ring-blue-400"
-                  : "border-red-700 focus:ring-2 focus:ring-red-400"
-              }`}
+              className="flex-1 px-4 py-2 sm:px-5 sm:py-3 border-2 rounded-full text-sm sm:text-base shadow-lg bg-white focus:outline-none border-gray-700 focus:ring-2 focus:ring-gray-400"
               style={{ maxWidth: 500 }}
             />
             <button
               type="submit"
               disabled={isSubmittingArgument}
-              className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full font-extrabold text-sm sm:text-base shadow ${
-                currentUser?.id === user1?.id
-                  ? "bg-blue-700 text-white hover:bg-blue-900"
-                  : "bg-red-700 text-white hover:bg-red-900"
-              } transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto`}
+              className="px-4 py-2 sm:px-6 sm:py-3 rounded-full font-extrabold text-sm sm:text-base shadow bg-gray-700 text-white hover:bg-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               {isSubmittingArgument ? "Sending..." : "Send"}
             </button>

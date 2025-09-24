@@ -109,6 +109,19 @@ export async function getPublicDebates() {
   }
 }
 
+export async function getPublicDebate(id) {
+  try {
+    const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}/public`);
+    return data?.debate;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "getPublicDebate",
+      component: "DebatesAPI",
+      data: { debateId: id },
+    });
+  }
+}
+
 export async function getLiveDebates() {
   return getDebates({ status: "live" });
 }
