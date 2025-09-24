@@ -160,11 +160,18 @@ class AuthManager {
       // Also store token for mobile compatibility
       if (this.user.token) {
         localStorage.setItem("auth_token", this.user.token);
+        console.log(
+          "🔑 Token saved to localStorage:",
+          this.user.token.substring(0, 20) + "..."
+        );
+      } else {
+        console.log("❌ No token in user object");
       }
     } else {
       localStorage.removeItem("activeUser");
       localStorage.removeItem("lastActivity");
       localStorage.removeItem("auth_token");
+      console.log("🧹 Auth cleared from localStorage");
     }
   }
 

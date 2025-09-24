@@ -18,6 +18,9 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("auth_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("🔑 Token added to request:", token.substring(0, 20) + "...");
+  } else {
+    console.log("❌ No token found in localStorage");
   }
   return config;
 });
@@ -34,7 +37,11 @@ export async function login(email, password) {
     const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
 
     if (response.data.success) {
-      return response.data.user; // Return user data from server
+      // Return user data with token for mobile compatibility
+      return {
+        ...response.data.user,
+        token: response.data.token,
+      };
     } else {
       throw new Error(response.data.message || "Login failed");
     }
