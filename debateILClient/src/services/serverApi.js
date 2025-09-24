@@ -19,7 +19,12 @@ const normalizeError = (error, context = {}) => {
 // Authentication API
 export async function login(email, password) {
   try {
+    console.log("🔐 Client: Attempting login for:", email);
     const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
+
+    console.log("🔐 Client: Login response:", response.data);
+    console.log("🔐 Client: Response headers:", response.headers);
+    console.log("🔐 Client: Cookies after login:", document.cookie);
 
     if (response.data.success) {
       return response.data.user; // Return user data from server
@@ -27,6 +32,7 @@ export async function login(email, password) {
       throw new Error(response.data.message || "Login failed");
     }
   } catch (error) {
+    console.log("🔐 Client: Login error:", error);
     throw normalizeError(error, {
       action: "login",
       component: "AuthAPI",
@@ -56,9 +62,13 @@ export async function register(userData) {
 // Debates API
 export async function getDebates() {
   try {
+    console.log("📊 Client: Getting debates...");
+    console.log("📊 Client: Cookies before request:", document.cookie);
     const { data } = await api.get(API_ENDPOINTS.DEBATES);
+    console.log("📊 Client: Debates response:", data);
     return data?.debates ?? [];
   } catch (err) {
+    console.log("📊 Client: Get debates error:", err);
     if (err?.response?.status === 404) return [];
     throw normalizeError(err, {
       action: "getDebates",
