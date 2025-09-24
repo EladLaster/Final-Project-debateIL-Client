@@ -53,41 +53,6 @@ export default function DebatePage() {
   const { handleEndDebate, timeUntilAutoEnd, isAutoEndActive } =
     useDebateEnding(id, debate?.status, currentUser, user1, user2);
 
-  // Load debate data
-  useEffect(() => {
-    loadDebateData();
-  }, [id]);
-
-  const loadDebateData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const debateData = await getDebate(id);
-      if (!debateData) {
-        setError("Debate not found");
-        return;
-      }
-
-      setDebate(debateData);
-
-      // Load arguments for the debate
-      const argumentsData = await getArgumentsForDebate(id);
-      setDebateArguments(argumentsData || []);
-
-      // Voting data is now handled by the voting hook
-
-      // Load user data for participants
-      if (debateData.user1_id || debateData.user2_id) {
-        await usersStore.loadUsersForDebates([debateData]);
-      }
-    } catch (err) {
-      setError(err.message || "Failed to load debate");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Auto scroll
   const chatEndRef = useRef(null);
   useEffect(() => {
@@ -103,7 +68,7 @@ export default function DebatePage() {
     { id: 105, avatar: "" },
   ];
 
-  // Vote bar calculation (now handled by voting store)
+  // Vote bar calculation (now handled by centralized store)
   const totalVotes = votes?.total || 0;
   const user1Percent = votes?.user1Percent || 50;
   const user2Percent = votes?.user2Percent || 50;
@@ -151,6 +116,11 @@ export default function DebatePage() {
     [newArgument, currentUser, id]
   );
 
+  // Load debate data
+  useEffect(() => {
+    loadDebateData();
+  }, [id]);
+
   // Vote handling is now done by the voting components
 
   // Optimized refresh function for debate data
@@ -194,6 +164,36 @@ export default function DebatePage() {
       maxInterval: 10000,
     }
   );
+
+  const loadDebateData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const debateData = await getDebate(id);
+      if (!debateData) {
+        setError("Debate not found");
+        return;
+      }
+
+      setDebate(debateData);
+
+      // Load arguments for the debate
+      const argumentsData = await getArgumentsForDebate(id);
+      setDebateArguments(argumentsData || []);
+
+      // Voting data is now handled by the voting hook
+
+      // Load user data for participants
+      if (debateData.user1_id || debateData.user2_id) {
+        await usersStore.loadUsersForDebates([debateData]);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to load debate");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Loading state
   if (loading) {

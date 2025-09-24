@@ -1,15 +1,12 @@
-// Application constants - Updated for Render deployment
+// Application constants - Updated for local development
 export const APP_CONFIG = {
-  API_BASE_URL:
-    import.meta.env.VITE_API_BASE ||
-    "https://final-project-debateil-server.onrender.com",
+  API_BASE_URL: "http://localhost:3030",
   DEBATES_PREFIX: "/api/debates",
   AUTH_PREFIX: "/auth",
 };
 
 // Debug log to see which URL is being used
 console.log("🔗 API Base URL:", APP_CONFIG.API_BASE_URL);
-console.log("🔄 Auth fix deployed - v1.1");
 
 // Debate status constants
 export const DEBATE_STATUS = {

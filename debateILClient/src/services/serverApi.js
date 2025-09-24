@@ -6,6 +6,11 @@ import { handleApiError } from "../utils/errorHandler";
 const api = axios.create({
   baseURL: APP_CONFIG.API_BASE_URL,
   withCredentials: true, // Enable cookies for authentication
+  timeout: 10000, // 10 second timeout
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 // Cookie-based authentication only - no headers needed
