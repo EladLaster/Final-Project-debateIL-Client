@@ -73,7 +73,7 @@ function HomePage() {
   // Auto refresh every 3 seconds for real-time updates (only when logged in)
   useEffect(() => {
     if (!authStore.activeUser) return; // Don't auto-refresh if not logged in
-    
+
     const interval = setInterval(async () => {
       try {
         setIsAutoRefreshing(true);
