@@ -1,6 +1,6 @@
 // Application constants - Dynamic URL based on environment
 export const APP_CONFIG = {
-  API_BASE_URL: "http://localhost:3030",
+  API_BASE_URL: "https://final-project-debateil-server.onrender.com",
   DEBATES_PREFIX: "/api/debates",
   AUTH_PREFIX: "/auth",
 };
