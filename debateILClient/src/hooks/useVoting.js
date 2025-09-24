@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { votingStore } from "../stores/votingStore";
+import { useOptimizedRefresh } from "./useOptimizedRefresh";
 
 /**
  * useVoting Hook
@@ -19,16 +20,19 @@ export const useVoting = (debateId, options = {}) => {
     }
   }, [debateId, autoLoad]);
 
-  // Auto refresh votes
-  useEffect(() => {
-    if (!autoRefresh || !debateId) return;
-
-    const interval = setInterval(() => {
-      votingStore.refreshVoteResults(debateId);
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [debateId, autoRefresh, refreshInterval]);
+  // Optimized auto refresh votes
+  const { isRefreshing: isVotesRefreshing } = useOptimizedRefresh(
+    () => votingStore.refreshVoteResults(debateId),
+    {
+      interval: refreshInterval,
+      enabled: autoRefresh && !!debateId,
+      immediate: false,
+      maxRetries: 2,
+      backoffMultiplier: 1.5,
+      minInterval: 2000,
+      maxInterval: 15000,
+    }
+  );
 
   // Vote for a user
   const vote = useCallback(
@@ -75,6 +79,7 @@ export const useVoting = (debateId, options = {}) => {
     voteStatus: debateId ? votingStore.getUserVoteStatus(debateId) : null,
     isLoading: debateId ? votingStore.isLoading(debateId) : false,
     error: debateId ? votingStore.getError(debateId) : null,
+    isRefreshing: isVotesRefreshing,
   };
 };
 

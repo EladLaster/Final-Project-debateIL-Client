@@ -11,6 +11,7 @@ import { usersStore } from "../stores/usersStore";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useVoting } from "../hooks/useVoting";
 import { useDebateEnding } from "../hooks/useDebateEnding";
+import { useOptimizedRefresh } from "../hooks/useOptimizedRefresh";
 import VoteBar from "../components/features/voting/VoteBar";
 import VoteButtons from "../components/features/voting/VoteButtons";
 import AudienceDisplay from "../components/features/voting/AudienceDisplay";
@@ -24,7 +25,7 @@ export default function DebatePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmittingArgument, setIsSubmittingArgument] = useState(false);
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+  // Removed isAutoRefreshing - now handled by useOptimizedRefresh
 
   // Voting hook
   const {
@@ -152,43 +153,47 @@ export default function DebatePage() {
 
   // Vote handling is now done by the voting components
 
-  // Auto refresh every 3 seconds for real-time updates
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        // Only refresh if debate is live
-        if (debate?.status === "live") {
-          setIsAutoRefreshing(true);
+  // Optimized refresh function for debate data
+  const refreshDebateData = useCallback(async () => {
+    if (debate?.status !== "live") return;
 
-          // Refresh debate data
-          const debateData = await getDebate(id);
-          if (debateData) {
-            setDebate(debateData);
+    try {
+      // Refresh debate data
+      const debateData = await getDebate(id);
+      if (debateData) {
+        setDebate(debateData);
 
-            // If debate status changed to finished, navigate to replay
-            if (debateData.status === "finished") {
-              navigate(`/replay/${id}`);
-              return;
-            }
-          }
-
-          // Refresh arguments
-          const argumentsData = await getArgumentsForDebate(id);
-          setDebateArguments(argumentsData || []);
-
-          // Refresh votes (handled by voting hook)
-          await refreshVotes();
-
-          setIsAutoRefreshing(false);
+        // If debate status changed to finished, navigate to replay
+        if (debateData.status === "finished") {
+          navigate(`/replay/${id}`);
+          return;
         }
-      } catch (error) {
-        // Silent fail for auto-refresh
-        setIsAutoRefreshing(false);
       }
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, [id, debate?.status, refreshVotes]);
+      // Refresh arguments
+      const argumentsData = await getArgumentsForDebate(id);
+      setDebateArguments(argumentsData || []);
+
+      // Refresh votes (handled by voting hook)
+      await refreshVotes();
+    } catch (error) {
+      console.warn("Debate refresh error:", error);
+    }
+  }, [id, debate?.status, refreshVotes, navigate]);
+
+  // Optimized auto-refresh for live debates
+  const { isRefreshing, error: refreshError } = useOptimizedRefresh(
+    refreshDebateData,
+    {
+      interval: 4000, // 4 seconds for live debates (more frequent)
+      enabled: debate?.status === "live", // Only for live debates
+      immediate: false,
+      maxRetries: 3,
+      backoffMultiplier: 1.5,
+      minInterval: 2000,
+      maxInterval: 10000,
+    }
+  );
 
   // Loading state
   if (loading) {
@@ -340,7 +345,7 @@ export default function DebatePage() {
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
               <span className="text-xs sm:text-sm text-gray-600">
-                {isAutoRefreshing ? "Updating..." : "Live"}
+                {isRefreshing ? "Updating..." : "Live"}
               </span>
               {timeUntilAutoEnd && (
                 <div className="flex items-center gap-1 ml-2">

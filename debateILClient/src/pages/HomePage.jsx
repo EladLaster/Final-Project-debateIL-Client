@@ -8,13 +8,13 @@ import { usersStore } from "../stores/usersStore";
 import CreateDebateModal from "../components/features/debate/CreateDebateModal";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import { useErrorHandler } from "../utils/errorHandler";
+import { useOptimizedRefresh } from "../hooks/useOptimizedRefresh";
 
 function HomePage() {
   const [allDebates, setAllDebates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const navigate = useNavigate();
   const handleError = useErrorHandler();
 
@@ -70,23 +70,20 @@ function HomePage() {
     }
   }, [authStore.activeUser?.id]); // Remove loadDebates to prevent infinite loop
 
-  // Auto refresh every 3 seconds for real-time updates (only when logged in)
-  useEffect(() => {
-    if (!authStore.activeUser) return; // Don't auto-refresh if not logged in
-
-    const interval = setInterval(async () => {
-      try {
-        setIsAutoRefreshing(true);
-        await loadDebates();
-        setIsAutoRefreshing(false);
-      } catch (error) {
-        // Silent fail for auto-refresh
-        setIsAutoRefreshing(false);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [loadDebates, authStore.activeUser]);
+  // Optimized auto-refresh with intelligent intervals
+  const {
+    isRefreshing,
+    error: refreshError,
+    manualRefresh,
+  } = useOptimizedRefresh(loadDebates, {
+    interval: 8000, // 8 seconds for homepage (less frequent)
+    enabled: !!authStore.activeUser, // Only when logged in
+    immediate: false, // Don't refresh immediately on mount
+    maxRetries: 2,
+    backoffMultiplier: 1.5,
+    minInterval: 2000,
+    maxInterval: 15000,
+  });
 
   // Calculate available spots inline
   const getAvailableSpots = (debate) =>
@@ -103,6 +100,7 @@ function HomePage() {
 
   if (loading) return <div className="p-6">Loading open debates…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (refreshError) console.warn("Auto-refresh error:", refreshError);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -116,7 +114,7 @@ function HomePage() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm text-gray-600">
-                  {isAutoRefreshing ? "Updating..." : "Live"}
+                  {isRefreshing ? "Updating..." : "Live"}
                 </span>
               </div>
             </div>
