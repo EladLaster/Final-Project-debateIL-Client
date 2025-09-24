@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import DebateSection from "../components/features/homepage/DebateSection";
 import DebateStats from "../components/features/homepage/DebateStats";
-import { getDebates } from "../services/serverApi";
+import { getDebates, getPublicDebates } from "../services/serverApi";
 import { authManager } from "../stores/authManager";
 import { usersStore } from "../stores/usersStore";
 import CreateDebateModal from "../components/features/debate/CreateDebateModal";
@@ -20,7 +20,10 @@ function HomePage() {
 
   const loadDebates = useCallback(async () => {
     try {
-      const list = await getDebates();
+      // Use public API for non-authenticated users, authenticated API for logged in users
+      const list = authManager.user
+        ? await getDebates()
+        : await getPublicDebates();
       setAllDebates(Array.isArray(list) ? list : []);
 
       // Load user data for all debates
@@ -46,12 +49,8 @@ function HomePage() {
       setLoading(true);
       setError(""); // Clear any previous errors
 
-      // Only load debates if user is logged in
-      if (authManager.user) {
-        await loadDebates();
-      } else {
-        setAllDebates([]);
-      }
+      // Always load debates, but show different content based on auth status
+      await loadDebates();
 
       if (alive) setLoading(false);
     }
@@ -77,7 +76,7 @@ function HomePage() {
     manualRefresh,
   } = useOptimizedRefresh(loadDebates, {
     interval: 8000, // 8 seconds for homepage (less frequent)
-    enabled: !!authManager.user, // Only when logged in
+    enabled: true, // Always enabled to show live debates
     immediate: false, // Don't refresh immediately on mount
     maxRetries: 2,
     backoffMultiplier: 1.5,
@@ -158,25 +157,32 @@ function HomePage() {
       )}
 
       {!authManager.user && (
-        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
-            Want to see more debates?
-          </h3>
-          <p className="text-blue-600 mb-4">
-            Register to join upcoming debates and view finished discussions
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-blue-600">ℹ️</span>
+            <h3 className="text-lg font-semibold text-blue-800">
+              Welcome to DebateIL!
+            </h3>
+          </div>
+          <p className="text-blue-700 mb-3">
+            You can watch live debates and vote for your favorite arguments
+            without logging in. To participate in debates or create new ones,
+            please log in.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-2">
             <PrimaryButton
               variant="primary"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/login")}
+              className="text-sm"
             >
-              Register Now
+              🔐 Log In
             </PrimaryButton>
             <PrimaryButton
               variant="secondary"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/register")}
+              className="text-sm"
             >
-              Login
+              📝 Register
             </PrimaryButton>
           </div>
         </div>
