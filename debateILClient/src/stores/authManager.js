@@ -157,9 +157,14 @@ class AuthManager {
     if (this.isAuthenticated && this.user) {
       localStorage.setItem("activeUser", JSON.stringify(this.user));
       localStorage.setItem("lastActivity", this.lastActivity.toString());
+      // Also store token for mobile compatibility
+      if (this.user.token) {
+        localStorage.setItem("auth_token", this.user.token);
+      }
     } else {
       localStorage.removeItem("activeUser");
       localStorage.removeItem("lastActivity");
+      localStorage.removeItem("auth_token");
     }
   }
 

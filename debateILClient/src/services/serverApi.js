@@ -13,7 +13,14 @@ const api = axios.create({
   },
 });
 
-// Cookie-based authentication only - no headers needed
+// Add request interceptor to include token in headers for mobile compatibility
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("auth_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // Error handling utility - now uses centralized error handler
 const normalizeError = (error, context = {}) => {
