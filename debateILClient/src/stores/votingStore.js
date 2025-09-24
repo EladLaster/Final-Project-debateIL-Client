@@ -54,12 +54,16 @@ class VotingStore {
     try {
       const results = await getVoteResults(debateId);
 
+      const user1Votes = results.user1Votes || 0;
+      const user2Votes = results.user2Votes || 0;
+      const percentages = this.calculatePercentages(user1Votes, user2Votes);
+
       this.setVotes(debateId, {
-        user1: results.user1Votes || 0,
-        user2: results.user2Votes || 0,
-        total: results.totalVotes || 0,
-        user1Percent: results.user1Percentage || 50,
-        user2Percent: results.user2Percentage || 50,
+        user1: user1Votes,
+        user2: user2Votes,
+        total: user1Votes + user2Votes,
+        user1Percent: percentages.user1Percent,
+        user2Percent: percentages.user2Percent,
       });
 
       // Check if user has voted (using localStorage for now)
@@ -88,21 +92,16 @@ class VotingStore {
       const updatedDebate = await voteForUser(debateId, userSide);
 
       // Update votes
+      const user1Votes = updatedDebate.score_user1 || 0;
+      const user2Votes = updatedDebate.score_user2 || 0;
+      const percentages = this.calculatePercentages(user1Votes, user2Votes);
+
       this.setVotes(debateId, {
-        user1: updatedDebate.score_user1 || 0,
-        user2: updatedDebate.score_user2 || 0,
-        total:
-          (updatedDebate.score_user1 || 0) + (updatedDebate.score_user2 || 0),
-        user1Percent: this.calculatePercentage(
-          updatedDebate.score_user1 || 0,
-          updatedDebate.score_user2 || 0,
-          0
-        ),
-        user2Percent: this.calculatePercentage(
-          updatedDebate.score_user2 || 0,
-          updatedDebate.score_user1 || 0,
-          1
-        ),
+        user1: user1Votes,
+        user2: user2Votes,
+        total: user1Votes + user2Votes,
+        user1Percent: percentages.user1Percent,
+        user2Percent: percentages.user2Percent,
       });
 
       // Update user vote status
@@ -125,22 +124,31 @@ class VotingStore {
   }
 
   // Helper methods
-  calculatePercentage(votes, otherVotes, fallback) {
+  calculatePercentage(votes, otherVotes) {
     const total = votes + otherVotes;
     if (total === 0) {
       return 50; // Default to 50% when no votes
     }
 
-    // Handle edge cases for 100% and 0%
-    if (votes > 0 && otherVotes === 0) {
-      return 100;
-    } else if (votes === 0 && otherVotes > 0) {
-      return 0;
-    }
-
     // Calculate normal percentage
     const percentage = Math.round((votes / total) * 100);
     return Math.max(0, Math.min(100, percentage)); // Ensure between 0-100
+  }
+
+  // Calculate both percentages to ensure they sum to 100%
+  calculatePercentages(user1Votes, user2Votes) {
+    const total = user1Votes + user2Votes;
+    if (total === 0) {
+      return { user1Percent: 50, user2Percent: 50 };
+    }
+
+    const user1Percent = Math.round((user1Votes / total) * 100);
+    const user2Percent = 100 - user1Percent; // Ensure they sum to 100%
+
+    return {
+      user1Percent: Math.max(0, Math.min(100, user1Percent)),
+      user2Percent: Math.max(0, Math.min(100, user2Percent)),
+    };
   }
 
   setLoading(debateId, loading) {

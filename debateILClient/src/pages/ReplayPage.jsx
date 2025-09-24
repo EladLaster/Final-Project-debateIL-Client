@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getDebate, getArgumentsForDebate } from "../stores/usersStore";
-import { usersStore } from "../stores/usersStore";
+import { getDebate, getArgumentsForDebate, usersStore } from "../stores/usersStore";
 import { getVoteResults } from "../services/votingApi";
 import UserAvatar from "../components/ui/UserAvatar";
 import { formatDateTime } from "../utils/formatters";

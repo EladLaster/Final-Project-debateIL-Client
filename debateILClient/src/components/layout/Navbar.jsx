@@ -1,21 +1,21 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { brandColors } from "../../utils/brandColors";
-import { authStore } from "../../stores/authStore";
+import { authManager } from "../../stores/authManager";
 import { isAdmin } from "../../utils/adminAuth";
 import UserAvatar from "../ui/UserAvatar";
 import logoImg from "../../assets/logo.png";
 
 function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [user, setUser] = useState(authStore.activeUser);
+  const [user, setUser] = useState(authManager.user);
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
 
-  // Update user state when authStore changes
+  // Update user state when authManager changes
   useEffect(() => {
-    setUser(authStore.activeUser);
-  }, [authStore.activeUser]);
+    setUser(authManager.user);
+  }, [authManager.user]);
 
   // Listen for auth state changes
   useEffect(() => {
@@ -152,7 +152,7 @@ function Navbar() {
                         className="block w-full text-left px-4 py-2 text-sm transition hover:opacity-80"
                         style={{ color: brandColors.primary }}
                         onClick={() => {
-                          authStore.handleLogout();
+                          authManager.logout();
                           setUserMenuOpen(false);
                           navigate("/");
                         }}

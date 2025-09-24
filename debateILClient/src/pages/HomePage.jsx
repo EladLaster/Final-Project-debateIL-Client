@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DebateSection from "../components/features/homepage/DebateSection";
 import DebateStats from "../components/features/homepage/DebateStats";
 import { getDebates } from "../services/serverApi";
-import { authStore } from "../stores/authStore";
+import { authManager } from "../stores/authManager";
 import { usersStore } from "../stores/usersStore";
 import CreateDebateModal from "../components/features/debate/CreateDebateModal";
 import PrimaryButton from "../components/ui/PrimaryButton";
@@ -47,7 +47,7 @@ function HomePage() {
       setError(""); // Clear any previous errors
 
       // Only load debates if user is logged in
-      if (authStore.activeUser) {
+      if (authManager.user) {
         await loadDebates();
       } else {
         setAllDebates([]);
@@ -64,11 +64,11 @@ function HomePage() {
 
   // Auto-refresh when user login status changes
   useEffect(() => {
-    if (authStore.activeUser) {
+    if (authManager.user) {
       // User just logged in, refresh debates
       loadDebates();
     }
-  }, [authStore.activeUser?.id]); // Remove loadDebates to prevent infinite loop
+  }, [authManager.user?.id]); // Remove loadDebates to prevent infinite loop
 
   // Optimized auto-refresh with intelligent intervals
   const {
@@ -77,7 +77,7 @@ function HomePage() {
     manualRefresh,
   } = useOptimizedRefresh(loadDebates, {
     interval: 8000, // 8 seconds for homepage (less frequent)
-    enabled: !!authStore.activeUser, // Only when logged in
+    enabled: !!authManager.user, // Only when logged in
     immediate: false, // Don't refresh immediately on mount
     maxRetries: 2,
     backoffMultiplier: 1.5,
@@ -118,12 +118,12 @@ function HomePage() {
               </div>
             </div>
             <p className="text-gray-600">
-              {authStore.activeUser
+              {authManager.user
                 ? "Join active debates or register for upcoming discussions"
                 : "Watch live debates and vote for your favorite arguments"}
             </p>
           </div>
-          {authStore.activeUser && (
+          {authManager.user && (
             <div className="mt-4 sm:mt-0">
               <PrimaryButton
                 variant="primary"
@@ -142,7 +142,7 @@ function HomePage() {
         type="live"
         onRefresh={loadDebates}
       />
-      {authStore.activeUser && (
+      {authManager.user && (
         <>
           <DebateSection
             debates={registerableDebates}
@@ -157,7 +157,7 @@ function HomePage() {
         </>
       )}
 
-      {!authStore.activeUser && (
+      {!authManager.user && (
         <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
           <h3 className="text-lg font-semibold text-blue-800 mb-2">
             Want to see more debates?

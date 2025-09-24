@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { brandColors } from "../utils/brandColors";
 import logoImg from "../assets/logo.png";
-import { authStore } from "../stores/authStore";
+import { authManager } from "../stores/authManager";
 import PrimaryButton from "../components/ui/PrimaryButton";
 
 export default function RegisterPage() {
@@ -82,7 +82,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       const { confirmPassword, ...userData } = formData;
-      await authStore.handleRegister(userData);
+      await authManager.register(userData);
       navigate("/");
     } catch (error) {
       setErrors({ general: error.message || "Registration failed" });

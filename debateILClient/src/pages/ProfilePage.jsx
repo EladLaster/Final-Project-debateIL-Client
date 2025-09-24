@@ -4,7 +4,7 @@ import ProfileCard from "../components/features/profile/ProfileCard";
 import UserStats from "../components/features/profile/UserStats";
 import UserDebateHistory from "../components/features/profile/UserDebateHistory";
 import EditProfile from "../components/features/profile/EditProfile";
-import { authStore } from "../stores/authStore";
+import { authManager } from "../stores/authManager";
 import { usersStore } from "../stores/usersStore";
 import { getDebates, updateUserProfile } from "../services/serverApi";
 
@@ -15,7 +15,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const isOwnProfile = authStore.activeUser?.id?.toString() === id;
+  const isOwnProfile = authManager.user?.id?.toString() === id;
 
   useEffect(() => {
     loadUserData();
@@ -30,9 +30,9 @@ export default function ProfilePage() {
       if (userData) {
         setUser(userData);
       } else {
-        // If server data not available, use authStore for own profile
-        if (isOwnProfile && authStore.activeUser) {
-          setUser(authStore.activeUser);
+        // If server data not available, use authManager for own profile
+        if (isOwnProfile && authManager.user) {
+          setUser(authManager.user);
         } else {
           // Create a fallback user if not found
           setUser({
@@ -67,9 +67,9 @@ export default function ProfilePage() {
       // Update local state
       setUser(updatedUser);
 
-      // Update authStore if it's the current user
+      // Update authManager if it's the current user
       if (isOwnProfile) {
-        authStore.activeUser = updatedUser;
+        authManager.setUser(updatedUser);
         localStorage.activeUser = JSON.stringify(updatedUser);
       }
 

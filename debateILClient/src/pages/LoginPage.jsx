@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { brandColors } from "../utils/brandColors";
 import logoImg from "../assets/logo.png";
-import { authStore } from "../stores/authStore";
+import { authManager } from "../stores/authManager";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await authStore.handleLogin(email, password);
+      await authManager.login(email, password);
       navigate("/");
     } catch (error) {
       // Error handled by authStore

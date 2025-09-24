@@ -58,6 +58,16 @@ export async function register(userData) {
   }
 }
 
+export async function logout() {
+  try {
+    const response = await api.post(API_ENDPOINTS.LOGOUT);
+    return response.data;
+  } catch (error) {
+    // Continue with logout even if server call fails
+    return { success: true };
+  }
+}
+
 // Debates API
 export async function getDebates() {
   try {

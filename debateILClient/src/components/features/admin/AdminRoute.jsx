@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authStore } from "../../../stores/authStore";
+import { authManager } from "../../../stores/authManager";
 import { isAdmin } from "../../../utils/adminAuth";
 
 export default function AdminRoute({ children, requiredPermission = null }) {
@@ -10,7 +10,7 @@ export default function AdminRoute({ children, requiredPermission = null }) {
 
   useEffect(() => {
     const checkAdminAccess = () => {
-      const user = authStore.activeUser;
+      const user = authManager.user;
 
       if (!user) {
         // User not logged in, redirect to login

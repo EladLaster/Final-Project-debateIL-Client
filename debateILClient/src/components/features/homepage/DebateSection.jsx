@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PrimaryButton from "../../ui/PrimaryButton";
 import DebateGrid from "./DebateGrid";
-import { authStore } from "../../../stores/authStore";
+import { authManager } from "../../../stores/authManager";
 import { registerForDebate, usersStore } from "../../../stores/usersStore";
 import { formatDate, formatDateTime } from "../../../utils/formatters";
 
@@ -57,13 +57,13 @@ const DEBATE_CONFIGS = {
         </>
       );
     },
-    getButton: (debate, navigate, authStore) => (
+    getButton: (debate, navigate, authManager) => (
       <PrimaryButton
         variant="secondary"
         onClick={() => navigate(`/debate/${debate.id}`)}
         className="w-full text-sm py-2"
       >
-        {authStore?.activeUser ? "🎯 Join Live!" : "👁️ Watch Live"}
+        {authManager?.user ? "🎯 Join Live!" : "👁️ Watch Live"}
       </PrimaryButton>
     ),
   },
@@ -104,22 +104,22 @@ const DEBATE_CONFIGS = {
         </>
       );
     },
-    getButton: (debate, navigate, authStore, onRegisterSuccess) => (
+    getButton: (debate, navigate, authManager, onRegisterSuccess) => (
       <PrimaryButton
         variant="primary"
         onClick={async () => {
-          if (!authStore?.activeUser) {
+          if (!authManager?.user) {
             navigate("/login");
             return;
           }
 
-          if (!authStore.activeUser.id) {
+          if (!authManager.user.id) {
             alert("❌ User ID not found. Please log in again.");
             return;
           }
 
           try {
-            await registerForDebate(debate.id, authStore.activeUser.id);
+            await registerForDebate(debate.id, authManager.user.id);
             alert("🎉 Successfully registered for the debate!");
             if (onRegisterSuccess) {
               onRegisterSuccess();
@@ -246,7 +246,7 @@ export default function DebateSection({ debates, type, onRefresh }) {
 
   const renderMiddleContent = (debate) => config.getMiddleContent(debate);
   const renderButton = (debate) =>
-    config.getButton(debate, navigate, authStore, onRefresh);
+    config.getButton(debate, navigate, authManager, onRefresh);
 
   return (
     <DebateGrid

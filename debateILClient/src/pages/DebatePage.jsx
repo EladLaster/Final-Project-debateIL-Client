@@ -1,20 +1,12 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  memo,
-  useMemo,
-} from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { validateArgument, sanitizeInput } from "../utils/validators";
-import { getDebate } from "../stores/usersStore";
+import { getDebate, usersStore } from "../stores/usersStore";
 import {
   getArgumentsForDebate,
   createArgument,
 } from "../services/argumentsApi";
-import { authStore } from "../stores/authStore";
-import { usersStore } from "../stores/usersStore";
+import { authManager } from "../stores/authManager";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useVoting } from "../hooks/useVoting";
 import { useDebateEnding } from "../hooks/useDebateEnding";
@@ -54,7 +46,7 @@ export default function DebatePage() {
   const user2 = debate?.user2_id
     ? usersStore.getUserForComponent(debate.user2_id)
     : null;
-  const currentUser = authStore.activeUser;
+  const currentUser = authManager.user;
 
   // Debate ending hook
   const { handleEndDebate, timeUntilAutoEnd, isAutoEndActive } =

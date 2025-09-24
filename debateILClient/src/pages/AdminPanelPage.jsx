@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import { getDebates, finishDebateForUser } from "../stores/usersStore";
-import { usersStore } from "../stores/usersStore";
-import { authStore } from "../stores/authStore";
+import {
+  getDebates,
+  finishDebateForUser,
+  usersStore,
+} from "../stores/usersStore";
+import { authManager } from "../stores/authManager";
 import { getAllUsers, deleteDebate } from "../services/serverApi";
 import { getAllArguments, deleteArgument } from "../services/argumentsApi";
 import { getAdminLevel, hasAdminPermission } from "../utils/adminAuth";
@@ -27,7 +30,7 @@ export default function AdminPanelPage() {
     liveDebates: 0,
   });
 
-  const currentUser = authStore.activeUser;
+  const currentUser = authManager.user;
   const adminLevel = getAdminLevel(currentUser);
 
   useEffect(() => {
