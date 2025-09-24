@@ -9,6 +9,7 @@ export const APP_CONFIG = {
 
 // Debug log to see which URL is being used
 console.log("🔗 API Base URL:", APP_CONFIG.API_BASE_URL);
+console.log("🔄 Auth fix deployed - v1.1");
 
 // Debate status constants
 export const DEBATE_STATUS = {
