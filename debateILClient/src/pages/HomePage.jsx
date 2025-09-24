@@ -45,7 +45,14 @@ function HomePage() {
       if (!alive) return;
       setLoading(true);
       setError(""); // Clear any previous errors
-      await loadDebates();
+
+      // Only load debates if user is logged in
+      if (authStore.activeUser) {
+        await loadDebates();
+      } else {
+        setAllDebates([]);
+      }
+
       if (alive) setLoading(false);
     }
 
