@@ -134,7 +134,7 @@ export async function registerToDebate(debateId, userId) {
   try {
     const response = await api.post(
       `${API_ENDPOINTS.DEBATES}/${debateId}/register`,
-      { userId } // Send userId in request body
+      {} // Don't send userId in body - let server use JWT token
     );
 
     if (response.data.success) {
