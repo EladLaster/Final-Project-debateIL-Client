@@ -1,30 +1,31 @@
 // Date and time formatting utilities
-export const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
+const formatDatePart = (date) => {
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
 
-export const formatTime = (dateString) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
+const formatTimePart = (date) => {
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
+export const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  return formatDatePart(new Date(dateString));
+};
+
+export const formatTime = (dateString) => {
+  if (!dateString) return "N/A";
+  return formatTimePart(new Date(dateString));
+};
+
 export const formatDateTime = (dateString) => {
   if (!dateString) return "N/A";
   const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+  return `${formatDatePart(date)} ${formatTimePart(date)}`;
 };
 
 // Duration calculation

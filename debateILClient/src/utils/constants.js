@@ -5,9 +5,6 @@ export const APP_CONFIG = {
   AUTH_PREFIX: "/auth",
 };
 
-// Debug log to see which URL is being used
-console.log("🔗 API Base URL:", APP_CONFIG.API_BASE_URL);
-
 // Debate status constants
 export const DEBATE_STATUS = {
   LIVE: "live",

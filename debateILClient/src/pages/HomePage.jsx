@@ -100,7 +100,6 @@ function HomePage() {
 
   if (loading) return <div className="p-6">Loading open debates…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (refreshError) console.warn("Auto-refresh error:", refreshError);
 
   return (
     <div className="max-w-6xl mx-auto p-6">

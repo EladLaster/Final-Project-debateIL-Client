@@ -59,8 +59,8 @@ export function calculateUserStatistics(user, debates = []) {
     totalScore,
     averageScore,
     currentStreak: calculateCurrentStreak(userDebates, user.id),
-    bestScore: calculateBestScore(finishedDebates, user.id),
-    worstScore: calculateWorstScore(finishedDebates, user.id),
+    bestScore: calculateScoreRange(finishedDebates, user.id).best,
+    worstScore: calculateScoreRange(finishedDebates, user.id).worst,
   };
 }
 
@@ -111,12 +111,12 @@ function calculateCurrentStreak(userDebates, userId) {
 }
 
 /**
- * Calculate best score achieved
+ * Calculate best/worst score achieved
  * @param {Array} finishedDebates - Finished debates
  * @param {string} userId - User ID
- * @returns {number} Best score
+ * @returns {Object} Best and worst scores
  */
-function calculateBestScore(finishedDebates, userId) {
+function calculateScoreRange(finishedDebates, userId) {
   const scores = finishedDebates.map((debate) => {
     if (debate.user1_id === userId) {
       return debate.score_user1 || 0;
@@ -125,25 +125,10 @@ function calculateBestScore(finishedDebates, userId) {
     }
   });
 
-  return scores.length > 0 ? Math.max(...scores) : 0;
-}
-
-/**
- * Calculate worst score achieved
- * @param {Array} finishedDebates - Finished debates
- * @param {string} userId - User ID
- * @returns {number} Worst score
- */
-function calculateWorstScore(finishedDebates, userId) {
-  const scores = finishedDebates.map((debate) => {
-    if (debate.user1_id === userId) {
-      return debate.score_user1 || 0;
-    } else {
-      return debate.score_user2 || 0;
-    }
-  });
-
-  return scores.length > 0 ? Math.min(...scores) : 0;
+  return {
+    best: scores.length > 0 ? Math.max(...scores) : 0,
+    worst: scores.length > 0 ? Math.min(...scores) : 0,
+  };
 }
 
 /**
@@ -274,4 +259,3 @@ export function formatStatsForDisplay(stats) {
     },
   ];
 }
-

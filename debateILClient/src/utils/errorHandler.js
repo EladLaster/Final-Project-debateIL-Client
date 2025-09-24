@@ -7,7 +7,6 @@
  * @returns {Object} Normalized error object
  */
 export function handleApiError(error, context = {}) {
-
   let message = "An unexpected error occurred";
   let type = "UNKNOWN_ERROR";
 
@@ -66,23 +65,17 @@ export function handleApiError(error, context = {}) {
  * @returns {Object} Normalized error object
  */
 export function handleAuthError(error, context = {}) {
+  // Use the main error handler for consistency
+  const result = handleApiError(error, context);
 
-  let message = "Authentication failed";
-
+  // Override specific auth messages
   if (error.response?.status === 401) {
-    message = "Invalid email or password";
+    result.message = "Invalid email or password";
   } else if (error.response?.status === 409) {
-    message = "User already exists";
-  } else if (error.message) {
-    message = error.message;
+    result.message = "User already exists";
   }
 
-  return {
-    message,
-    type: "AUTH_ERROR",
-    originalError: error,
-    context,
-  };
+  return result;
 }
 
 /**
@@ -123,7 +116,7 @@ export function logError(error, context = {}) {
     context,
     timestamp: new Date().toISOString(),
   };
-  
+
   // In production, this would be sent to a logging service
   // For now, we just store the error info
 }

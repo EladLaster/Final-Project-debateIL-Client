@@ -1,9 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import {
-  voteForUser,
-  getVoteResults,
-  hasUserVoted as checkUserVoted,
-} from "../services/votingApi";
+import { voteForUser, getVoteResults } from "../services/votingApi";
 
 /**
  * Voting Store
@@ -66,15 +62,15 @@ class VotingStore {
         user2Percent: results.user2Percentage || 50,
       });
 
-      // Check if user has voted
-      const hasVoted = await checkUserVoted(debateId);
+      // Check if user has voted (using localStorage for now)
+      const voteKey = `voted_${debateId}`;
+      const hasVoted = localStorage.getItem(voteKey) === "true";
       this.setUserVotes(debateId, {
         hasVoted,
         votedFor: hasVoted ? this.userVotes[debateId]?.votedFor : null,
       });
     } catch (error) {
       this.setError(debateId, error.message);
-      console.error("Failed to load vote results:", error);
     } finally {
       this.setLoading(debateId, false);
     }

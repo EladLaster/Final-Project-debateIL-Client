@@ -183,9 +183,7 @@ export default function DebatePage() {
 
       // Refresh votes (handled by voting hook)
       await refreshVotes();
-    } catch (error) {
-      console.warn("Debate refresh error:", error);
-    }
+    } catch (error) {}
   }, [id, debate?.status, refreshVotes, navigate]);
 
   // Optimized auto-refresh for live debates

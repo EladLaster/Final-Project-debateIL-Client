@@ -136,45 +136,6 @@ export async function getVoteResults(debateId) {
 }
 
 /**
- * Check if current user has already voted in a debate
- * Note: This is a placeholder function since the server doesn't have this endpoint yet
- * @param {string|number} debateId - The debate ID
- * @returns {Promise<boolean>} Whether user has voted
- */
-export async function hasUserVoted(debateId) {
-  // TODO: Implement this endpoint on the server
-  // For now, we'll use localStorage to track voting status
-  try {
-    const voteKey = `voted_${debateId}`;
-    return localStorage.getItem(voteKey) === "true";
-  } catch (error) {
-    return false;
-  }
-}
-
-/**
- * Get voting statistics for a debate
- * Note: This is a placeholder function since the server doesn't have this endpoint yet
- * @param {string|number} debateId - The debate ID
- * @returns {Promise<Object>} Voting statistics
- */
-export async function getVotingStats(debateId) {
-  // TODO: Implement this endpoint on the server
-  // For now, return basic stats from vote results
-  try {
-    const voteResults = await getVoteResults(debateId);
-    return {
-      totalVoters: voteResults.totalVotes,
-      votingTrend: [],
-      user1Votes: voteResults.user1Votes,
-      user2Votes: voteResults.user2Votes,
-    };
-  } catch (error) {
-    return { totalVoters: 0, votingTrend: [], user1Votes: 0, user2Votes: 0 };
-  }
-}
-
-/**
  * Generic vote function that accepts user side
  * @param {string|number} debateId - The debate ID
  * @param {string} userSide - Either 'user1' or 'user2'

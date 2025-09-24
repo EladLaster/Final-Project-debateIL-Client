@@ -38,7 +38,6 @@ export default function ReplayPage() {
         const votes = await getVoteResults(id);
         setVoteResults(votes);
       } catch (voteError) {
-        console.warn("Could not load vote results:", voteError);
         // Fallback to debate scores
         setVoteResults({
           user1Votes: debateData.score_user1 || 0,

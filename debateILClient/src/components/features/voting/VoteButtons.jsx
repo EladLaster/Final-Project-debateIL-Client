@@ -19,7 +19,6 @@ const VoteButtons = observer(
           onVoteSuccess(userSide);
         }
       } catch (error) {
-        console.error("Vote failed:", error);
         // Error is already handled by the store
       }
     };
