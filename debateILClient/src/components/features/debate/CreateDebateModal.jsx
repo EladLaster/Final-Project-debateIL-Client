@@ -6,8 +6,6 @@ import ContentCard from "../../ui/ContentCard";
 export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     topic: "",
-    start_time: "",
-    duration: 60, // minutes
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -37,20 +35,6 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
       newErrors.topic = "Topic must be at least 10 characters";
     }
 
-    if (!formData.start_time) {
-      newErrors.start_time = "Start time is required";
-    } else {
-      const startTime = new Date(formData.start_time);
-      const now = new Date();
-      if (startTime <= now) {
-        newErrors.start_time = "Start time must be in the future";
-      }
-    }
-
-    if (formData.duration < 15 || formData.duration > 180) {
-      newErrors.duration = "Duration must be between 15 and 180 minutes";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -64,9 +48,9 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
 
     setIsLoading(true);
     try {
-      // Calculate end time
-      const startTime = new Date(formData.start_time);
-      const endTime = new Date(startTime.getTime() + formData.duration * 60000);
+      // Set start time to current time and end time to 1 hour later
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + 60 * 60000); // 1 hour = 60 minutes
 
       const debateData = {
         topic: formData.topic,
@@ -80,8 +64,6 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
       // Reset form
       setFormData({
         topic: "",
-        start_time: "",
-        duration: 60,
       });
 
       onSuccess?.(newDebate);
@@ -96,8 +78,6 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
   const handleClose = () => {
     setFormData({
       topic: "",
-      start_time: "",
-      duration: 60,
     });
     setErrors({});
     onClose();
@@ -152,58 +132,32 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
               )}
             </div>
 
-            {/* Start Time and Duration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="start_time"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Start Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  id="start_time"
-                  name="start_time"
-                  value={formData.start_time}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.start_time ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.start_time && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.start_time}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label
-                  htmlFor="duration"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Duration (minutes) *
-                </label>
-                <select
-                  id="duration"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.duration ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  <option value={15}>15 minutes</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={60}>1 hour</option>
-                  <option value={90}>1.5 hours</option>
-                  <option value={120}>2 hours</option>
-                  <option value={180}>3 hours</option>
-                </select>
-                {errors.duration && (
-                  <p className="text-red-500 text-sm mt-1">{errors.duration}</p>
-                )}
+            {/* Auto-scheduled info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-blue-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    Auto-scheduled Debate
+                  </h3>
+                  <div className="mt-1 text-sm text-blue-700">
+                    <p>
+                      This debate will start immediately and run for 1 hour.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

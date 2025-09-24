@@ -28,7 +28,7 @@ export async function voteForUser1(debateId) {
   try {
     const { data } = await api.patch(
       `/api/debates/${debateId}/vote/user1`,
-      {},
+      {}
       // { withCredentials: true }
     );
 
@@ -38,7 +38,7 @@ export async function voteForUser1(debateId) {
 
     // Save voting status to localStorage
     const voteKey = `voted_${debateId}`;
-    localStorage.setItem(voteKey, 'true');
+    localStorage.setItem(voteKey, "true");
 
     return data?.debate;
   } catch (error) {
@@ -59,7 +59,7 @@ export async function voteForUser2(debateId) {
   try {
     const { data } = await api.patch(
       `/api/debates/${debateId}/vote/user2`,
-      {},
+      {}
       // { withCredentials: true }
     );
 
@@ -69,7 +69,7 @@ export async function voteForUser2(debateId) {
 
     // Save voting status to localStorage
     const voteKey = `voted_${debateId}`;
-    localStorage.setItem(voteKey, 'true');
+    localStorage.setItem(voteKey, "true");
 
     return data?.debate;
   } catch (error) {
@@ -105,12 +105,29 @@ export async function getVoteResults(debateId) {
     const user2Votes = scores.score_user2 || 0;
     const totalVotes = user1Votes + user2Votes;
 
+    // Calculate percentages with proper edge case handling
+    let user1Percentage = 50;
+    let user2Percentage = 50;
+
+    if (totalVotes > 0) {
+      if (user1Votes > 0 && user2Votes === 0) {
+        user1Percentage = 100;
+        user2Percentage = 0;
+      } else if (user1Votes === 0 && user2Votes > 0) {
+        user1Percentage = 0;
+        user2Percentage = 100;
+      } else {
+        user1Percentage = Math.round((user1Votes / totalVotes) * 100);
+        user2Percentage = Math.round((user2Votes / totalVotes) * 100);
+      }
+    }
+
     return {
       user1Votes,
       user2Votes,
       totalVotes,
-      user1Percentage: totalVotes > 0 ? Math.round((user1Votes / totalVotes) * 100) : 50,
-      user2Percentage: totalVotes > 0 ? Math.round((user2Votes / totalVotes) * 100) : 50,
+      user1Percentage,
+      user2Percentage,
     };
   } catch (error) {
     // Return default values if endpoint doesn't exist or fails
@@ -129,7 +146,7 @@ export async function hasUserVoted(debateId) {
   // For now, we'll use localStorage to track voting status
   try {
     const voteKey = `voted_${debateId}`;
-    return localStorage.getItem(voteKey) === 'true';
+    return localStorage.getItem(voteKey) === "true";
   } catch (error) {
     return false;
   }
@@ -150,7 +167,7 @@ export async function getVotingStats(debateId) {
       totalVoters: voteResults.totalVotes,
       votingTrend: [],
       user1Votes: voteResults.user1Votes,
-      user2Votes: voteResults.user2Votes
+      user2Votes: voteResults.user2Votes,
     };
   } catch (error) {
     return { totalVoters: 0, votingTrend: [], user1Votes: 0, user2Votes: 0 };
@@ -164,9 +181,9 @@ export async function getVotingStats(debateId) {
  * @returns {Promise<Object>} Updated debate with new scores
  */
 export async function voteForUser(debateId, userSide) {
-  if (userSide === 'user1') {
+  if (userSide === "user1") {
     return voteForUser1(debateId);
-  } else if (userSide === 'user2') {
+  } else if (userSide === "user2") {
     return voteForUser2(debateId);
   } else {
     throw new Error("Invalid user side. Must be 'user1' or 'user2'");

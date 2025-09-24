@@ -16,33 +16,31 @@ const VoteBar = observer(
         <div className="flex h-8 rounded-full overflow-hidden shadow-2xl border-2 border-gray-300 relative">
           {/* User 1 votes */}
           <div
-            className="flex items-center justify-end pr-2 text-white font-extrabold text-sm bg-blue-700 transition-all duration-500"
-            style={{ 
+            className="bg-blue-700 transition-all duration-500"
+            style={{
               width: `${Math.max(votes.user1Percent, 0)}%`,
-              minWidth: votes.user1Percent > 0 ? '20px' : '0px'
+              minWidth: votes.user1Percent > 0 ? "20px" : "0px",
             }}
-          >
-            {isLoading ? (
-              <div className="animate-pulse text-xs">Loading...</div>
-            ) : votes.user1Percent > 0 ? (
-              `${votes.user1Percent}% ${user1Name}`
-            ) : null}
-          </div>
+          ></div>
 
           {/* User 2 votes */}
           <div
-            className="flex items-center justify-start pl-2 text-white font-extrabold text-sm bg-red-700 transition-all duration-500"
-            style={{ 
+            className="bg-red-700 transition-all duration-500"
+            style={{
               width: `${Math.max(votes.user2Percent, 0)}%`,
-              minWidth: votes.user2Percent > 0 ? '20px' : '0px'
+              minWidth: votes.user2Percent > 0 ? "20px" : "0px",
             }}
-          >
-            {isLoading ? (
-              <div className="animate-pulse text-xs">Loading...</div>
-            ) : votes.user2Percent > 0 ? (
-              `${votes.user2Percent}% ${user2Name}`
-            ) : null}
-          </div>
+          ></div>
+        </div>
+
+        {/* Percentage labels */}
+        <div className="flex justify-between text-xs text-gray-600 mt-1">
+          <span className="font-semibold text-blue-700">
+            {isLoading ? "Loading..." : `${votes.user1Percent}% ${user1Name}`}
+          </span>
+          <span className="font-semibold text-red-700">
+            {isLoading ? "Loading..." : `${votes.user2Percent}% ${user2Name}`}
+          </span>
         </div>
 
         {/* Vote counts */}

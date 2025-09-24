@@ -1,4 +1,4 @@
-// Application constants - Updated for local development
+// Application constants - Dynamic URL based on environment
 export const APP_CONFIG = {
   API_BASE_URL: "http://localhost:3030",
   DEBATES_PREFIX: "/api/debates",

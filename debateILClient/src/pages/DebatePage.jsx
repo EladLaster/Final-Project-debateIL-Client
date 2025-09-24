@@ -1,4 +1,11 @@
-import { useState, useRef, useEffect, useCallback, memo } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  memo,
+  useMemo,
+} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { validateArgument, sanitizeInput } from "../utils/validators";
 import { getDebate } from "../stores/usersStore";
@@ -59,14 +66,44 @@ export default function DebatePage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [debateArguments]);
 
-  // Mock audience for now (could be loaded from server in the future)
-  const audience = [
-    { id: 101, avatar: "" },
-    { id: 102, avatar: "" },
-    { id: 103, avatar: "" },
-    { id: 104, avatar: "" },
-    { id: 105, avatar: "" },
-  ];
+  // Real audience - get from debate participants and other users
+  const audience = useMemo(() => {
+    const audienceMembers = [];
+
+    // Add debate participants
+    if (user1) {
+      audienceMembers.push({
+        id: user1.id,
+        firstName: user1.firstName,
+        lastName: user1.lastName,
+        avatarUrl: user1.avatarUrl,
+      });
+    }
+
+    if (user2) {
+      audienceMembers.push({
+        id: user2.id,
+        firstName: user2.firstName,
+        lastName: user2.lastName,
+        avatarUrl: user2.avatarUrl,
+      });
+    }
+
+    // Add current user if not already in audience
+    if (
+      currentUser &&
+      !audienceMembers.find((member) => member.id === currentUser.id)
+    ) {
+      audienceMembers.push({
+        id: currentUser.id,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        avatarUrl: currentUser.avatarUrl,
+      });
+    }
+
+    return audienceMembers;
+  }, [user1, user2, currentUser]);
 
   // Vote bar calculation (now handled by centralized store)
   const totalVotes = votes?.total || 0;
@@ -295,11 +332,6 @@ export default function DebatePage() {
           </div>
           <div className="text-center font-extrabold text-blue-700 text-sm sm:text-base md:text-lg tracking-wide drop-shadow-lg mt-1">
             {user1?.firstName || "User 1"}
-            {currentUser?.id === user1?.id && (
-              <span className="block text-xs text-green-600 font-normal">
-                (You)
-              </span>
-            )}
           </div>
         </div>
         <div className="flex flex-col items-center">
@@ -326,11 +358,6 @@ export default function DebatePage() {
           </div>
           <div className="text-center font-extrabold text-red-700 text-sm sm:text-base md:text-lg tracking-wide drop-shadow-lg mt-1">
             {user2?.firstName || "User 2"}
-            {currentUser?.id === user2?.id && (
-              <span className="block text-xs text-green-600 font-normal">
-                (You)
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -347,14 +374,6 @@ export default function DebatePage() {
               <span className="text-xs sm:text-sm text-gray-600">
                 {isRefreshing ? "Updating..." : "Live"}
               </span>
-              {timeUntilAutoEnd && (
-                <div className="flex items-center gap-1 ml-2">
-                  <span className="text-xs text-orange-600">⏰</span>
-                  <span className="text-xs text-orange-600 font-mono">
-                    Auto-end: {timeUntilAutoEnd}
-                  </span>
-                </div>
-              )}
             </div>
           )}
           {debate?.status === "finished" && (
