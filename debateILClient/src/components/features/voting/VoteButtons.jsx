@@ -1,4 +1,5 @@
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { votingStore } from "../../../stores/votingStore";
 
 /**
@@ -9,16 +10,20 @@ const VoteButtons = observer(
   ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true }) => {
     const voteStatus = votingStore.getUserVoteStatus(debateId);
     const isLoading = votingStore.isLoading(debateId);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const error = votingStore.getError(debateId);
 
     const handleVote = async (userSide) => {
       try {
+        setIsSubmitting(true);
         await votingStore.voteForDebate(debateId, userSide);
         if (onVoteSuccess) {
           onVoteSuccess(userSide);
         }
       } catch (error) {
         // Error is already handled by the store
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
@@ -61,17 +66,17 @@ const VoteButtons = observer(
         <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
           <button
             onClick={() => handleVote("user1")}
-            disabled={isLoading || disabledByCadence || timeGated}
+            disabled={isSubmitting || disabledByCadence || timeGated}
             className="bg-blue-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
-            {isLoading ? "Voting..." : `Vote ${user1Name}`}
+            {isSubmitting ? "Voting..." : `Vote ${user1Name}`}
           </button>
           <button
             onClick={() => handleVote("user2")}
-            disabled={isLoading || disabledByCadence || timeGated}
+            disabled={isSubmitting || disabledByCadence || timeGated}
             className="bg-red-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-red-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
-            {isLoading ? "Voting..." : `Vote ${user2Name}`}
+            {isSubmitting ? "Voting..." : `Vote ${user2Name}`}
           </button>
         </div>
       </div>

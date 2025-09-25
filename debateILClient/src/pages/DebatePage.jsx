@@ -331,11 +331,13 @@ export default function DebatePage() {
       </div>
 
       {/* Vote Bar */}
-      <VoteBar
-        debateId={id}
-        user1Name={user1?.firstName || "User 1"}
-        user2Name={user2?.firstName || "User 2"}
-      />
+      <div className="pointer-events-none select-none">
+        <VoteBar
+          debateId={id}
+          user1Name={user1?.firstName || "User 1"}
+          user2Name={user2?.firstName || "User 2"}
+        />
+      </div>
 
       {/* Debaters Avatars - OUTSIDE the ring */}
       <div className="w-full max-w-4xl mx-auto flex flex-row justify-between items-center px-4 mb-2">
@@ -442,7 +444,7 @@ export default function DebatePage() {
           }}
         >
           {/* Chat Area */}
-          <div className="relative w-full flex flex-col items-center h-full">
+          <div className="relative w-full flex flex-col items-center h-full pb-20">
             <div
               className="flex flex-col-reverse overflow-y-auto w-full h-full px-2 py-2"
               style={{
@@ -501,9 +503,9 @@ export default function DebatePage() {
         </div>
       </div>
 
-      {/* Input box BELOW the ring - For all authenticated users */}
+      {/* Input area - fixed spacer below chat to prevent overlap */}
       {currentUser && (
-        <div className="w-full max-w-4xl mx-auto px-4 py-2">
+        <div className="w-full max-w-4xl mx-auto px-4 py-2 sticky bottom-0 bg-gradient-to-t from-gray-100 to-transparent">
           <form
             onSubmit={handleAddArgument}
             className="flex flex-col sm:flex-row items-center justify-center gap-2"
