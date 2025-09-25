@@ -6,14 +6,14 @@ import { votingStore } from "../../../stores/votingStore";
  * Displays voting buttons for audience members
  */
 const VoteButtons = observer(
-  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true }) => {
+  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true, currentArgumentCount = 0 }) => {
     const voteStatus = votingStore.getUserVoteStatus(debateId);
     const isLoading = votingStore.isLoading(debateId);
     const error = votingStore.getError(debateId);
 
     const handleVote = async (userSide) => {
       try {
-        await votingStore.voteForDebate(debateId, userSide);
+        await votingStore.voteForDebate(debateId, userSide, currentArgumentCount);
         if (onVoteSuccess) {
           onVoteSuccess(userSide);
         }
@@ -22,7 +22,7 @@ const VoteButtons = observer(
       }
     };
 
-    if (voteStatus.hasVoted) {
+    if (false && voteStatus.hasVoted) {
       return (
         <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-1 pb-2 px-4">
           <div className="bg-green-100 border-2 border-green-300 rounded-lg p-2 text-center">

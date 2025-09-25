@@ -12,7 +12,7 @@ class VotingStore {
 
   // State
   votes = {}; // { debateId: { user1: 0, user2: 0, total: 0, user1Percent: 50, user2Percent: 50 } }
-  userVotes = {}; // { debateId: { hasVoted: false, votedFor: null } }
+  userVotes = {}; // { debateId: { hasVoted: false, votedFor: null, lastVoteCount: 0 } }
   loading = {}; // { debateId: false }
   errors = {}; // { debateId: null }
 
@@ -34,6 +34,7 @@ class VotingStore {
       this.userVotes[debateId] || {
         hasVoted: false,
         votedFor: null,
+        lastVoteCount: 0,
       }
     );
   }
@@ -66,12 +67,14 @@ class VotingStore {
         user2Percent: percentages.user2Percent,
       });
 
-      // Check if user has voted (using localStorage for now)
-      const voteKey = `voted_${debateId}`;
-      const hasVoted = localStorage.getItem(voteKey) === "true";
+      // Load last vote marker so we can allow voting again every 4 messages
+      const markerKey = `vote_marker_${debateId}`;
+      const markerRaw = localStorage.getItem(markerKey);
+      const lastVoteCount = markerRaw ? Number(markerRaw) : 0;
       this.setUserVotes(debateId, {
-        hasVoted,
-        votedFor: hasVoted ? this.userVotes[debateId]?.votedFor : null,
+        hasVoted: false,
+        votedFor: this.userVotes[debateId]?.votedFor || null,
+        lastVoteCount,
       });
     } catch (error) {
       this.setError(debateId, error.message);
@@ -80,11 +83,7 @@ class VotingStore {
     }
   }
 
-  async voteForDebate(debateId, userSide) {
-    if (this.getUserVoteStatus(debateId).hasVoted) {
-      throw new Error("You have already voted in this debate");
-    }
-
+  async voteForDebate(debateId, userSide, currentArgumentCount) {
     this.setLoading(debateId, true);
     this.setError(debateId, null);
 
@@ -104,10 +103,14 @@ class VotingStore {
         user2Percent: percentages.user2Percent,
       });
 
-      // Update user vote status
+      // Update user vote status and store last vote argument count
+      const markerKey = `vote_marker_${debateId}`;
+      const countToStore = Number(currentArgumentCount) || 0;
+      localStorage.setItem(markerKey, String(countToStore));
       this.setUserVotes(debateId, {
-        hasVoted: true,
+        hasVoted: false,
         votedFor: userSide,
+        lastVoteCount: countToStore,
       });
 
       return updatedDebate;

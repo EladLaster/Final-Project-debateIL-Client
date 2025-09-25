@@ -559,6 +559,7 @@ export default function DebatePage() {
         user1Name={user1?.firstName || "User 1"}
         user2Name={user2?.firstName || "User 2"}
         canVote={canAudienceVote}
+        currentArgumentCount={debateArguments?.length || 0}
       />
     </div>
   );
