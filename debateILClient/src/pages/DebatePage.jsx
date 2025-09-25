@@ -103,12 +103,8 @@ export default function DebatePage() {
   const user1Percent = votes?.user1Percent || 50;
   const user2Percent = votes?.user2Percent || 50;
 
-  // Voting cadence: allow audience voting every 4 arguments during live
-  const canAudienceVote = useMemo(() => {
-    if (debate?.status !== "live") return false;
-    const count = debateArguments?.length || 0;
-    return count > 0 && count % 4 === 0;
-  }, [debate?.status, debateArguments?.length]);
+  // Voting availability: allowed during live debates; throttled per user in store (20s cooldown)
+  const canAudienceVote = debate?.status === "live";
 
   // Add argument with validation
   const handleAddArgument = useCallback(
@@ -559,7 +555,6 @@ export default function DebatePage() {
         user1Name={user1?.firstName || "User 1"}
         user2Name={user2?.firstName || "User 2"}
         canVote={canAudienceVote}
-        currentArgumentCount={debateArguments?.length || 0}
       />
     </div>
   );

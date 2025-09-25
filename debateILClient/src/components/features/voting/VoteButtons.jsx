@@ -53,7 +53,7 @@ const VoteButtons = observer(
         )}
 
         {!canVote && (
-          <div className="text-xs text-gray-600 mb-1">Voting opens every 4 messages.</div>
+          <div className="text-xs text-gray-600 mb-1">Voting available when debate is live.</div>
         )}
         {canVote && timeGated && (
           <div className="text-xs text-gray-600 mb-1">You can vote again in {Math.ceil(remainingMs/1000)}s.</div>
