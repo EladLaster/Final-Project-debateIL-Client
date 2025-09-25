@@ -11,9 +11,10 @@ const VoteButtons = observer(
     const isLoading = votingStore.isLoading(debateId);
     const error = votingStore.getError(debateId);
 
+    const currentRound = Math.floor((currentArgumentCount || 0) / 4);
     const handleVote = async (userSide) => {
       try {
-        await votingStore.voteForDebate(debateId, userSide, currentArgumentCount);
+        await votingStore.voteForDebate(debateId, userSide, currentRound);
         if (onVoteSuccess) {
           onVoteSuccess(userSide);
         }
@@ -39,9 +40,7 @@ const VoteButtons = observer(
     }
 
     const disabledByCadence = !canVote;
-    const alreadyVotedThisRound =
-      (currentArgumentCount || 0) > 0 &&
-      voteStatus?.lastVoteCount === (currentArgumentCount || 0);
+    const alreadyVotedThisRound = currentRound > 0 && voteStatus?.lastVoteRound === currentRound;
     return (
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-1 pb-2 px-4">
         {error && (

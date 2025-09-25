@@ -12,7 +12,7 @@ class VotingStore {
 
   // State
   votes = {}; // { debateId: { user1: 0, user2: 0, total: 0, user1Percent: 50, user2Percent: 50 } }
-  userVotes = {}; // { debateId: { hasVoted: false, votedFor: null, lastVoteCount: 0 } }
+  userVotes = {}; // { debateId: { hasVoted: false, votedFor: null, lastVoteRound: 0 } }
   loading = {}; // { debateId: false }
   errors = {}; // { debateId: null }
 
@@ -34,7 +34,7 @@ class VotingStore {
       this.userVotes[debateId] || {
         hasVoted: false,
         votedFor: null,
-        lastVoteCount: 0,
+        lastVoteRound: 0,
       }
     );
   }
@@ -67,14 +67,14 @@ class VotingStore {
         user2Percent: percentages.user2Percent,
       });
 
-      // Load last vote marker so we can allow voting again every 4 messages
-      const markerKey = `vote_marker_${debateId}`;
+      // Load last vote round so we can allow voting again each new round (every 4 msgs)
+      const markerKey = `vote_round_${debateId}`;
       const markerRaw = localStorage.getItem(markerKey);
-      const lastVoteCount = markerRaw ? Number(markerRaw) : 0;
+      const lastVoteRound = markerRaw ? Number(markerRaw) : 0;
       this.setUserVotes(debateId, {
         hasVoted: false,
         votedFor: this.userVotes[debateId]?.votedFor || null,
-        lastVoteCount,
+        lastVoteRound,
       });
     } catch (error) {
       this.setError(debateId, error.message);
@@ -83,7 +83,7 @@ class VotingStore {
     }
   }
 
-  async voteForDebate(debateId, userSide, currentArgumentCount) {
+  async voteForDebate(debateId, userSide, currentRound) {
     this.setLoading(debateId, true);
     this.setError(debateId, null);
 
@@ -103,14 +103,14 @@ class VotingStore {
         user2Percent: percentages.user2Percent,
       });
 
-      // Update user vote status and store last vote argument count
-      const markerKey = `vote_marker_${debateId}`;
-      const countToStore = Number(currentArgumentCount) || 0;
-      localStorage.setItem(markerKey, String(countToStore));
+      // Update user vote status and store last vote round
+      const markerKey = `vote_round_${debateId}`;
+      const roundToStore = Number(currentRound) || 0;
+      localStorage.setItem(markerKey, String(roundToStore));
       this.setUserVotes(debateId, {
         hasVoted: false,
         votedFor: userSide,
-        lastVoteCount: countToStore,
+        lastVoteRound: roundToStore,
       });
 
       return updatedDebate;
