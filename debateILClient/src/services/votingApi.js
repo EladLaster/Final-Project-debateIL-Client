@@ -26,21 +26,29 @@ const normalizeError = (error, context = {}) => {
  */
 export async function voteForUser1(debateId) {
   try {
-    const { data } = await api.patch(
-      `/api/debates/${debateId}/vote/user1`,
-      {}
-      // { withCredentials: true }
-    );
-
-    if (data?.success === false) {
-      throw new Error(data.message || "Failed to vote for user1");
+    try {
+      const { data } = await api.patch(`/api/debates/${debateId}/vote/user1`, {});
+      if (data?.success === false) {
+        throw new Error(data.message || "Failed to vote for user1");
+      }
+      const voteKey = `voted_${debateId}`;
+      localStorage.setItem(voteKey, "true");
+      return data?.debate;
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        const { data } = await api.patch(
+          `/api/debates/${debateId}/vote/user1/public`,
+          {}
+        );
+        if (data?.success === false) {
+          throw new Error(data.message || "Failed to vote for user1");
+        }
+        const voteKey = `voted_${debateId}`;
+        localStorage.setItem(voteKey, "true");
+        return data?.debate;
+      }
+      throw err;
     }
-
-    // Save voting status to localStorage
-    const voteKey = `voted_${debateId}`;
-    localStorage.setItem(voteKey, "true");
-
-    return data?.debate;
   } catch (error) {
     throw normalizeError(error, {
       action: "voteForUser1",
@@ -57,21 +65,29 @@ export async function voteForUser1(debateId) {
  */
 export async function voteForUser2(debateId) {
   try {
-    const { data } = await api.patch(
-      `/api/debates/${debateId}/vote/user2`,
-      {}
-      // { withCredentials: true }
-    );
-
-    if (data?.success === false) {
-      throw new Error(data.message || "Failed to vote for user2");
+    try {
+      const { data } = await api.patch(`/api/debates/${debateId}/vote/user2`, {});
+      if (data?.success === false) {
+        throw new Error(data.message || "Failed to vote for user2");
+      }
+      const voteKey = `voted_${debateId}`;
+      localStorage.setItem(voteKey, "true");
+      return data?.debate;
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        const { data } = await api.patch(
+          `/api/debates/${debateId}/vote/user2/public`,
+          {}
+        );
+        if (data?.success === false) {
+          throw new Error(data.message || "Failed to vote for user2");
+        }
+        const voteKey = `voted_${debateId}`;
+        localStorage.setItem(voteKey, "true");
+        return data?.debate;
+      }
+      throw err;
     }
-
-    // Save voting status to localStorage
-    const voteKey = `voted_${debateId}`;
-    localStorage.setItem(voteKey, "true");
-
-    return data?.debate;
   } catch (error) {
     throw normalizeError(error, {
       action: "voteForUser2",
@@ -88,47 +104,55 @@ export async function voteForUser2(debateId) {
  */
 export async function getVoteResults(debateId) {
   try {
-    const { data } = await api.get(`/api/debates/${debateId}/votes`, {
-      // withCredentials: true,
-    });
-
-    if (data?.success === false) {
-      return { user1Votes: 0, user2Votes: 0, totalVotes: 0 };
-    }
-
-    const scores = data?.scores;
-    if (!scores) {
-      return { user1Votes: 0, user2Votes: 0, totalVotes: 0 };
-    }
-
-    const user1Votes = scores.score_user1 || 0;
-    const user2Votes = scores.score_user2 || 0;
-    const totalVotes = user1Votes + user2Votes;
-
-    // Calculate percentages with proper edge case handling
-    let user1Percentage = 50;
-    let user2Percentage = 50;
-
-    if (totalVotes > 0) {
-      if (user1Votes > 0 && user2Votes === 0) {
-        user1Percentage = 100;
-        user2Percentage = 0;
-      } else if (user1Votes === 0 && user2Votes > 0) {
-        user1Percentage = 0;
-        user2Percentage = 100;
-      } else {
-        user1Percentage = Math.round((user1Votes / totalVotes) * 100);
-        user2Percentage = Math.round((user2Votes / totalVotes) * 100);
+    try {
+      const { data } = await api.get(`/api/debates/${debateId}/votes`, {});
+      if (data?.success === false) {
+        return { user1Votes: 0, user2Votes: 0, totalVotes: 0 };
       }
+      const scores = data?.scores;
+      const user1Votes = scores?.score_user1 || 0;
+      const user2Votes = scores?.score_user2 || 0;
+      const totalVotes = user1Votes + user2Votes;
+      let user1Percentage = 50;
+      let user2Percentage = 50;
+      if (totalVotes > 0) {
+        if (user1Votes > 0 && user2Votes === 0) {
+          user1Percentage = 100;
+          user2Percentage = 0;
+        } else if (user1Votes === 0 && user2Votes > 0) {
+          user1Percentage = 0;
+          user2Percentage = 100;
+        } else {
+          user1Percentage = Math.round((user1Votes / totalVotes) * 100);
+          user2Percentage = Math.round((user2Votes / totalVotes) * 100);
+        }
+      }
+      return { user1Votes, user2Votes, totalVotes, user1Percentage, user2Percentage };
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        const { data } = await api.get(`/api/debates/${debateId}/votes/public`, {});
+        const scores = data?.scores;
+        const user1Votes = scores?.score_user1 || 0;
+        const user2Votes = scores?.score_user2 || 0;
+        const totalVotes = user1Votes + user2Votes;
+        let user1Percentage = 50;
+        let user2Percentage = 50;
+        if (totalVotes > 0) {
+          if (user1Votes > 0 && user2Votes === 0) {
+            user1Percentage = 100;
+            user2Percentage = 0;
+          } else if (user1Votes === 0 && user2Votes > 0) {
+            user1Percentage = 0;
+            user2Percentage = 100;
+          } else {
+            user1Percentage = Math.round((user1Votes / totalVotes) * 100);
+            user2Percentage = Math.round((user2Votes / totalVotes) * 100);
+          }
+        }
+        return { user1Votes, user2Votes, totalVotes, user1Percentage, user2Percentage };
+      }
+      throw err;
     }
-
-    return {
-      user1Votes,
-      user2Votes,
-      totalVotes,
-      user1Percentage,
-      user2Percentage,
-    };
   } catch (error) {
     // Return default values if endpoint doesn't exist or fails
     return { user1Votes: 0, user2Votes: 0, totalVotes: 0 };
