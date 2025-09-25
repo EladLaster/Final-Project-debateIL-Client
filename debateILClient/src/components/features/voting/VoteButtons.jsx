@@ -6,15 +6,14 @@ import { votingStore } from "../../../stores/votingStore";
  * Displays voting buttons for audience members
  */
 const VoteButtons = observer(
-  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true, currentArgumentCount = 0 }) => {
+  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true }) => {
     const voteStatus = votingStore.getUserVoteStatus(debateId);
     const isLoading = votingStore.isLoading(debateId);
     const error = votingStore.getError(debateId);
 
-    const currentRound = Math.floor((currentArgumentCount || 0) / 4);
     const handleVote = async (userSide) => {
       try {
-        await votingStore.voteForDebate(debateId, userSide, currentRound);
+        await votingStore.voteForDebate(debateId, userSide);
         if (onVoteSuccess) {
           onVoteSuccess(userSide);
         }
@@ -40,7 +39,9 @@ const VoteButtons = observer(
     }
 
     const disabledByCadence = !canVote;
-    const alreadyVotedThisRound = currentRound > 0 && voteStatus?.lastVoteRound === currentRound;
+    const now = Date.now();
+    const remainingMs = voteStatus?.lastVoteAt ? Math.max(0, 20000 - (now - voteStatus.lastVoteAt)) : 0;
+    const timeGated = remainingMs > 0;
     return (
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-1 pb-2 px-4">
         {error && (
@@ -54,20 +55,20 @@ const VoteButtons = observer(
         {!canVote && (
           <div className="text-xs text-gray-600 mb-1">Voting opens every 4 messages.</div>
         )}
-        {canVote && alreadyVotedThisRound && (
-          <div className="text-xs text-gray-600 mb-1">You already voted in this round.</div>
+        {canVote && timeGated && (
+          <div className="text-xs text-gray-600 mb-1">You can vote again in {Math.ceil(remainingMs/1000)}s.</div>
         )}
         <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
           <button
             onClick={() => handleVote("user1")}
-            disabled={isLoading || disabledByCadence || alreadyVotedThisRound}
+            disabled={isLoading || disabledByCadence || timeGated}
             className="bg-blue-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? "Voting..." : `Vote ${user1Name}`}
           </button>
           <button
             onClick={() => handleVote("user2")}
-            disabled={isLoading || disabledByCadence || alreadyVotedThisRound}
+            disabled={isLoading || disabledByCadence || timeGated}
             className="bg-red-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-red-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? "Voting..." : `Vote ${user2Name}`}
