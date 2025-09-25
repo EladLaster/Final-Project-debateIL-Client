@@ -8,7 +8,7 @@ import { votingStore } from "../../../stores/votingStore";
 const VoteBar = observer(
   ({ debateId, user1Name = "User 1", user2Name = "User 2" }) => {
     const votes = votingStore.getVotesForDebate(debateId);
-    const isLoading = votingStore.isLoading(debateId);
+    const isLoading = false; // suppress loading flashes for smoother UX
 
     return (
       <div className="w-full max-w-4xl mx-auto mt-2 mb-1 px-4">
@@ -34,12 +34,8 @@ const VoteBar = observer(
 
         {/* Percentage labels */}
         <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span className="font-semibold text-blue-700">
-            {isLoading ? "Loading..." : `${votes.user1Percent}% ${user1Name}`}
-          </span>
-          <span className="font-semibold text-red-700">
-            {isLoading ? "Loading..." : `${votes.user2Percent}% ${user2Name}`}
-          </span>
+          <span className="font-semibold text-blue-700">{`${votes.user1Percent}% ${user1Name}`}</span>
+          <span className="font-semibold text-red-700">{`${votes.user2Percent}% ${user2Name}`}</span>
         </div>
 
         {/* Vote counts */}

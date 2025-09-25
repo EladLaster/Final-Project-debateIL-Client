@@ -404,9 +404,7 @@ export default function DebatePage() {
           {debate?.status === "live" && (
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-xs sm:text-sm text-gray-600">
-                {isRefreshing ? "Updating..." : "Live"}
-              </span>
+              <span className="text-xs sm:text-sm text-gray-600">Live</span>
               {typeof timeLeft === "number" && (
                 <span className="text-xs sm:text-sm text-orange-600 font-mono">
                   {(() => {
