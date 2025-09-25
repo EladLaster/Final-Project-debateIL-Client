@@ -6,7 +6,7 @@ import { votingStore } from "../../../stores/votingStore";
  * Displays voting buttons for audience members
  */
 const VoteButtons = observer(
-  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess }) => {
+  ({ debateId, user1Name = "User 1", user2Name = "User 2", onVoteSuccess, canVote = true }) => {
     const voteStatus = votingStore.getUserVoteStatus(debateId);
     const isLoading = votingStore.isLoading(debateId);
     const error = votingStore.getError(debateId);
@@ -38,6 +38,7 @@ const VoteButtons = observer(
       );
     }
 
+    const disabledByCadence = !canVote;
     return (
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-1 pb-2 px-4">
         {error && (
@@ -48,17 +49,20 @@ const VoteButtons = observer(
           </div>
         )}
 
+        {!canVote && (
+          <div className="text-xs text-gray-600 mb-1">Voting opens every 4 messages.</div>
+        )}
         <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
           <button
             onClick={() => handleVote("user1")}
-            disabled={isLoading}
+            disabled={isLoading || disabledByCadence}
             className="bg-blue-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? "Voting..." : `Vote ${user1Name}`}
           </button>
           <button
             onClick={() => handleVote("user2")}
-            disabled={isLoading}
+            disabled={isLoading || disabledByCadence}
             className="bg-red-700 text-white px-4 py-1 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold shadow-lg hover:bg-red-900 transition disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {isLoading ? "Voting..." : `Vote ${user2Name}`}

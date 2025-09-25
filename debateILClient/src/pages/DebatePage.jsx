@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { validateArgument, sanitizeInput } from "../utils/validators";
-import { getDebate, usersStore } from "../stores/usersStore";
+import { getDebate, usersStore, finishDebateForUser } from "../stores/usersStore";
 import {
   getArgumentsForDebate,
   createArgument,
@@ -24,6 +24,7 @@ export default function DebatePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmittingArgument, setIsSubmittingArgument] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null); // mm:ss remaining based on end_time
   // Removed isAutoRefreshing - now handled by useOptimizedRefresh
 
   // Voting hook
@@ -101,6 +102,13 @@ export default function DebatePage() {
   const totalVotes = votes?.total || 0;
   const user1Percent = votes?.user1Percent || 50;
   const user2Percent = votes?.user2Percent || 50;
+
+  // Voting cadence: allow audience voting every 4 arguments during live
+  const canAudienceVote = useMemo(() => {
+    if (debate?.status !== "live") return false;
+    const count = debateArguments?.length || 0;
+    return count > 0 && count % 4 === 0;
+  }, [debate?.status, debateArguments?.length]);
 
   // Add argument with validation
   const handleAddArgument = useCallback(
@@ -202,6 +210,20 @@ export default function DebatePage() {
 
       setDebate(debateData);
 
+      // Initialize countdown from server end_time if present
+      if (debateData?.end_time) {
+        const end = new Date(debateData.end_time).getTime();
+        const now = Date.now();
+        const remainingMs = Math.max(0, end - now);
+        if (remainingMs === 0 && debateData.status === "live") {
+          // If already past due, attempt to finish
+          try { await finishDebateForUser(id, {}); } catch (_) {}
+        }
+        setTimeLeft(remainingMs);
+      } else {
+        setTimeLeft(null);
+      }
+
       // Load arguments for the debate
       const argumentsData = await getArgumentsForDebate(id);
       setDebateArguments(argumentsData || []);
@@ -218,6 +240,32 @@ export default function DebatePage() {
       setLoading(false);
     }
   };
+
+  // Countdown ticker
+  useEffect(() => {
+    if (!debate?.end_time || debate?.status !== "live") return;
+    let rafId;
+    const tick = () => {
+      const endTs = new Date(debate.end_time).getTime();
+      const remaining = Math.max(0, endTs - Date.now());
+      setTimeLeft(remaining);
+      if (remaining === 0) return; // stop; auto-finish handled below
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [debate?.end_time, debate?.status]);
+
+  // Auto-finish when timer hits zero
+  useEffect(() => {
+    if (debate?.status !== "live") return;
+    if (timeLeft === 0) {
+      (async () => {
+        try { await finishDebateForUser(id, {}); } catch (_) {}
+        await refreshDebateData();
+      })();
+    }
+  }, [timeLeft, debate?.status, id, refreshDebateData]);
 
   // Loading state
   if (loading) {
@@ -361,6 +409,16 @@ export default function DebatePage() {
               <span className="text-xs sm:text-sm text-gray-600">
                 {isRefreshing ? "Updating..." : "Live"}
               </span>
+              {typeof timeLeft === "number" && (
+                <span className="text-xs sm:text-sm text-orange-600 font-mono">
+                  {(() => {
+                    const totalSec = Math.ceil(timeLeft / 1000);
+                    const mm = Math.floor(totalSec / 60).toString().padStart(2, "0");
+                    const ss = (totalSec % 60).toString().padStart(2, "0");
+                    return `${mm}:${ss}`;
+                  })()}
+                </span>
+              )}
             </div>
           )}
           {debate?.status === "finished" && (
@@ -384,7 +442,7 @@ export default function DebatePage() {
             background: "linear-gradient(135deg, #f8fafc 80%, #e0e7ef 100%)",
             position: "relative",
             overflow: "hidden",
-            minHeight: "200px",
+            minHeight: "260px",
           }}
         >
           {/* Chat Area */}
@@ -395,7 +453,7 @@ export default function DebatePage() {
                 scrollbarWidth: "none",
                 background: "transparent",
                 minWidth: "200px",
-                maxHeight: "250px",
+                maxHeight: "300px",
               }}
             >
               <div ref={chatEndRef}></div>
@@ -500,6 +558,7 @@ export default function DebatePage() {
         debateId={id}
         user1Name={user1?.firstName || "User 1"}
         user2Name={user2?.firstName || "User 2"}
+        canVote={canAudienceVote}
       />
     </div>
   );
