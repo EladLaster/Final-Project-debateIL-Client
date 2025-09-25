@@ -26,15 +26,28 @@ const normalizeError = (error, context = {}) => {
  */
 export async function getArgumentsForDebate(debateId) {
   try {
-    const { data } = await api.get(`/api/debates/${debateId}/arguments`, {
-      // withCredentials: true,
-    });
+    try {
+      const { data } = await api.get(`/api/debates/${debateId}/arguments`, {
+        // withCredentials: true,
+      });
 
-    if (data?.success === false) {
-      return [];
+      if (data?.success === false) {
+        return [];
+      }
+
+      return data?.arguments ?? [];
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        const { data } = await api.get(
+          `/api/debates/${debateId}/arguments/public`
+        );
+        if (data?.success === false) {
+          return [];
+        }
+        return data?.arguments ?? [];
+      }
+      throw err;
     }
-
-    return data?.arguments ?? [];
   } catch (err) {
     if (err?.response?.status === 404) return [];
     throw normalizeError(err, {

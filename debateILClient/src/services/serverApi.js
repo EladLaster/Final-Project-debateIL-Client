@@ -128,9 +128,16 @@ export async function getLiveDebates() {
 
 export async function getDebate(id) {
   try {
-    const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}`);
-    // Expects { success, debate }
-    return data?.debate;
+    try {
+      const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}`);
+      return data?.debate;
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}/public`);
+        return data?.debate;
+      }
+      throw err;
+    }
   } catch (err) {
     throw normalizeError(err, {
       action: "getDebate",
