@@ -341,8 +341,8 @@ export default function DebatePage() {
               <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Back to Home</span>
         </button>
 
-            {/* End Debate Button - Center */}
-            {debate?.status === "live" && (
+            {/* End Debate Button - Center (only for debate participants) */}
+            {debate?.status === "live" && currentUser && (currentUser.id === user1?.id || currentUser.id === user2?.id) && (
               <button
                 onClick={handleEndDebate}
                 className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-red-500/25 hover:scale-105 transition-all duration-200 flex items-center gap-2 text-sm"
@@ -572,7 +572,7 @@ export default function DebatePage() {
                               <div className="text-xs font-semibold text-purple-700 mb-1">
                                 {argument.author?.firstName || "User"}
                               </div>
-                              <div className="text-gray-800 text-sm leading-relaxed">{argument.text}</div>
+                              <div className="text-gray-800 text-base font-medium leading-relaxed">{argument.text}</div>
                             </div>
                           </div>
                         )}
@@ -585,7 +585,7 @@ export default function DebatePage() {
                               <div className="text-xs font-semibold text-blue-700 mb-1 text-right">
                                 {argument.author?.firstName || "User"}
                               </div>
-                              <div className="text-gray-800 text-sm leading-relaxed text-right">{argument.text}</div>
+                              <div className="text-gray-800 text-base font-medium leading-relaxed text-right">{argument.text}</div>
                             </div>
             </div>
           )}
@@ -676,7 +676,7 @@ export default function DebatePage() {
                             <div className="text-xs font-semibold text-purple-700 mb-1">
                                 {argument.author?.firstName || "User"}
                               </div>
-                            <div className="text-gray-800 text-sm leading-relaxed">{argument.text}</div>
+                            <div className="text-gray-800 text-base font-medium leading-relaxed">{argument.text}</div>
                             </div>
                           </div>
                       )}
@@ -689,7 +689,7 @@ export default function DebatePage() {
                             <div className="text-xs font-semibold text-blue-700 mb-1 text-right">
                               {argument.author?.firstName || "User"}
                             </div>
-                            <div className="text-gray-800 text-sm leading-relaxed text-right">{argument.text}</div>
+                            <div className="text-gray-800 text-base font-medium leading-relaxed text-right">{argument.text}</div>
                           </div>
                           </div>
                       )}
