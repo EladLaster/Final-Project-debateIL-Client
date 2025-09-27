@@ -326,6 +326,7 @@ CMD ["npm", "run", "start"]
 
 - **Elad Laster** - Full Stack Developer
 - **Lior Kirshner** - Frontend Specialist
+- **Guy Hanan** - Backend Developer & Database Specialist
 
 ## 📞 יצירת קשר
 
