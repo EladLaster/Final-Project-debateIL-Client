@@ -56,10 +56,19 @@ export default function DebatePage() {
   const { handleEndDebate, timeUntilAutoEnd, isAutoEndActive } =
     useDebateEnding(id, debate?.status, currentUser, user1, user2);
 
-  // Auto scroll
+  // Auto scroll - only when new messages are added
   const chatEndRef = useRef(null);
+  const prevArgumentsLength = useRef(0);
+  
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only scroll if new messages were added (not on initial load or refresh)
+    if (debateArguments.length > prevArgumentsLength.current && prevArgumentsLength.current > 0) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 100);
+    }
+    prevArgumentsLength.current = debateArguments.length;
   }, [debateArguments]);
 
   // Real audience - get from debate participants and other users
@@ -363,8 +372,8 @@ export default function DebatePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Vote Bar - Moved to top */}
-        <div className="mb-4">
+        {/* Vote Bar - Desktop only */}
+        <div className="hidden lg:block mb-4">
           <VoteBar
             debateId={id}
             user1Name={user1?.firstName || "User 1"}
@@ -379,33 +388,34 @@ export default function DebatePage() {
           </h1>
         </div>
 
-        {/* Participants - Mobile First Layout */}
-        <div className="mb-4">
+        {/* Mobile Layout: Participants above chat */}
+        <div className="block lg:hidden mb-4">
+          {/* Participants Row */}
           <div className="flex justify-center gap-4 mb-4">
             {/* User 1 */}
-            <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center">
               <div className="relative group">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-1 shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-1 shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-105">
                   <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                    {user1?.avatarUrl ? (
-                      <img
-                        src={user1.avatarUrl}
-                        alt="user1"
+              {user1?.avatarUrl ? (
+                <img
+                  src={user1.avatarUrl}
+                  alt="user1"
                         className="w-full h-full rounded-xl object-cover"
-                      />
-                    ) : user1 ? (
+                />
+              ) : user1 ? (
                       <UserAvatar user={user1} size="2xl" className="w-full h-full rounded-xl" />
-                    ) : (
+              ) : (
                       <span className="text-purple-300 text-3xl">+</span>
-                    )}
-                  </div>
+              )}
+            </div>
                 </div>
-                {currentUser?.id === user1?.id && (
+            {currentUser?.id === user1?.id && (
                   <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
-                    YOU
-                  </div>
-                )}
+                YOU
               </div>
+            )}
+          </div>
               <div className="mt-3 text-center">
                 <h3 className="text-lg font-bold text-purple-700">{user1?.firstName || "User 1"}</h3>
                 <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-purple-700 rounded-full mx-auto mt-1"></div>
@@ -420,38 +430,33 @@ export default function DebatePage() {
                   canVote={canAudienceVote}
                   showOnlyUser1={true}
                 />
-              </div>
-            </div>
-
-            {/* VS Divider */}
-            <div className="flex items-center justify-center">
-              <div className="text-2xl font-bold text-gray-400">VS</div>
-            </div>
+          </div>
+        </div>
 
             {/* User 2 */}
-            <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center">
               <div className="relative group">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-1 shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-1 shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-300 group-hover:scale-105">
                   <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-                    {user2?.avatarUrl ? (
-                      <img
-                        src={user2.avatarUrl}
-                        alt="user2"
+              {user2?.avatarUrl ? (
+                <img
+                  src={user2.avatarUrl}
+                  alt="user2"
                         className="w-full h-full rounded-xl object-cover"
-                      />
-                    ) : user2 ? (
+                />
+              ) : user2 ? (
                       <UserAvatar user={user2} size="2xl" className="w-full h-full rounded-xl" />
-                    ) : (
+              ) : (
                       <span className="text-blue-300 text-3xl">+</span>
-                    )}
-                  </div>
+              )}
+            </div>
                 </div>
-                {currentUser?.id === user2?.id && (
+            {currentUser?.id === user2?.id && (
                   <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
-                    YOU
-                  </div>
-                )}
+                YOU
               </div>
+            )}
+          </div>
               <div className="mt-3 text-center">
                 <h3 className="text-lg font-bold text-blue-700">{user2?.firstName || "User 2"}</h3>
                 <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full mx-auto mt-1"></div>
@@ -467,18 +472,165 @@ export default function DebatePage() {
                   showOnlyUser2={true}
                 />
               </div>
+          </div>
+        </div>
+      </div>
+
+        {/* Desktop Layout: Participants on sides, Chat in middle */}
+        <div className="hidden lg:grid grid-cols-12 gap-4 mb-4">
+          {/* User 1 Side Panel */}
+          <div className="col-span-2 flex flex-col items-center justify-center p-2">
+            <div className="relative group mb-4">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-1 shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
+                  {user1?.avatarUrl ? (
+                    <img
+                      src={user1.avatarUrl}
+                      alt="user1"
+                      className="w-full h-full rounded-xl object-cover"
+                    />
+                  ) : user1 ? (
+                    <UserAvatar user={user1} size="2xl" className="w-full h-full rounded-xl" />
+                  ) : (
+                    <span className="text-purple-300 text-3xl">+</span>
+                  )}
+                </div>
+              </div>
+              {currentUser?.id === user1?.id && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                  YOU
+                </div>
+              )}
+            </div>
+            <div className="mt-3 text-center">
+              <h3 className="text-lg font-bold text-purple-700">{user1?.firstName || "User 1"}</h3>
+              <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-purple-700 rounded-full mx-auto mt-1"></div>
+            </div>
+            
+            {/* Vote Button for User 1 */}
+            <div className="mt-3 w-full">
+              <VoteButtons
+                debateId={id}
+                user1Name={user1?.firstName || "User 1"}
+                user2Name={user2?.firstName || "User 2"}
+                canVote={canAudienceVote}
+                showOnlyUser1={true}
+              />
+            </div>
+          </div>
+
+          {/* Chat Area - Center Column */}
+          <div className="col-span-8">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b border-gray-200/50">
+                <h2 className="text-base font-semibold text-gray-800 text-center">Live Discussion</h2>
+              </div>
+              
+              <div className="h-80 overflow-y-auto p-4 space-y-3 scroll-smooth" style={{ scrollbarWidth: "none" }}>
+                <div ref={chatEndRef}></div>
+                {debateArguments.length > 0 ? (
+                  debateArguments
+                    .slice()
+                    .reverse()
+                    .map((argument) => (
+                      <div
+                        key={argument.id}
+                        className={`flex items-start gap-3 ${
+                          argument.author?.id === user1?.id ? "justify-start" : "justify-end"
+                        }`}
+                      >
+                        {argument.author?.id === user1?.id && (
+                          <div className="flex items-start gap-3 max-w-md">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                              {argument.author?.firstName?.charAt(0) || "U"}
+                            </div>
+                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-purple-200">
+                              <div className="text-xs font-semibold text-purple-700 mb-1">
+                                {argument.author?.firstName || "User"}
+                              </div>
+                              <div className="text-gray-800 text-sm leading-relaxed">{argument.text}</div>
+                            </div>
+                          </div>
+                        )}
+                        {argument.author?.id === user2?.id && (
+                          <div className="flex items-start gap-3 max-w-md flex-row-reverse">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                              {argument.author?.firstName?.charAt(0) || "U"}
+                            </div>
+                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm border border-blue-200">
+                              <div className="text-xs font-semibold text-blue-700 mb-1 text-right">
+                                {argument.author?.firstName || "User"}
+                              </div>
+                              <div className="text-gray-800 text-sm leading-relaxed text-right">{argument.text}</div>
+                            </div>
+            </div>
+          )}
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 text-lg">No arguments yet. Start the discussion!</p>
+            </div>
+          )}
+        </div>
+      </div>
+          </div>
+
+          {/* User 2 Side Panel */}
+          <div className="col-span-2 flex flex-col items-center justify-center p-2">
+            <div className="relative group mb-4">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-1 shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
+                  {user2?.avatarUrl ? (
+                    <img
+                      src={user2.avatarUrl}
+                      alt="user2"
+                      className="w-full h-full rounded-xl object-cover"
+                    />
+                  ) : user2 ? (
+                    <UserAvatar user={user2} size="2xl" className="w-full h-full rounded-xl" />
+                  ) : (
+                    <span className="text-blue-300 text-3xl">+</span>
+                  )}
+                </div>
+              </div>
+              {currentUser?.id === user2?.id && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                  YOU
+                </div>
+              )}
+            </div>
+            <div className="mt-3 text-center">
+              <h3 className="text-lg font-bold text-blue-700">{user2?.firstName || "User 2"}</h3>
+              <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full mx-auto mt-1"></div>
+            </div>
+            
+            {/* Vote Button for User 2 */}
+            <div className="mt-3 w-full">
+              <VoteButtons
+                debateId={id}
+                user1Name={user1?.firstName || "User 1"}
+                user2Name={user2?.firstName || "User 2"}
+                canVote={canAudienceVote}
+                showOnlyUser2={true}
+              />
             </div>
           </div>
         </div>
 
-        {/* Chat Area - Full width */}
-        <div className="mb-4">
+        {/* Chat Area - Mobile only */}
+        <div className="block lg:hidden mb-4">
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b border-gray-200/50">
               <h2 className="text-base font-semibold text-gray-800 text-center">Live Discussion</h2>
             </div>
             
-            <div className="h-80 overflow-y-auto p-4 space-y-3" style={{ scrollbarWidth: "none" }}>
+            <div className="h-80 overflow-y-auto p-4 space-y-3 scroll-smooth" style={{ scrollbarWidth: "none" }}>
               <div ref={chatEndRef}></div>
               {debateArguments.length > 0 ? (
                 debateArguments
@@ -498,11 +650,11 @@ export default function DebatePage() {
                           </div>
                           <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-purple-200">
                             <div className="text-xs font-semibold text-purple-700 mb-1">
-                              {argument.author?.firstName || "User"}
-                            </div>
+                                {argument.author?.firstName || "User"}
+                              </div>
                             <div className="text-gray-800 text-sm leading-relaxed">{argument.text}</div>
+                            </div>
                           </div>
-                        </div>
                       )}
                       {argument.author?.id === user2?.id && (
                         <div className="flex items-start gap-3 max-w-md flex-row-reverse">
@@ -515,7 +667,7 @@ export default function DebatePage() {
                             </div>
                             <div className="text-gray-800 text-sm leading-relaxed text-right">{argument.text}</div>
                           </div>
-                        </div>
+                          </div>
                       )}
                     </div>
                   ))
@@ -529,9 +681,9 @@ export default function DebatePage() {
                   <p className="text-gray-500 text-lg">No arguments yet. Start the discussion!</p>
                 </div>
               )}
-            </div>
           </div>
         </div>
+      </div>
 
         {/* Input Area - Only for debate participants */}
         {currentUser && (currentUser.id === user1?.id || currentUser.id === user2?.id) && (
