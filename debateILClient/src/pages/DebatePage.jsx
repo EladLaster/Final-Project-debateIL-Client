@@ -340,6 +340,20 @@ export default function DebatePage() {
           </svg>
               <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Back to Home</span>
         </button>
+
+            {/* End Debate Button - Center */}
+            {debate?.status === "live" && (
+              <button
+                onClick={handleEndDebate}
+                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-red-500/25 hover:scale-105 transition-all duration-200 flex items-center gap-2 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+                End Debate
+              </button>
+            )}
             
             {/* Status Badge */}
             <div className="flex items-center gap-2">
@@ -372,7 +386,7 @@ export default function DebatePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Vote Bar - Desktop only */}
+        {/* Vote Bar - Desktop */}
         <div className="hidden lg:block mb-4">
           <VoteBar
             debateId={id}
@@ -380,6 +394,16 @@ export default function DebatePage() {
             user2Name={user2?.firstName || "User 2"}
           />
         </div>
+
+        {/* Vote Bar - Mobile (smaller) */}
+        <div className="block lg:hidden mb-3">
+          <VoteBar
+            debateId={id}
+            user1Name={user1?.firstName || "User 1"}
+            user2Name={user2?.firstName || "User 2"}
+          />
+        </div>
+
 
         {/* Debate Title */}
         <div className="text-center mb-4">
@@ -393,22 +417,22 @@ export default function DebatePage() {
           {/* Participants Row */}
           <div className="flex justify-center gap-4 mb-4">
             {/* User 1 */}
-        <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center">
               <div className="relative group">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-1 shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 p-1 shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-105">
                   <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-              {user1?.avatarUrl ? (
-                <img
-                  src={user1.avatarUrl}
-                  alt="user1"
+                    {user1?.avatarUrl ? (
+                      <img
+                        src={user1.avatarUrl}
+                        alt="user1"
                         className="w-full h-full rounded-xl object-cover"
-                />
-              ) : user1 ? (
+                      />
+                    ) : user1 ? (
                       <UserAvatar user={user1} size="2xl" className="w-full h-full rounded-xl" />
-              ) : (
-                      <span className="text-purple-300 text-3xl">+</span>
-              )}
-            </div>
+                    ) : (
+                      <span className="text-purple-300 text-2xl">+</span>
+                    )}
+                  </div>
                 </div>
             {currentUser?.id === user1?.id && (
                   <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
@@ -434,22 +458,22 @@ export default function DebatePage() {
         </div>
 
             {/* User 2 */}
-        <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center">
               <div className="relative group">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-1 shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-300 group-hover:scale-105">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-1 shadow-2xl group-hover:shadow-blue-500/25 transition-all duration-300 group-hover:scale-105">
                   <div className="w-full h-full rounded-xl bg-white flex items-center justify-center overflow-hidden">
-              {user2?.avatarUrl ? (
-                <img
-                  src={user2.avatarUrl}
-                  alt="user2"
+                    {user2?.avatarUrl ? (
+                      <img
+                        src={user2.avatarUrl}
+                        alt="user2"
                         className="w-full h-full rounded-xl object-cover"
-                />
-              ) : user2 ? (
+                      />
+                    ) : user2 ? (
                       <UserAvatar user={user2} size="2xl" className="w-full h-full rounded-xl" />
-              ) : (
-                      <span className="text-blue-300 text-3xl">+</span>
-              )}
-            </div>
+                    ) : (
+                      <span className="text-blue-300 text-2xl">+</span>
+                    )}
+                  </div>
                 </div>
             {currentUser?.id === user2?.id && (
                   <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
@@ -724,21 +748,6 @@ export default function DebatePage() {
             </button>
           </form>
 
-            {/* End Debate Button */}
-          {debate?.status === "live" && (
-            <div className="flex justify-center mt-3">
-              <button
-                onClick={handleEndDebate}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-red-500/25 hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                  </svg>
-                  End Debate
-              </button>
-            </div>
-          )}
 
           {/* Debate Ended Message */}
           {debate?.status === "finished" && (
