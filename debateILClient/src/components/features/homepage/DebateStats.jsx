@@ -86,22 +86,22 @@ export default function DebateStats({ debates = [] }) {
 
   return (
     <ContentCard className="p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">
+      <h2 className="text-xl font-bold text-gray-900 mb-6 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
         📊 Platform Statistics
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statItems.map((stat, index) => (
           <div
             key={index}
-            className={`p-4 rounded-lg border-2 ${stat.bgColor} ${stat.borderColor}`}
+            className={`p-4 rounded-2xl border-2 ${stat.bgColor} ${stat.borderColor} shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
           >
-            <div className="flex items-center space-x-3">
-              <div className="text-2xl">{stat.icon}</div>
-              <div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="text-3xl">{stat.icon}</div>
+              <div className="text-center">
                 <div className={`text-2xl font-bold ${stat.color}`}>
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-600">{stat.title}</div>
+                <div className="text-sm text-gray-600 font-medium">{stat.title}</div>
               </div>
             </div>
           </div>

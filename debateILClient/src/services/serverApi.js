@@ -276,4 +276,96 @@ export async function deleteDebate(debateId) {
   }
 }
 
+// Audience API
+export async function joinAudience(debateId, userInfo) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/join`, userInfo);
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "joinAudience",
+      component: "AudienceAPI",
+      data: { debateId, userInfo },
+    });
+  }
+}
+
+export async function joinAudiencePublic(debateId, userInfo) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/join/public`, userInfo);
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "joinAudiencePublic",
+      component: "AudienceAPI",
+      data: { debateId, userInfo },
+    });
+  }
+}
+
+export async function leaveAudience(debateId, memberId) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/leave`, { memberId });
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "leaveAudience",
+      component: "AudienceAPI",
+      data: { debateId, memberId },
+    });
+  }
+}
+
+export async function leaveAudiencePublic(debateId, memberId) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/leave/public`, { memberId });
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "leaveAudiencePublic",
+      component: "AudienceAPI",
+      data: { debateId, memberId },
+    });
+  }
+}
+
+export async function getAudience(debateId) {
+  try {
+    const { data } = await api.get(`/api/debates/${debateId}/audience`);
+    return data?.audience ?? [];
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "getAudience",
+      component: "AudienceAPI",
+      data: { debateId },
+    });
+  }
+}
+
+export async function heartbeatAudience(debateId, memberId) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/heartbeat`, { memberId });
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "heartbeatAudience",
+      component: "AudienceAPI",
+      data: { debateId, memberId },
+    });
+  }
+}
+
+export async function heartbeatAudiencePublic(debateId, memberId) {
+  try {
+    const response = await api.post(`/api/debates/${debateId}/audience/heartbeat/public`, { memberId });
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err, {
+      action: "heartbeatAudiencePublic",
+      component: "AudienceAPI",
+      data: { debateId, memberId },
+    });
+  }
+}
+
 export { api };

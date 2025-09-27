@@ -97,16 +97,37 @@ function HomePage() {
     (debate) => debate.status === "finished"
   );
 
-  if (loading) return <div className="p-6">Loading open debates…</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading debates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error</h2>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 DebateIL - Live Debates
               </h1>
               <div className="flex items-center gap-2">
@@ -116,25 +137,30 @@ function HomePage() {
                 </span>
               </div>
             </div>
-            <p className="text-gray-600">
-              {authManager.user
-                ? "Join active debates or register for upcoming discussions"
-                : "Watch live debates and vote for your favorite arguments"}
-            </p>
-          </div>
-          {authManager.user && (
-            <div className="mt-4 sm:mt-0">
+            {authManager.user && (
               <PrimaryButton
                 variant="primary"
                 size="large"
                 onClick={() => setShowCreateModal(true)}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
               >
                 🎯 Create New Debate
               </PrimaryButton>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Welcome Section */}
+        <div className="text-center mb-8">
+          <p className="text-lg text-gray-600 mb-4">
+            {authManager.user
+              ? "Join active debates or register for upcoming discussions"
+              : "Watch live debates and vote for your favorite arguments"}
+          </p>
+        </div>
 
       <DebateSection
         debates={liveDebates}
@@ -156,46 +182,47 @@ function HomePage() {
         </>
       )}
 
-      {!authManager.user && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-blue-600">ℹ️</span>
-            <h3 className="text-lg font-semibold text-blue-800">
-              Welcome to DebateIL!
-            </h3>
+        {!authManager.user && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-3xl p-6 mb-8 shadow-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-2xl">ℹ️</span>
+              <h3 className="text-xl font-bold text-purple-800">
+                Welcome to DebateIL!
+              </h3>
+            </div>
+            <p className="text-purple-700 mb-4 text-lg">
+              You can watch live debates and vote for your favorite arguments
+              without logging in. To participate in debates or create new ones,
+              please log in.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <PrimaryButton
+                variant="primary"
+                onClick={() => navigate("/login")}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-6 py-3"
+              >
+                🔐 Log In
+              </PrimaryButton>
+              <PrimaryButton
+                variant="secondary"
+                onClick={() => navigate("/register")}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 py-3"
+              >
+                📝 Register
+              </PrimaryButton>
+            </div>
           </div>
-          <p className="text-blue-700 mb-3">
-            You can watch live debates and vote for your favorite arguments
-            without logging in. To participate in debates or create new ones,
-            please log in.
-          </p>
-          <div className="flex gap-2">
-            <PrimaryButton
-              variant="primary"
-              onClick={() => navigate("/login")}
-              className="text-sm"
-            >
-              🔐 Log In
-            </PrimaryButton>
-            <PrimaryButton
-              variant="secondary"
-              onClick={() => navigate("/register")}
-              className="text-sm"
-            >
-              📝 Register
-            </PrimaryButton>
-          </div>
-        </div>
-      )}
+        )}
 
-      <DebateStats debates={allDebates} />
+        <DebateStats debates={allDebates} />
 
-      {/* Create Debate Modal */}
-      <CreateDebateModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={loadDebates}
-      />
+        {/* Create Debate Modal */}
+        <CreateDebateModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={loadDebates}
+        />
+      </div>
     </div>
   );
 }

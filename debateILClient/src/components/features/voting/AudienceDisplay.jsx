@@ -25,25 +25,33 @@ const AudienceDisplay = ({ audience = [] }) => {
       </div>
 
       <div className="flex items-center gap-2 mb-2 flex-wrap justify-center">
-        {audience.map((member) => (
-          <div
-            key={member.id}
-            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white border-2 sm:border-3 md:border-4 border-gray-400 flex items-center justify-center text-sm sm:text-base md:text-lg shadow-lg"
-            title={`Audience #${member.id}`}
-          >
-            {member.avatar ? (
-              <img
-                src={member.avatar}
-                alt={`Audience #${member.id}`}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : member.firstName ? (
-              <UserAvatar user={member} size="2xl" className="w-full h-full" />
-            ) : (
-              <span className="text-gray-300">+</span>
-            )}
-          </div>
-        ))}
+        {audience.map((member, idx) => {
+          const key = member.id ?? `guest-${idx}`;
+          const isGuest = member.isGuest || (!member.firstName && !member.avatar && !member.avatarUrl);
+          const avatarSrc = member.avatar || member.avatarUrl;
+
+          return (
+            <div
+              key={key}
+              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white border-2 sm:border-3 md:border-4 border-gray-400 flex items-center justify-center text-xs sm:text-sm md:text-base shadow-lg overflow-hidden"
+              title={isGuest ? "Guest" : `${member.firstName || "User"}`}
+            >
+              {isGuest ? (
+                <span className="text-gray-500 font-semibold">Guest</span>
+              ) : avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt={member.firstName || "Audience"}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : member.firstName ? (
+                <UserAvatar user={member} size="2xl" className="w-full h-full" />
+              ) : (
+                <span className="text-gray-300">+</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -123,7 +123,7 @@ function Navbar() {
 
                 {userMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-50"
+                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg z-[60]"
                     style={{
                       background: brandColors.bgLight,
                       border: `1px solid ${brandColors.primary}`,
