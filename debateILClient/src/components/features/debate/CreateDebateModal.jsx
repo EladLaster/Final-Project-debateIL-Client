@@ -6,6 +6,7 @@ import ContentCard from "../../ui/ContentCard";
 export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     topic: "",
+    duration: 60,
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -48,9 +49,9 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
 
     setIsLoading(true);
     try {
-      // Set start time to current time and end time to 1 hour later
+      // Set start time to current time and end time based on selected duration
       const startTime = new Date();
-      const endTime = new Date(startTime.getTime() + 60 * 60000); // 1 hour = 60 minutes
+      const endTime = new Date(startTime.getTime() + Number(formData.duration) * 60000);
 
       const debateData = {
         topic: formData.topic,
@@ -64,6 +65,7 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
       // Reset form
       setFormData({
         topic: "",
+        duration: 60,
       });
 
       onSuccess?.(newDebate);
@@ -78,6 +80,7 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
   const handleClose = () => {
     setFormData({
       topic: "",
+      duration: 60,
     });
     setErrors({});
     onClose();
@@ -132,6 +135,27 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
               )}
             </div>
 
+          {/* Duration */}
+          <div>
+            <label
+              htmlFor="duration"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Duration
+            </label>
+            <select
+              id="duration"
+              name="duration"
+              value={formData.duration}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+            >
+              <option value={15}>15 minutes</option>
+              <option value={30}>30 minutes</option>
+              <option value={60}>60 minutes</option>
+            </select>
+          </div>
+
             {/* Auto-scheduled info */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
               <div className="flex items-center">
@@ -154,7 +178,7 @@ export default function CreateDebateModal({ isOpen, onClose, onSuccess }) {
                   </h3>
                   <div className="mt-1 text-sm text-blue-700">
                     <p>
-                      This debate will start immediately and run for 1 hour.
+                      This debate will start immediately and run for {formData.duration} minutes.
                     </p>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import axios from "axios";
 import { APP_CONFIG, API_ENDPOINTS } from "../utils/constants";
-import { registerToDebate, finishDebate } from "../services/serverApi";
+import { registerToDebate, finishDebate, getPublicDebate } from "../services/serverApi";
 
 // API configuration
 const api = axios.create({
@@ -56,10 +56,17 @@ async function getDebates() {
 
 async function getDebate(id) {
   try {
-    const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}`, {
-      withCredentials: true,
-    });
-    return data?.debate;
+    try {
+      const { data } = await api.get(`${API_ENDPOINTS.DEBATES}/${id}`, {
+        withCredentials: true,
+      });
+      return data?.debate;
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        return await getPublicDebate(id);
+      }
+      throw err;
+    }
   } catch (err) {
     throw normalizeError(err);
   }
