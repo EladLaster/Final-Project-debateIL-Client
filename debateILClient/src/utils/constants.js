@@ -1,6 +1,8 @@
 // Application constants - Dynamic URL based on environment
 export const APP_CONFIG = {
-  API_BASE_URL: "https://final-project-debateil-server.onrender.com",
+  // For local development, use localhost. For production, use Render URL
+  API_BASE_URL: import.meta.env.VITE_API_URL || "http://localhost:3030",
+  // API_BASE_URL: "https://final-project-debateil-server.onrender.com", // Production URL
   DEBATES_PREFIX: "/api/debates",
   AUTH_PREFIX: "/auth",
 };
